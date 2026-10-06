@@ -444,7 +444,7 @@ Pour que Google la trouve vite (une seule fois, avec ton compte Google) :
 ## Le code sur GitHub (et l'adresse github.io)
 
 - **Code** : https://github.com/alue4/plycube (dépôt **public** : tout le monde peut le lire).
-- **Adresse gratuite** : https://alue4.github.io/plycube/ renvoie tout de suite vers l'adresse Tailscale du site (`https://jeu-sjdc.tail22ba4f.ts.net`), même page (ex. `…/plycube/games/fps/` → Arena FPS). C'est le dossier `docs/` (GitHub Pages) : `index.html` et `404.html` font la redirection, `presentation.html` est une page de présentation de secours. Pour changer d'adresse de destination, remplace-la dans ces deux fichiers.
+- **Adresse gratuite** : https://alue4.github.io/plycube/ renvoie tout de suite vers l'adresse Tailscale du site (`https://jeu-sjdc.lleyn-bass.ts.net`), même page (ex. `…/plycube/games/fps/` → Arena FPS). C'est le dossier `docs/` (GitHub Pages) : `index.html` et `404.html` font la redirection, `presentation.html` est une page de présentation de secours. Pour changer d'adresse de destination, remplace-la dans ces deux fichiers.
 - **Jamais envoyé** (liste dans `.gitignore`) : la base des joueurs `data/`, les clés `cloudflared/`, `tailscale/`, `tailscale-nas/`, `node_modules/`, les rendus vidéo et la musique HeyGen de la bande-annonce.
 - **Envoyer les nouveautés** (git et l'outil `gh` sont installés dans ton dossier, sans sudo ; tu es connecté avec `gh`) :
 

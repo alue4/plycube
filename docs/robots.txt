@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://alue4.github.io/plycube/sitemap.xml

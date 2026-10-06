@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1a3a"/>
+      <stop offset="1" stop-color="#03050b"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#10224a"/>
+      <stop offset="1" stop-color="#05070d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.45" r="0.5">
+      <stop offset="0" stop-color="#3b82f6" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#3b82f6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#sky)"/>
+  <rect y="200" width="640" height="160" fill="url(#floor)"/>
+  <!-- grille au sol en perspective -->
+  <g stroke="#2563eb" stroke-opacity=".35" stroke-width="1.5">
+    <path d="M320 200 L-200 360 M320 200 L0 360 M320 200 L160 360 M320 200 L320 360 M320 200 L480 360 M320 200 L640 360 M320 200 L840 360"/>
+    <path d="M0 220 H640 M0 245 H640 M0 280 H640 M0 330 H640"/>
+  </g>
+  <!-- blocs de l'arène -->
+  <g fill="#0d1a36" stroke="#3b82f6" stroke-opacity=".6" stroke-width="2">
+    <path d="M70 140 h110 v95 h-110z"/>
+    <path d="M470 120 h120 v120 h-120z"/>
+    <path d="M250 165 h60 v50 h-60z"/>
+  </g>
+  <rect width="640" height="360" fill="url(#glow)"/>
+  <!-- viseur -->
+  <g stroke="#93c5fd" stroke-width="3" fill="none" stroke-linecap="round">
+    <circle cx="320" cy="170" r="34"/>
+    <path d="M320 120v24M320 196v24M270 170h24M346 170h24"/>
+  </g>
+  <circle cx="320" cy="170" r="3.5" fill="#93c5fd"/>
+  <text x="32" y="330" fill="#e8eef9" font-family="Segoe UI, Arial, sans-serif" font-size="38" font-weight="800" letter-spacing="2">ARENA FPS</text>
+</svg>

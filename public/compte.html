@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#05070d">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Mon compte · Plycube</title>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/animations/animations.css">
+  <script src="/assets/animations/animations.js"></script>
+</head>
+<body data-page="compte">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/"><img class="brand-logo" src="/assets/img/logo.svg" alt=""><span>Plycube</span><span class="beta">BÊTA</span></a>
+      <button class="menu-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false"></button>
+      <nav class="nav" aria-label="Navigation principale">
+        <a href="/">Jeux</a>
+        <a href="/personnage">Mon personnage</a>
+        <a href="/amis" data-friends-link>Amis</a>
+        <a href="/suggestions">Idées &amp; feuille de route</a>
+        <a href="/admin" class="hidden" data-admin-only>Admin</a>
+        <div class="user-chip">
+          <a href="/compte" class="name" data-me-name title="Mon compte"></a>
+          <button class="btn btn-ghost btn-sm" type="button" data-logout>Déconnexion</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+  <main class="container narrow">
+    <div class="page-head">
+      <h1>Mon compte</h1>
+      <p>Connecté en tant que <strong data-me-name></strong>.</p>
+    </div>
+    <section class="panel" aria-labelledby="titre-mdp">
+      <h2 id="titre-mdp">Changer mon mot de passe</h2>
+      <form id="password-form" novalidate>
+        <div class="field"><label for="pw-current">Mot de passe actuel</label><input type="password" id="pw-current" autocomplete="current-password" required></div>
+        <div class="field"><label for="pw-new">Nouveau mot de passe</label><input type="password" id="pw-new" autocomplete="new-password" minlength="8" required><div class="hint">8 caractères minimum.</div></div>
+        <div class="field"><label for="pw-confirm">Confirme le nouveau mot de passe</label><input type="password" id="pw-confirm" autocomplete="new-password" required></div>
+        <button class="btn" type="submit">Changer</button>
+      </form>
+    </section>
+    <section class="panel">
+      <h2>Mes données</h2>
+      <p class="muted">Le site ne connaît que ton pseudo, ton mot de passe (chiffré, illisible même pour l'admin), tes amis, tes idées et tes votes. Pas d'e-mail, pas de nom, pas d'adresse.</p>
+      <p class="muted mb-0">Mot de passe oublié ? Demande à l'administrateur de t'en donner un provisoire.</p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container">
+      <span>Plycube · version bêta · <span data-year></span></span>
+      <span>Aucune donnée personnelle : juste un pseudo. Reste poli et fair-play 🎮</span>
+    </div>
+  </footer>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <script src="/assets/js/platform.js"></script>
+  <script src="/assets/js/common.js"></script>
+  <script src="/assets/js/pages/compte.js"></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+/* =====================================================================
+   EFFETS DE SURVOL (souris) ET D'APPUI
+   ---------------------------------------------------------------------
+   Sur téléphone, il n'y a pas de "survol" : la règle @media (hover: hover)
+   applique ces effets seulement aux appareils avec une souris.
+   ===================================================================== */
+
+/* Les cartes de jeux se soulèvent et s'entourent d'une lueur bleue. */
+.game-card,
+.suggestion,
+.stat {
+  transition:
+    transform var(--anim-survol-duree) var(--anim-courbe),
+    box-shadow var(--anim-survol-duree) var(--anim-courbe),
+    border-color var(--anim-survol-duree) ease;
+}
+
+@media (hover: hover) {
+  .game-card:hover {
+    transform: translateY(var(--anim-survol-hauteur));
+    box-shadow: var(--anim-survol-lueur);
+    border-color: var(--blue);
+  }
+  /* L'image du jeu zoome légèrement. */
+  .game-card .game-cover img {
+    transition: transform 600ms var(--anim-courbe);
+  }
+  .game-card:hover .game-cover img {
+    transform: scale(1.05);
+  }
+  .suggestion:hover {
+    border-color: var(--border-strong);
+  }
+}
+
+/* Boutons : changement de couleur fluide et petit "enfoncement" au clic. */
+.btn,
+.vote-btn,
+.icon-btn,
+.nav a {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 120ms ease;
+}
+.btn:active:not(:disabled),
+.vote-btn:active:not(:disabled),
+.icon-btn:active {
+  transform: scale(var(--anim-bouton-appui));
+}
+
+/* Le bouton de vote "saute" quand on vote (classe ajoutée par la page suggestions). */
+@keyframes vote-saut {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.vote-btn.vote-anim {
+  animation: vote-saut 350ms var(--anim-courbe);
+}

@@ -1,0 +1,17 @@
+{
+  "nom": "Arena FPS",
+  "description": "Un jeu de tir multijoueur en blocs, directement dans le navigateur ! Crée ton perso, choisis 4 armes parmi 21 (principale, secondaire, mêlée, gadget), 4 cartes, Chacun pour soi ou Bleus contre Rouges, et des ragdolls rigolos (sans sang).",
+  "image": "cover.svg",
+  "statut": "beta",
+  "joueurs": "2 à 10 joueurs",
+  "tags": [
+    "Multijoueur",
+    "Action",
+    "3D"
+  ],
+  "ordre": 1,
+  "bandeAnnonce": {
+    "boucle": "bande-annonce-boucle.mp4",
+    "complete": "bande-annonce.mp4"
+  }
+}

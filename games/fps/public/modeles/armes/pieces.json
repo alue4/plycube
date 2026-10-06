@@ -1,0 +1,33 @@
+{
+  "_aide": "Pièces animées des modèles réalistes (.glb). Pour chaque fichier, les îlots (morceaux qui ne se touchent pas) accrochés à chaque pièce du modèle en boîtes : ils bougent, tombent ou disparaissent avec elle (chargeur qui tombe au rechargement, culasse qui recule au tir, roquette qui disparaît...). Un îlot s'écrit \"maillage:îlot\" (numéros dans l'ordre du fichier) ou \"maillage:*\" pour tout un maillage. Pièces possibles : chargeur, culasse, pompe, barillet, canons, munition, munitionCanon, crochet, objet. Les gadgets (grenade, fumigène, kit de soin) sont pris en entier sans rien écrire ici. Voir js/armes-glb.js.",
+  "simple/fusil.glb": { "chargeur": ["1:0"] },
+  "simple/rafale.glb": { "chargeur": ["1:25", "0:2"] },
+  "simple/smg.glb": { "chargeur": ["0:2", "2:1"] },
+  "simple/pompe.glb": { "pompe": ["0:0"] },
+  "simple/sniper.glb": { "culasse": ["1:2"] },
+  "simple/roquette.glb": { "munition": ["0:9"] },
+  "simple/revolver.glb": { "barillet": ["2:2"] },
+  "simple/pistolet.glb": {
+    "culasse": ["2:0", "0:0", "0:1", "0:2", "0:3", "0:7", "0:8", "0:9", "0:10", "0:4", "0:5", "0:6", "0:12", "0:13", "1:1", "2:1", "2:2"],
+    "chargeur": ["1:0"]
+  },
+  "simple/uzi.glb": { "chargeur": ["2:6", "3:7"] },
+  "simple/canon_scie.glb": { "canons": ["0:1", "0:2", "2:0", "3:0"] },
+  "simple/lance_fusee.glb": { "canons": ["0:2", "0:0"] },
+  "simple/grappin.glb": { "crochet": ["5:0"] },
+
+  "texture/fusil.glb": { "chargeur": ["0:*"] },
+  "texture/rafale.glb": { "chargeur": ["55:*"] },
+  "texture/smg.glb": { "chargeur": ["17:*"] },
+  "texture/pompe.glb": { "pompe": ["0:5"] },
+  "texture/precision.glb": { "chargeur": ["29:*"] },
+  "texture/sniper.glb": { "culasse": ["4:*"] },
+  "texture/roquette.glb": { "munition": ["0:*"] },
+  "texture/revolver.glb": {
+    "barillet": ["3:*", "5:*", "7:*", "8:*", "9:*", "10:*", "11:*", "12:*", "13:*", "14:*", "15:*", "16:*", "17:*", "18:*"]
+  },
+  "texture/pistolet.glb": { "culasse": ["1:*"] },
+  "texture/uzi.glb": { "chargeur": ["1:*", "2:*", "3:*", "4:*"] },
+  "texture/canon_scie.glb": { "canons": ["0:*", "1:*"] },
+  "texture/grappin.glb": { "crochet": ["12:*"] }
+}

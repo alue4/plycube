@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head><meta charset="UTF-8"></head>
+  <body>
+    <template>
+      <style>
+        @font-face { font-family: "Archivo Black"; font-weight: 400; src: url("assets/fonts/ArchivoBlack-400.woff2") format("woff2"); }
+        @font-face { font-family: "Space Mono"; font-weight: 700; src: url("assets/fonts/SpaceMono-700.woff2") format("woff2"); }
+        #root { position: absolute; inset: 0; }
+        #s03-panneau { position: absolute; right: 90px; top: 150px; width: 520px; height: 640px; overflow: hidden;
+          background: rgba(8, 12, 26, .9); border: 4px solid #2a3b6b; border-radius: 26px; }
+        #s03-repere { position: absolute; left: 0; right: 0; top: 265px; height: 110px; background: rgba(255, 138, 31, .14); border-top: 3px solid #ff8a1f; border-bottom: 3px solid #ff8a1f; }
+        #s03-colonne { position: absolute; left: 0; right: 0; top: 265px; }
+        .s03-cat { transform-origin: 0% 50%; height: 110px; display: flex; align-items: center; padding-left: 44px; font: 700 46px/1 "Space Mono", monospace; letter-spacing: .08em; color: #b8c6de; }
+        #s03-toi { position: absolute; left: 90px; bottom: 90px; margin: 0; font: italic 400 150px/1 "Archivo Black", sans-serif; letter-spacing: -0.04em; color: #eef4ff; text-shadow: 0 10px 0 #1d2a4d, 0 24px 48px rgba(0, 0, 0, .45); }
+        #s03-toi span { color: #ff8a1f; text-shadow: 0 10px 0 #a14e0a, 0 24px 48px rgba(0, 0, 0, .45); }
+        #s03-titre { position: absolute; right: 90px; top: 74px; width: 520px; text-align: center; font: 700 30px/1 "Space Mono", monospace; letter-spacing: .14em; color: #7fe8ff; background: rgba(8, 12, 26, .9); border-radius: 14px; padding: 12px 0; box-sizing: border-box; }
+      </style>
+      <div data-hf-id="hf-3azd" id="root" data-composition-id="s03" data-width="1920" data-height="1080">
+        <div data-hf-id="hf-bk72" id="s03-titre">GARDE-ROBE</div>
+        <div data-hf-id="hf-fwsk" id="s03-panneau">
+          <div data-hf-id="hf-hb51" id="s03-repere"></div>
+          <div data-hf-id="hf-lzia" id="s03-colonne">
+            <div data-hf-id="hf-6tr8" class="s03-cat" id="s03-c0">HAUTS</div>
+            <div data-hf-id="hf-n58q" class="s03-cat" id="s03-c1">BAS</div>
+            <div data-hf-id="hf-8tpm" class="s03-cat" id="s03-c2">CHAPEAUX</div>
+            <div data-hf-id="hf-60g2" class="s03-cat" id="s03-c3">CAPES</div>
+            <div data-hf-id="hf-vqyn" class="s03-cat" id="s03-c4">ACCESSOIRES</div>
+          </div>
+        </div>
+        <h2 data-hf-id="hf-rlat" id="s03-toi">100 % <span data-hf-id="hf-uaff">TOI</span></h2>
+      </div>
+      <script>
+        // Mêmes moments que les changements de tenue du moteur 3D (TENUES_T - 8 s)
+        const CHANGEMENTS = [[0, 0], [0.94, 1], [1.74, 2], [2.40, 2], [2.81, 4], [3.60, 4], [4.005, 3], [4.50, 4], [4.81, 3]];
+        const tl = gsap.timeline({ paused: true });
+        tl.fromTo("#s03-panneau", { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0);
+        tl.fromTo("#s03-titre", { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.1);
+        let avant = -1;
+        CHANGEMENTS.forEach(([t, i]) => {
+          tl.to("#s03-colonne", { y: -i * 110, duration: 0.28, ease: "back.out(1.8)" }, t);
+          if (avant >= 0 && avant !== i) tl.to(`#s03-c${avant}`, { color: "#b8c6de", scale: 1, duration: 0.15, ease: "power1.out" }, t);
+          tl.fromTo(`#s03-c${i}`, { scale: 1.35, transformOrigin: "0% 50%" }, { color: "#ff8a1f", scale: 1.12, duration: 0.3, ease: "back.out(3)", immediateRender: t === 0 }, t);
+          tl.fromTo("#s03-repere", { scaleY: 1.4 }, { scaleY: 1, duration: 0.25, ease: "power2.out", immediateRender: t === 0 }, t);
+          avant = i;
+        });
+        tl.fromTo("#s03-toi", { opacity: 0, scale: 2.2, transformOrigin: "0% 100%" }, { opacity: 1, scale: 1, duration: 0.3, ease: "power4.out" }, 4.92);
+        tl.to("#s03-toi", { y: -10, duration: 1.6, ease: "sine.inOut" }, 5.2);
+        tl.to(["#s03-panneau", "#s03-titre"], { opacity: 0, x: 60, duration: 0.3, ease: "power2.in" }, 6.6);
+        window.__timelines["s03"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

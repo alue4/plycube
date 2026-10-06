@@ -1,0 +1,14 @@
+{
+  "nom": "Caméléon",
+  "description": "Cache-cache en blocs ! Les cacheurs se peignent avec les couleurs du décor pour devenir invisibles, les chercheurs les traquent au pistolet à peinture. Poses, leurres, sifflets et radar. 3 cartes, avec ou sans bots.",
+  "image": "cover.svg",
+  "statut": "bientot",
+  "statutAvecServeur": "beta",
+  "joueurs": "1 à 12 joueurs",
+  "tags": [
+    "Multijoueur",
+    "Cache-cache",
+    "3D"
+  ],
+  "ordre": 2
+}

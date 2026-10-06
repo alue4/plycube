@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#05070d">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Amis · Plycube</title>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/animations/animations.css">
+  <script src="/assets/animations/animations.js"></script>
+</head>
+<body data-page="amis">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/"><img class="brand-logo" src="/assets/img/logo.svg" alt=""><span>Plycube</span><span class="beta">BÊTA</span></a>
+      <button class="menu-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false"></button>
+      <nav class="nav" aria-label="Navigation principale">
+        <a href="/">Jeux</a>
+        <a href="/personnage">Mon personnage</a>
+        <a href="/amis" data-friends-link>Amis</a>
+        <a href="/suggestions">Idées &amp; feuille de route</a>
+        <a href="/admin" class="hidden" data-admin-only>Admin</a>
+        <div class="user-chip">
+          <a href="/compte" class="name" data-me-name title="Mon compte"></a>
+          <button class="btn btn-ghost btn-sm" type="button" data-logout>Déconnexion</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <div class="page-head">
+      <h1>Mes amis</h1>
+      <p>Tes amis sont les mêmes dans tous les jeux. Tu vois qui est en ligne, à quoi ils jouent, et tu peux les rejoindre ou les inviter.</p>
+    </div>
+    <div class="friends-layout">
+      <section class="panel" aria-labelledby="titre-liste">
+        <div class="panel-head"><h2 id="titre-liste">Liste d'amis <span class="muted small" id="friends-count"></span></h2></div>
+        <ul class="friend-list" id="friends"><li class="empty">Chargement…</li></ul>
+      </section>
+      <aside>
+        <section class="panel" aria-labelledby="titre-ajout">
+          <h2 id="titre-ajout">Ajouter un ami</h2>
+          <form id="add-friend" class="inline-form" autocomplete="off" novalidate>
+            <label class="sr-only" for="friend-name">Pseudo de ton ami</label>
+            <input type="text" id="friend-name" name="username" placeholder="Pseudo exact" maxlength="16" required>
+            <button class="btn" type="submit">Envoyer</button>
+          </form>
+          <p class="hint small muted mt-8">Ton ami devra accepter ta demande.</p>
+        </section>
+        <section class="panel" aria-labelledby="titre-recues">
+          <h2 id="titre-recues">Demandes reçues</h2>
+          <ul class="friend-list" id="incoming"></ul>
+        </section>
+        <section class="panel" aria-labelledby="titre-envoyees">
+          <h2 id="titre-envoyees">Demandes envoyées</h2>
+          <ul class="friend-list" id="outgoing"></ul>
+        </section>
+      </aside>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="container">
+      <span>Plycube · version bêta · <span data-year></span></span>
+      <span>Aucune donnée personnelle : juste un pseudo. Reste poli et fair-play 🎮</span>
+    </div>
+  </footer>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <script src="/assets/js/platform.js"></script>
+  <script src="/assets/js/common.js"></script>
+  <script src="/assets/js/pages/amis.js"></script>
+</body>
+</html>

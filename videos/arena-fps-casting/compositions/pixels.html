@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head><meta charset="UTF-8"></head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; pointer-events: none; }
+        .px-carre { position: absolute; width: 121px; height: 121px; }
+      </style>
+      <div data-hf-id="hf-shni" id="root" data-composition-id="pixels" data-width="1920" data-height="1080"><div data-hf-id="hf-xj1u" id="px-scene"></div></div>
+      <script>
+        // Transition « pixels » : des carrés aux couleurs du jeu recouvrent l'image en vague,
+        // la scène change pendant qu'ils couvrent tout, puis ils disparaissent.
+        const COUPES = [15.0, 24.5, 43.5];
+        const COULEURS = ["#0a0f1d", "#ff8a1f", "#3d8bff", "#0a0f1d", "#7fe8ff", "#16203b", "#ff5a5a", "#0a0f1d"];
+        const racine = document.getElementById("px-scene");
+        const carres = [];
+        for (let y = 0; y < 9; y++) for (let x = 0; x < 16; x++) {
+          const d = document.createElement("div");
+          d.className = "px-carre";
+          d.style.left = `${x * 120}px`; d.style.top = `${y * 120}px`;
+          d.style.background = COULEURS[(x * 3 + y * 5) % COULEURS.length];
+          racine.appendChild(d);
+          carres.push({ d, ordre: (x + y) / 23 });
+        }
+        const tl = gsap.timeline({ paused: true });
+        carres.forEach(({ d }) => tl.set(d, { scale: 0 }, 0));
+        COUPES.forEach((T) => {
+          carres.forEach(({ d, ordre }) => {
+            tl.fromTo(d, { scale: 0 }, { scale: 1, duration: 0.12, ease: "power2.out", immediateRender: false }, T - 0.34 + ordre * 0.2);
+            tl.to(d, { scale: 0, duration: 0.14, ease: "power2.in" }, T + 0.04 + ordre * 0.24);
+          });
+        });
+        window.__timelines["pixels"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

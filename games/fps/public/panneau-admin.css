@@ -1,0 +1,117 @@
+/* Panneau d'admin : style terminal de hacker (vert sur noir, lignes de balayage, fenêtres qui s'allument). */
+.admin-panel {
+  --vert: #39ff88; --vert-fonce: #021006; --rouge: #ff4d5e; --ambre: #ffcc33;
+  position: fixed; inset: 0; z-index: 36; overflow: hidden; background: rgba(0, 6, 2, .86); color: var(--vert);
+  font: 13px/1.45 "Cascadia Mono", "Fira Code", "JetBrains Mono", Consolas, "DejaVu Sans Mono", "Courier New", monospace;
+  text-shadow: 0 0 6px rgba(57, 255, 136, .35);
+}
+.admin-panel p, .admin-panel dl, .admin-panel ol, .admin-panel pre { margin: 0; }
+
+/* Lignes de balayage, coins sombres et une bande lumineuse qui descend (comme un vieil écran) */
+.ap-ecran { position: absolute; inset: 0; z-index: 5; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px), radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, .65)); }
+.ap-ecran::after { content: ""; position: absolute; left: 0; right: 0; top: -20%; height: 18%;
+  background: linear-gradient(transparent, rgba(57, 255, 136, .07), transparent); animation: ap-balayage 6s linear infinite; }
+@keyframes ap-balayage { to { top: 110%; } }
+
+/* ---------- Les fenêtres ---------- */
+.ap-fenetre { position: absolute; display: flex; flex-direction: column; min-height: 0;
+  background: rgba(2, 14, 6, .93); border: 1px solid var(--vert);
+  box-shadow: 0 0 18px rgba(57, 255, 136, .25), inset 0 0 30px rgba(57, 255, 136, .06); }
+.ap-barre { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 3px 8px;
+  background: var(--vert); color: var(--vert-fonce); font-weight: 700; font-size: 12px; white-space: nowrap; text-shadow: none; }
+.ap-titre-fenetre { overflow: hidden; text-overflow: ellipsis; }
+.ap-pid { opacity: .7; font-weight: 400; }
+.ap-corps { flex: 1; min-height: 0; overflow: hidden; padding: 8px 10px; }
+.ap-fermer { font: inherit; font-weight: 700; color: var(--vert-fonce); background: transparent; border: 0; padding: 0 4px; cursor: pointer; }
+.ap-fermer:hover, .ap-fermer:focus-visible { background: var(--vert-fonce); color: var(--vert); outline: none; }
+
+/* Le menu au milieu, 4 fenêtres dans les coins (pas tout à fait alignées : ça fait plus « piraté ») */
+.ap-principale { left: 50%; top: 50%; z-index: 2; width: min(760px, 52vw); max-height: calc(100% - 32px); transform: translate(-50%, -50%); }
+.ap-principale .ap-corps { overflow-y: auto; }
+.ap-coin { width: min(280px, 22vw); height: calc(50% - 34px); }
+.ap-hg { left: 16px; top: 16px; --d: .15s; }
+.ap-hd { right: 22px; top: 34px; --d: .3s; }
+.ap-bg { left: 28px; bottom: 18px; --d: .45s; }
+.ap-bd { right: 14px; bottom: 26px; --d: .6s; }
+
+/* Allumage : chaque fenêtre s'ouvre comme un écran cathodique, l'une après l'autre */
+.ap-allume .ap-fenetre { animation: ap-allumage .45s cubic-bezier(.2, .9, .3, 1) both; animation-delay: var(--d, 0s); }
+@keyframes ap-allumage {
+  0% { opacity: 0; clip-path: inset(49% 0 49% 0); filter: brightness(3); }
+  40% { opacity: 1; clip-path: inset(49% 0 49% 0); }
+  100% { clip-path: inset(0 0 0 0); filter: none; }
+}
+/* Texte tapé à la machine */
+.ap-tape { white-space: pre-wrap; }
+.ap-allume .ap-tape { animation: ap-taper .35s steps(28, end) both; animation-delay: var(--d, 0s); }
+@keyframes ap-taper { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+/* ---------- Le menu des pouvoirs ---------- */
+.ap-banniere { font-size: 9px; line-height: 1.05; text-shadow: 0 0 8px rgba(57, 255, 136, .8); overflow: hidden; }
+.ap-titre { margin: 8px 0 6px; font-weight: 700; letter-spacing: .22em; animation: ap-glitch 4.5s steps(1) infinite; }
+.ap-titre .ap-sep { color: var(--ambre); }
+@keyframes ap-glitch {
+  0%, 91%, 100% { text-shadow: 0 0 8px var(--vert); transform: none; }
+  92% { text-shadow: -2px 0 var(--rouge), 2px 0 #3cf; transform: translateX(2px); }
+  94% { text-shadow: 2px 0 var(--rouge), -2px 0 #3cf; transform: translateX(-2px); }
+}
+.ap-boot { opacity: .8; font-size: 12px; }
+.ap-boot .ap-ok { color: var(--ambre); font-weight: 700; }
+.ap-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 14px; margin: 10px 0 8px; }
+.ap-section { grid-column: 1 / -1; margin-top: 8px; font-size: 11px; letter-spacing: .25em; color: var(--ambre); opacity: .85; }
+.ap-section:first-child { margin-top: 0; }
+.ap-action .ap-etat { color: var(--ambre); }
+.ap-option.ap-choisie.ap-action .ap-etat { color: inherit; }
+.ap-secondaire { grid-column: 1 / -1; }
+.ap-allume .ap-options { animation: ap-taper .4s steps(20, end) both; animation-delay: .95s; }
+.ap-option { display: flex; align-items: baseline; gap: 8px; width: 100%; padding: 5px 6px; font: inherit; text-align: left;
+  color: var(--vert); background: transparent; border: 0; cursor: pointer; text-shadow: inherit; }
+.ap-option.ap-choisie { background: var(--vert); color: var(--vert-fonce); text-shadow: none; }
+.admin-panel .ap-option:focus, body.saisie-manette .admin-panel .ap-option:focus { outline: none; }
+.ap-num { opacity: .7; }
+.ap-nom { font-weight: 700; letter-spacing: .04em; white-space: nowrap; }
+.ap-points { flex: 1; min-width: 12px; border-bottom: 2px dotted currentColor; opacity: .45; transform: translateY(-4px); }
+.ap-etat { font-weight: 700; white-space: pre; }
+.ap-option[aria-checked="true"] .ap-etat { color: var(--vert); text-shadow: 0 0 10px var(--vert); }
+.ap-option[aria-checked="false"] .ap-etat { color: var(--rouge); text-shadow: none; }
+.ap-option.ap-choisie .ap-etat { color: inherit; text-shadow: none; }
+.ap-secondaire { margin-top: 4px; opacity: .8; }
+.ap-flash { animation: ap-flash .35s steps(2) 2; }
+@keyframes ap-flash { 50% { background: var(--ambre); color: var(--vert-fonce); } }
+.ap-aide { min-height: 2.9em; color: var(--ambre); }
+.ap-invite { margin-top: 8px !important; }
+.ap-curseur { animation: ap-clignote 1s steps(1) infinite; }
+@keyframes ap-clignote { 50% { opacity: 0; } }
+.ap-pied { margin-top: 6px !important; font-size: 11px; opacity: .55; }
+
+/* ---------- Fenêtres des coins ---------- */
+.ap-infos { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3px 10px; font-size: 12px; }
+.ap-infos dt { opacity: .6; }
+.ap-infos dd { margin: 0; text-align: right; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap-journal { list-style: none; padding: 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; font-size: 12px; }
+.ap-journal li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: ap-taper .3s steps(30, end) both; }
+.ap-journal .t { opacity: .5; margin-right: 6px; }
+.ap-journal .fort { color: var(--ambre); font-weight: 700; }
+.ap-bd .ap-corps { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.ap-radar { flex: 1; min-height: 0; max-width: 100%; aspect-ratio: 1; }
+.ap-legende { font-size: 11px; opacity: .7; }
+
+/* Écran étroit ou bas : seulement le menu */
+@media (max-width: 900px), (max-height: 520px) {
+  .ap-coin { display: none; }
+  .ap-principale { width: min(760px, calc(100% - 24px)); }
+}
+@media (max-width: 620px) { .ap-options { grid-template-columns: minmax(0, 1fr); } }
+.ap-nom { overflow: hidden; text-overflow: ellipsis; }
+@media (max-height: 640px) { .ap-banniere { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .admin-panel *, .admin-panel *::after { animation: none !important; }
+}
+
+/* Le bouton dans les réglages */
+.btn-admin-panel { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 12px 14px; cursor: pointer;
+  font: 700 1rem "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace; letter-spacing: .08em; color: #39ff88; background: #020e06;
+  border: 1px solid #39ff88; border-radius: 10px; text-shadow: 0 0 8px rgba(57, 255, 136, .6); box-shadow: 0 0 14px rgba(57, 255, 136, .2); }
+.btn-admin-panel:hover { background: #052a12; }
+.btn-admin-panel small { font-weight: 400; font-size: .78rem; letter-spacing: 0; opacity: .8; }

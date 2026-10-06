@@ -1,0 +1,428 @@
+/* Style du jeu : menus et affichage pendant la partie (HUD). */
+:root {
+  --bleu: #3d8bff;
+  --bleu-clair: #7fe8ff;
+  --rouge: #ff5a5a;
+  --orange: #ff8a1f;
+  --fond: rgba(8, 12, 26, 0.82);
+  --bord: rgba(127, 232, 255, 0.25);
+  --texte: #eef4ff;
+  --gris: #9fb0cc;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #0a0f1d; color: var(--texte);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; user-select: none; }
+#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* ---------- Boutons et cartes ---------- */
+.btn { font: inherit; font-weight: 700; color: #fff; background: linear-gradient(180deg, #4b97ff, #2d6fe0);
+  border: 0; border-bottom: 4px solid #1d4ea8; border-radius: 10px; padding: 10px 16px; cursor: pointer;
+  text-decoration: none; display: inline-block; text-align: center; transition: transform .08s, filter .15s; }
+.btn:hover { filter: brightness(1.12); }
+.btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+.btn.gros { display: block; width: 100%; font-size: 1.15rem; padding: 14px; margin: 10px 0; }
+.btn.danger { background: linear-gradient(180deg, #ff6b6b, #d93c3c); border-bottom-color: #9e2626; }
+.btn.lien { background: none; border: 0; color: var(--gris); font-weight: 600; }
+.btn.bleu-rouge { background: linear-gradient(90deg, #3d8bff 0 50%, #ff5a5a 50% 100%); border-bottom-color: #333; }
+.btn[disabled] { opacity: .5; cursor: default; }
+.carte { background: var(--fond); border: 1px solid var(--bord); border-radius: 16px; padding: 20px;
+  backdrop-filter: blur(8px); box-shadow: 0 20px 50px rgba(0, 0, 0, .4); }
+.carte h2 { margin: 0 0 8px; font-size: 1.2rem; letter-spacing: .03em; }
+.sous { color: var(--gris); margin: 0 0 8px; }
+.erreur { color: #ffb4b4; font-weight: 600; min-height: 1.2em; text-align: center; }
+kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; margin-right: 2px; border-radius: 5px;
+  background: #1c2742; border: 1px solid #34466e; border-bottom-width: 3px; font: 600 .8rem system-ui; text-align: center; }
+.aide { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--gris); font-size: .9rem; }
+.code { font-family: ui-monospace, Consolas, monospace; color: var(--bleu-clair); letter-spacing: .15em; }
+
+/* ---------- Écrans (hall, pause, réglages) ---------- */
+.ecran { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 20; }
+#pause, #reglages, #message { background: rgba(5, 8, 18, .55); }
+#pause .carte, #reglages .carte, #message .carte { width: min(520px, 100%); }
+#pause .rangee { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+#pause .rangee .btn { flex: 1; }
+#pause .aide { margin-top: 10px; }
+#liste-amis { list-style: none; padding: 0; margin: 0 0 12px; max-height: 200px; overflow: auto; }
+#liste-amis li { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--bord); }
+#liste-amis .btn { padding: 4px 10px; font-size: .85rem; }
+
+/* ---------- Hall : écran d'accueil façon Fortnite (le personnage 3D est derrière) ---------- */
+#hall { display: block; padding: 0; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 55%, rgba(5, 10, 25, 0) 40%, rgba(5, 10, 25, .55) 100%); }
+.hall-accueil { position: absolute; inset: 0; display: grid; gap: 14px 18px; padding: 16px 20px;
+  padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right));
+  grid-template-columns: minmax(250px, 300px) 1fr minmax(210px, 270px); grid-template-rows: auto 1fr auto;
+  grid-template-areas: "barre barre barre" "gauche centre droite" "aide aide aide"; pointer-events: none; }
+.hall-accueil > * { pointer-events: auto; }
+.hall-barre { grid-area: barre; display: flex; align-items: center; gap: 14px; }
+.hall-barre h1 { margin: 0; flex: 1; text-align: center; font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 900; letter-spacing: .06em; font-style: italic;
+  text-shadow: 0 4px 0 #1d4ea8, 0 8px 24px rgba(0, 0, 0, .5); }
+.hall-barre h1 span { color: var(--orange); text-shadow: 0 4px 0 #a14e0a, 0 8px 24px rgba(0, 0, 0, .5); }
+.retour { color: var(--texte); text-decoration: none; font-weight: 600; background: var(--fond); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--bord); }
+.beta { background: var(--orange); color: #1a0d00; font-weight: 800; padding: 4px 10px; border-radius: 999px; font-size: .8rem; }
+.hall-gauche { grid-area: gauche; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; padding-bottom: 6px; min-height: 0; }
+.hall-gauche #hall-perso .bouton-perso { margin-bottom: 0; background: var(--fond); backdrop-filter: blur(8px); }
+.btn-jouer { display: flex; flex-direction: column; align-items: flex-start; width: 100%; cursor: pointer; text-align: left; font: inherit;
+  color: #1a1200; background: linear-gradient(180deg, #ffe066, #ffbf1f); border: 0; border-bottom: 6px solid #b37c00; border-radius: 16px;
+  padding: 14px 22px 12px; box-shadow: 0 12px 30px rgba(255, 191, 31, .35); transform: skewX(-6deg); transition: transform .1s, filter .15s; }
+.btn-jouer:hover { filter: brightness(1.08); transform: skewX(-6deg) translateY(-2px); }
+.btn-jouer:active { transform: skewX(-6deg) translateY(3px); border-bottom-width: 3px; }
+.btn-jouer .jouer-titre { font-size: clamp(2.2rem, 5vw, 3.2rem); font-weight: 900; font-style: italic; letter-spacing: .05em; line-height: 1; }
+.btn-jouer small { font-weight: 700; opacity: .8; margin-top: 4px; }
+.bouton-hall { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; font: inherit; color: var(--texte); text-align: left; cursor: pointer;
+  background: var(--fond); border: 2px solid var(--bord); border-radius: 14px; padding: 10px 14px; backdrop-filter: blur(8px); transition: border-color .12s, transform .1s; }
+a.bouton-hall { text-decoration: none; box-sizing: border-box; }
+.bouton-hall[hidden] { display: none; }
+.bouton-hall:hover { border-color: rgba(127, 232, 255, .6); transform: translateX(3px); }
+.bouton-hall .icone { font-size: 1.6rem; width: 40px; text-align: center; flex: none; }
+.bouton-hall b { display: block; font-size: 1.05rem; }
+.bouton-hall small { display: block; color: var(--gris); font-size: .8rem; }
+.hall-droite { grid-area: droite; align-self: start; display: flex; flex-direction: column; min-height: 0; max-height: 100%;
+  background: var(--fond); border: 1px solid var(--bord); border-radius: 16px; padding: 12px 14px; backdrop-filter: blur(8px); }
+.hall-droite h2 { margin: 0 0 8px; font-size: 1rem; text-transform: uppercase; letter-spacing: .06em; color: var(--gris); }
+#amis-hall { list-style: none; margin: 0; padding: 0; overflow: auto; min-height: 0; }
+#amis-hall li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--bord); }
+#amis-hall li:last-child { border-bottom: 0; }
+#amis-hall li.vide { color: var(--gris); font-size: .9rem; border: 0; }
+#amis-hall .nom { flex: 1; min-width: 0; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#amis-hall .statut { display: block; color: var(--gris); font-size: .78rem; font-weight: 600; }
+#amis-hall .statut.joue { color: #3ee07a; }
+#amis-hall .point { width: 10px; height: 10px; border-radius: 50%; background: #3ee07a; flex: none; box-shadow: 0 0 8px #3ee07a; }
+#amis-hall .btn { padding: 6px 10px; font-size: .82rem; }
+.hall-aide { grid-area: aide; justify-self: start; max-width: 100%; background: var(--fond); border: 1px solid var(--bord); border-radius: 12px; padding: 6px 12px; }
+.hall-aide summary { cursor: pointer; color: var(--gris); font-weight: 700; padding: 4px 0; }
+.hall-aide[open] { max-width: min(900px, 100%); }
+.hall-aide .aide { padding: 6px 0 4px; font-size: .85rem; }
+
+/* Panneau "Jouer" qui glisse depuis la droite */
+.panneau-jouer { position: absolute; top: 0; right: 0; bottom: 0; width: min(580px, 100%); display: flex; flex-direction: column;
+  background: rgba(8, 12, 26, .94); border-left: 1px solid var(--bord); box-shadow: -20px 0 50px rgba(0, 0, 0, .45); backdrop-filter: blur(10px);
+  transform: translateX(105%); transition: transform .28s cubic-bezier(.2, .8, .2, 1), visibility 0s linear .28s; visibility: hidden; }
+#hall.jouer-ouvert .panneau-jouer { transform: none; visibility: visible; transition: transform .28s cubic-bezier(.2, .8, .2, 1); }
+#hall.jouer-ouvert .hall-droite, #hall.jouer-ouvert .hall-aide { opacity: 0; pointer-events: none; }
+#hall.jouer-ouvert .hall-gauche { opacity: .35; }
+.hall-droite, .hall-aide, .hall-gauche { transition: opacity .2s; }
+.panneau-entete { display: flex; align-items: center; gap: 10px; padding: 14px 16px 6px; padding-right: max(16px, env(safe-area-inset-right)); }
+.panneau-entete h2 { flex: 1; margin: 0; font-size: 1.8rem; font-weight: 900; font-style: italic; letter-spacing: .04em; color: #ffd21f; }
+.btn-fermer-panneau { font: 800 1.2rem system-ui; color: var(--texte); background: #1c2742; border: 1px solid var(--bord); border-radius: 12px; width: 48px; height: 48px; cursor: pointer; }
+.panneau-contenu { flex: 1; overflow: auto; padding: 6px 16px 18px; padding-right: max(16px, env(safe-area-inset-right)); -webkit-overflow-scrolling: touch; }
+.bloc-jouer { background: #0c1428; border: 1px solid var(--bord); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+.bloc-jouer h3 { margin: 0 0 8px; font-size: 1.05rem; }
+.bloc-jouer .btn.gros { margin: 8px 0; }
+
+/* Dans le hall, l'écran d'accueil marche aussi tablette debout : pas besoin du conseil "tourne ta tablette" */
+body:has(#hall:not([hidden])) #tourne { display: none !important; }
+
+/* Portrait (tablette tenue debout) : le personnage en haut, les boutons en bas */
+@media (orientation: portrait) {
+  .hall-accueil { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto auto;
+    grid-template-areas: "barre" "centre" "gauche" "droite"; gap: 10px; }
+  .hall-gauche { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-bottom: 0; }
+  .hall-gauche .btn-jouer, .hall-gauche #hall-perso { grid-column: 1 / -1; }
+  .hall-droite { max-height: 22vh; }
+  .hall-aide { display: none; }
+  .panneau-jouer { top: auto; left: 0; width: 100%; height: 82%; border-left: 0; border-top: 1px solid var(--bord);
+    border-radius: 20px 20px 0 0; transform: translateY(105%); }
+  #hall.jouer-ouvert .hall-gauche { opacity: 0; pointer-events: none; }
+}
+/* Écran pas très haut (portable) : un peu plus compact */
+@media (max-height: 640px) and (orientation: landscape) {
+  .hall-accueil { padding-top: 10px; padding-bottom: 10px; gap: 8px 14px; }
+  .bouton-hall { min-height: 50px; padding: 6px 12px; }
+  .btn-jouer { padding: 10px 18px 8px; }
+  .hall-barre h1 { font-size: 1.8rem; }
+}
+@media (max-width: 760px) and (orientation: landscape) {
+  .hall-accueil { grid-template-columns: minmax(220px, 260px) 1fr; grid-template-areas: "barre barre" "gauche centre" "aide aide"; }
+  .hall-droite { display: none; }
+}
+#form-code { display: flex; gap: 8px; margin-top: 6px; }
+#choix-cartes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 6px 0 12px; }
+.choix-carte { font: inherit; text-align: left; color: var(--texte); background: #0c1428; border: 2px solid var(--bord); border-radius: 12px;
+  padding: 10px 12px; cursor: pointer; transition: border-color .12s, transform .08s; }
+.choix-carte:hover { border-color: rgba(127, 232, 255, .6); }
+.choix-carte[aria-checked="true"] { border-color: var(--orange); background: #1a1a10; }
+.choix-carte b { display: block; font-size: 1rem; }
+.choix-carte span { display: block; color: var(--gris); font-size: .78rem; margin-top: 2px; }
+#form-code input { flex: 1; min-width: 0; font: 700 1.1rem ui-monospace, Consolas, monospace; letter-spacing: .3em; text-transform: uppercase;
+  background: #0c1428; color: var(--texte); border: 1px solid var(--bord); border-radius: 10px; padding: 10px; text-align: center; }
+#salons { list-style: none; padding: 0; margin: 0; max-height: 260px; overflow: auto; }
+#salons li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--bord); }
+#salons li .infos { flex: 1; }
+#salons li .mode { color: var(--gris); font-size: .85rem; }
+#salons li .nom-carte { color: var(--orange); font-weight: 700; }
+#salons .vide { color: var(--gris); justify-content: center; border: 0; }
+
+#reglages label { display: block; margin: 12px 0; font-weight: 600; }
+#reglages input[type=range] { width: 100%; accent-color: var(--bleu); }
+#reglages output { color: var(--bleu-clair); float: right; }
+#reglages .case { display: flex; gap: 8px; align-items: center; }
+
+/* ---------- HUD ---------- */
+#hud { position: fixed; inset: 0; pointer-events: none; z-index: 5; text-shadow: 0 2px 4px rgba(0, 0, 0, .6); }
+/* Viseur : les 4 traits s'écartent quand la dispersion augmente (variable --ecart) */
+#viseur { position: absolute; left: 50%; top: 50%; width: 0; height: 0; --ecart: 8px; transition: opacity .12s; }
+#viseur i { position: absolute; background: #fff; box-shadow: 0 0 2px rgba(0,0,0,.9); }
+#viseur .h, #viseur .b { width: 2px; height: 9px; left: -1px; }
+#viseur .g, #viseur .d { height: 2px; width: 9px; top: -1px; }
+#viseur .h { bottom: var(--ecart); } #viseur .b { top: var(--ecart); }
+#viseur .g { right: var(--ecart); } #viseur .d { left: var(--ecart); }
+#viseur .centre { width: 2px; height: 2px; left: -1px; top: -1px; }
+#viseur.cache { opacity: 0; }
+#marqueur { position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; transform: translate(-50%, -50%) rotate(45deg); opacity: 0; }
+#marqueur::before, #marqueur::after { content: ""; position: absolute; background: #fff; }
+#marqueur::before { left: 16px; top: 0; width: 2px; height: 34px; }
+#marqueur::after { top: 16px; left: 0; height: 2px; width: 34px; }
+#marqueur.actif { animation: marqueur .25s ease-out; }
+#marqueur.tete::before, #marqueur.tete::after { background: #ffe14d; }
+#marqueur.elim::before, #marqueur.elim::after { background: #ff5a5a; }
+#marqueur.protege::before, #marqueur.protege::after { background: #9fb0cc; }
+@keyframes marqueur { from { opacity: 1; transform: translate(-50%, -50%) rotate(45deg) scale(1.3); } to { opacity: 0; transform: translate(-50%, -50%) rotate(45deg) scale(.9); } }
+
+#haut { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; }
+#chrono { background: var(--fond); border: 1px solid var(--bord); border-radius: 10px; padding: 6px 14px; font: 800 1.3rem ui-monospace, Consolas, monospace; }
+.score { min-width: 64px; text-align: center; padding: 6px 12px; border-radius: 10px; font-weight: 900; font-size: 1.3rem; }
+.score:empty { display: none; }
+.score.bleu { background: var(--bleu); }
+.score.rouge { background: var(--rouge); }
+.score.moi { background: var(--fond); border: 1px solid var(--bord); }
+#objectif { position: absolute; top: 58px; left: 50%; transform: translateX(-50%); color: var(--gris); font-size: .8rem; font-weight: 600; }
+
+#fil { position: absolute; top: 12px; right: 12px; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+#fil li { background: var(--fond); border-radius: 8px; padding: 4px 10px; font-weight: 700; font-size: .9rem; animation: entree .2s ease-out; }
+#fil li.moi { border: 1px solid var(--orange); }
+#fil .arme { color: var(--gris); margin: 0 6px; }
+#fil .b { color: #8dbcff; } #fil .r { color: #ff9a9a; }
+@keyframes entree { from { transform: translateX(20px); opacity: 0; } }
+
+#annonce { position: absolute; top: 24%; left: 0; right: 0; text-align: center; opacity: 0; }
+#annonce.actif { animation: annonce 1.8s ease-out; }
+#annonce .grand { font-size: clamp(1.6rem, 4vw, 2.6rem); font-weight: 900; font-style: italic; color: var(--orange); text-shadow: 0 3px 0 #000, 0 0 24px rgba(255, 138, 31, .6); }
+#annonce .petit { font-weight: 700; color: #fff; }
+@keyframes annonce { 0% { opacity: 0; transform: scale(1.6); } 10% { opacity: 1; transform: scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+
+#bas-gauche { position: absolute; left: 20px; bottom: 20px; }
+.vie { display: flex; align-items: center; gap: 10px; background: var(--fond); padding: 8px 14px; border-radius: 12px; border: 1px solid var(--bord); }
+.vie b { font-size: 1.8rem; font-weight: 900; min-width: 2.2em; }
+.vie .barre { width: 180px; height: 14px; background: #1a2238; border-radius: 7px; overflow: hidden; }
+#pv-barre { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #3ee07a, #8cff6b); transition: width .15s; }
+#pv-barre.bas { background: linear-gradient(90deg, #ff5a5a, #ffb14d); }
+#protege { margin-bottom: 8px; background: rgba(61, 139, 255, .85); padding: 4px 10px; border-radius: 8px; font-weight: 700; display: inline-block; }
+#bas-droite { position: absolute; right: 20px; bottom: 20px; text-align: right; background: var(--fond); padding: 8px 16px; border-radius: 12px; border: 1px solid var(--bord); }
+.arme-nom { color: var(--orange); font-weight: 800; font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; }
+.munitions b { font-size: 2rem; font-weight: 900; }
+.munitions span { color: var(--gris); font-weight: 700; margin-left: 4px; }
+#munitions.vide { color: var(--rouge); }
+#recharge { color: var(--bleu-clair); font-weight: 700; font-size: .85rem; }
+#recharge .barre { height: 4px; background: #1a2238; border-radius: 2px; overflow: hidden; margin-top: 3px; }
+#recharge-barre { display: block; height: 100%; width: 0; background: var(--bleu-clair); }
+
+/* Barre des armes (touches 1 à 5) */
+#barre-armes { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; gap: 6px; list-style: none; margin: 0; padding: 0; }
+#barre-armes li { background: var(--fond); border: 1px solid var(--bord); border-radius: 10px; padding: 5px 10px 6px; min-width: 92px; opacity: .7;
+  transition: transform .12s, opacity .12s, border-color .12s; }
+#barre-armes li.active { opacity: 1; border-color: var(--orange); transform: translateY(-6px); box-shadow: 0 0 0 1px var(--orange); }
+#barre-armes .touche { color: var(--orange); font-weight: 900; font-size: .8rem; margin-right: 6px; }
+#barre-armes .nom { font-weight: 700; font-size: .82rem; }
+#barre-armes .mun { display: block; color: var(--gris); font: 700 .75rem ui-monospace, Consolas, monospace; }
+#barre-armes .mun.vide { color: var(--rouge); }
+@media (max-width: 900px) { #barre-armes li { min-width: 0; } #barre-armes .nom { display: none; } }
+
+/* Vue dans la lunette du sniper */
+#lunette { position: fixed; inset: 0; pointer-events: none; z-index: 4; }
+#lunette .verre { position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0, rgba(0,0,0,0) min(38vh, 38vw), rgba(0,0,0,.55) calc(min(38vh, 38vw) + 3px), #000 calc(min(38vh, 38vw) + 10px)); }
+#lunette .lh, #lunette .lv { position: absolute; background: rgba(0,0,0,.85); }
+#lunette .lh { left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; }
+#lunette .lv { top: 0; bottom: 0; left: 50%; width: 2px; margin-left: -1px; }
+#lunette .lh::after, #lunette .lv::after { content: ""; position: absolute; background: #ff3b3b; }
+#lunette .lh::after { left: 50%; top: -1px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; }
+#indicateurs { position: absolute; left: 50%; top: 50%; }
+.indicateur { position: absolute; left: -60px; top: -170px; width: 120px; height: 30px; transform-origin: 60px 170px;
+  background: radial-gradient(ellipse at 50% 100%, rgba(255, 138, 31, .95), rgba(255, 138, 31, 0) 70%); animation: fondu 1s forwards; }
+@keyframes fondu { to { opacity: 0; } }
+#flash-degats { position: absolute; inset: 0; box-shadow: inset 0 0 120px rgba(255, 120, 40, .7); opacity: 0; transition: opacity .3s; }
+#flash-degats.actif { opacity: 1; transition: none; }
+#infos { position: absolute; left: 8px; top: 8px; color: var(--gris); font: 600 .75rem ui-monospace, Consolas, monospace; }
+
+#hud.elimine #viseur, #hud.elimine #bas-droite, #hud.elimine #marqueur, #hud.elimine #barre-armes { display: none; }
+#mort { position: fixed; left: 0; right: 0; top: 28%; text-align: center; z-index: 6; pointer-events: none; text-shadow: 0 3px 0 #000; }
+#mort .titre { font-size: 2.6rem; font-weight: 900; font-style: italic; color: var(--rouge); }
+#mort .par { font-size: 1.2rem; font-weight: 700; }
+#mort .compte { color: var(--gris); margin-top: 6px; font-weight: 600; }
+
+#tableau { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 8; width: min(640px, 94vw);
+  background: var(--fond); border: 1px solid var(--bord); border-radius: 16px; padding: 18px; }
+#tableau h2 { margin: 0 0 10px; text-align: center; }
+.classement { width: 100%; border-collapse: collapse; }
+.classement th { color: var(--gris); font-size: .8rem; text-align: left; padding: 4px 8px; }
+.classement td { padding: 6px 8px; border-top: 1px solid var(--bord); font-weight: 600; }
+.classement td.n { text-align: right; width: 60px; }
+.classement th.n { text-align: right; }
+.classement tr.moi td { color: var(--orange); }
+.classement .pastille { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; background: #ccc; }
+.classement .pastille.b { background: var(--bleu); } .classement .pastille.r { background: var(--rouge); }
+.equipes-tableau { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.equipes-tableau h3 { margin: 0 0 6px; }
+.equipes-tableau .b h3 { color: #8dbcff; } .equipes-tableau .r h3 { color: #ff9a9a; }
+
+#fin { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 15; background: rgba(5, 8, 18, .5); padding: 16px; }
+#fin .carte { width: min(560px, 100%); text-align: center; }
+#fin .titre { font-size: 2.2rem; font-weight: 900; font-style: italic; color: var(--orange); margin-bottom: 12px; text-shadow: 0 3px 0 #000; }
+#fin .petit { color: var(--gris); margin-top: 12px; font-weight: 600; }
+
+#toasts { position: fixed; left: 50%; bottom: 110px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 30; align-items: center; }
+.toast { background: var(--fond); border: 1px solid var(--bord); border-radius: 12px; padding: 10px 14px; font-weight: 600; display: flex; gap: 10px; align-items: center; pointer-events: auto; animation: entree .2s; }
+.toast .btn { padding: 4px 10px; font-size: .85rem; }
+
+/* ---------- Tablette : commandes tactiles ---------- */
+html { touch-action: manipulation; -webkit-text-size-adjust: 100%; }
+body { -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+#scene, #tactile, #hud { touch-action: none; }
+#pause, #reglages, #message { overflow: auto; }
+#reglages select { display: block; width: 100%; font: inherit; padding: 10px; margin-top: 6px; border-radius: 10px;
+  background: #0c1428; color: var(--texte); border: 1px solid var(--bord); }
+#reglages #btn-disposition { width: 100%; margin: 2px 0 6px; }
+.carte-choisie { color: var(--orange); font-weight: 700; margin: 4px 0 10px; min-height: 1.2em; }
+body:not(.tactile) .aide-tactile { display: none !important; }
+body.tactile .aide-clavier { display: none !important; }
+
+#tactile { position: fixed; inset: 0; z-index: 6; }
+#tactile .zone-regard { position: absolute; inset: 0; }
+#tactile .commande { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.joystick .base { width: 150px; height: 150px; border-radius: 50%; background: rgba(8, 12, 26, .35);
+  border: 2px solid rgba(255, 255, 255, .35); display: flex; align-items: center; justify-content: center; }
+.joystick .manette { width: 64px; height: 64px; border-radius: 50%; background: rgba(255, 255, 255, .55);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .4); }
+#tactile .bouton { width: 76px; height: 76px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font: 800 .8rem system-ui, sans-serif; color: #fff; background: rgba(8, 12, 26, .45); border: 2px solid rgba(255, 255, 255, .45);
+  text-shadow: 0 1px 2px #000; letter-spacing: .03em; }
+#tactile .bouton.gros { width: 104px; height: 104px; background: rgba(255, 90, 90, .45); border-color: rgba(255, 200, 200, .75); font-size: .95rem; }
+#tactile .bouton.petit { width: 54px; height: 54px; font-size: 1.4rem; }
+#tactile .bouton.actif { background: rgba(255, 138, 31, .8); border-color: #ffd0a0; }
+#tactile .bouton:active { filter: brightness(1.35); }
+.armes-tactiles { display: flex; gap: 6px; }
+.arme-tactile { min-width: 72px; padding: 6px 8px; border-radius: 12px; background: rgba(8, 12, 26, .6);
+  border: 2px solid rgba(255, 255, 255, .25); color: #fff; text-align: center; }
+.arme-tactile b { display: block; color: var(--orange); font-size: 1.05rem; }
+.arme-tactile .nom { display: block; font-size: .68rem; font-weight: 700; }
+.arme-tactile .mun { display: block; font: 700 .68rem ui-monospace, Consolas, monospace; color: var(--gris); }
+.arme-tactile.active { border-color: var(--orange); background: rgba(40, 24, 8, .8); }
+
+/* Mode "personnaliser les boutons" */
+#tactile.edition { z-index: 40; background: rgba(5, 8, 18, .35); }
+#tactile.edition .commande { outline: 2px dashed rgba(255, 255, 255, .6); outline-offset: 4px; border-radius: 14px; }
+#tactile.edition .commande.choisi { outline: 3px solid var(--orange); }
+.outils-edition { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); width: min(600px, 94vw); z-index: 2;
+  background: var(--fond); border: 1px solid var(--bord); border-radius: 14px; padding: 10px 12px; text-align: center; }
+.outils-edition .consigne { margin: 0 0 8px; color: var(--texte); font-weight: 600; font-size: .9rem; }
+.outils-edition .rangee { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+body.edition-boutons #hall, body.edition-boutons #pause { visibility: hidden; }
+
+/* HUD sur tablette : vie et munitions en haut à gauche (sous ☰ et 🏆), la barre d'armes tactile remplace celle du bas */
+body.tactile #barre-armes { display: none; }
+body.tactile #bas-gauche { left: 12px; bottom: auto; top: calc(9% + 36px); transform: scale(.8); transform-origin: top left; }
+body.tactile #bas-droite { right: auto; left: 12px; bottom: auto; top: calc(9% + 100px); transform: scale(.8); transform-origin: top left; text-align: left; }
+
+/* Tablette tenue à la verticale : petit conseil (ne bloque pas le jeu) */
+#tourne { display: none; position: fixed; left: 50%; top: 12px; transform: translateX(-50%); z-index: 50; pointer-events: none;
+  background: var(--orange); color: #1a0d00; font-weight: 800; padding: 8px 14px; border-radius: 999px; white-space: nowrap; }
+@media (orientation: portrait) { body.tactile #tourne { display: block; } }
+
+/* Hall plus confortable au doigt */
+body.tactile .btn { min-height: 44px; }
+body.tactile .choix-carte { padding: 12px 14px; }
+body.tactile #salons .btn { padding: 10px 16px; }
+
+/* ---------- Menu des danses (touche B) ---------- */
+.menu-danses { position: fixed; right: 24px; top: 50%; transform: translateY(-50%); z-index: 30; min-width: 230px; max-width: 320px;
+  background: var(--fond); border: 1px solid var(--bord); border-radius: 14px; padding: 12px 14px; backdrop-filter: blur(8px); }
+.menu-danses h3 { margin: 0 0 8px; font-size: 1rem; }
+.menu-danses ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; max-height: 50vh; overflow-y: auto; }
+.menu-danses li button { width: 100%; display: flex; gap: 8px; align-items: center; text-align: left; font: inherit; color: var(--texte); cursor: pointer;
+  background: rgba(255, 255, 255, .06); border: 1px solid transparent; border-radius: 8px; padding: 7px 10px; }
+.menu-danses li button:hover { border-color: var(--bleu-clair); }
+.menu-danses li kbd { min-width: 1.4em; text-align: center; }
+.menu-danses .vide { color: var(--gris); font-size: .9rem; }
+.menu-danses p { margin: 8px 0 0; color: var(--gris); font-size: .8rem; }
+body.tactile .menu-danses .aide-clavier, body:not(.tactile) .menu-danses .aide-tactile { display: none; }
+
+/* Pouvoirs d'admin (réglages) */
+.reglages-admin { margin: 14px 0 12px; } /* le bouton ADMIN PANEL : voir panneau-admin.css */
+
+/* ---------- Manette ---------- */
+body:not(.avec-manette) .aide-manette { display: none !important; }
+/* le bouton choisi à la manette (croix ou stick gauche) */
+body.saisie-manette :focus { outline: 3px solid var(--orange); outline-offset: 3px; }
+body.saisie-manette .menu-danses li button:focus { border-color: var(--orange); background: rgba(255, 138, 31, .18); outline: none; }
+/* à la manette sur tablette : les boutons tactiles se cachent (ils reviennent dès qu'on touche l'écran) */
+body.saisie-manette:not(.edition-boutons) #tactile { display: none !important; }
+body.tactile.saisie-manette .menu-danses .aide-clavier { display: block !important; }
+body.saisie-manette .menu-danses .aide-tactile { display: none !important; }
+/* en jouant à la manette, la souris n'est pas capturée : pas de curseur au milieu de l'écran */
+body.saisie-manette.en-jeu { cursor: none; }
+#reglages #btn-touches { width: 100%; margin: 6px 0 2px; }
+.reglages-manette { margin: 12px 0; padding: 10px 12px; border: 1px solid var(--bord); border-radius: 12px; background: rgba(127, 232, 255, .05); }
+.reglages-manette h3 { margin: 0 0 4px; font-size: 1rem; color: var(--bleu-clair); }
+#reglages .reglages-manette label { margin: 8px 0; }
+
+/* ---------- Écran « Touches » ---------- */
+#ecran-touches { z-index: 34; background: rgba(5, 8, 18, .6); }
+#ecran-touches .carte { width: min(560px, 100%); max-height: 100%; display: flex; flex-direction: column; }
+#ecran-touches .carte > * { flex-shrink: 0; }
+#ecran-touches .carte > .liste-touches { flex-shrink: 1; }
+.onglets-touches { display: flex; gap: 6px; margin: 4px 0 10px; }
+.onglets-touches .onglet { flex: 1; font: inherit; font-weight: 700; color: var(--gris); background: rgba(10, 15, 29, .7);
+  border: 1px solid var(--bord); border-radius: 10px; padding: 9px; cursor: pointer; }
+.onglets-touches .onglet.actif { color: #fff; background: var(--bleu); border-color: var(--bleu); }
+.info-touches { margin: 0 0 6px; color: var(--orange); font-weight: 600; min-height: 1.2em; font-size: .9rem; }
+.liste-touches { overflow-y: auto; min-height: 0; flex: 1; padding: 4px 6px 4px 2px; }
+.liste-touches h3 { margin: 12px 0 4px; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; color: var(--bleu-clair); }
+.liste-touches h3:first-child { margin-top: 0; }
+.ligne-touche { display: grid; grid-template-columns: minmax(0, 1fr) 128px 128px; gap: 6px; align-items: center; padding: 3px 0;
+  border-bottom: 1px solid rgba(127, 232, 255, .08); }
+.ligne-touche .nom-action { font-weight: 600; }
+.ligne-touche .fixe { grid-column: span 2; color: var(--gris); font-size: .9rem; text-align: center; }
+.case-touche { font: 600 .9rem system-ui; color: var(--texte); background: #1c2742; border: 1px solid #34466e; border-bottom-width: 3px;
+  border-radius: 7px; padding: 6px 4px; cursor: pointer; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.case-touche:hover { border-color: var(--bleu-clair); }
+.case-touche.vide { color: var(--gris); }
+.case-touche.attente { background: var(--orange); border-color: var(--orange); color: #1a1205; animation: clignote-touche 1s infinite; }
+@keyframes clignote-touche { 50% { filter: brightness(1.25); } }
+#ecran-touches .rangee { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+#ecran-touches .rangee .btn { flex: 1; }
+@media (max-width: 520px) { .ligne-touche { grid-template-columns: minmax(0, 1fr) 96px 96px; } }
+
+/* ---------- Laser d'admin : réacteur autour du viseur, bords lumineux, flash au tir (js/laser-hud.js) ---------- */
+.laser-hud { position: fixed; left: 50%; top: 50%; width: 170px; height: 170px; transform: translate(-50%, -50%); pointer-events: none; z-index: 6; opacity: 0; transition: opacity .15s; }
+.laser-hud.actif { opacity: 1; }
+.laser-reacteur { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 6px rgba(57, 224, 255, .9)); }
+.laser-reacteur circle { fill: none; }
+.laser-anneau1 { stroke: #8ff6ff; stroke-width: 2.2; stroke-dasharray: 10 7; }
+.laser-anneau2 { stroke: #b48cff; stroke-width: 1.6; stroke-dasharray: 3 9 16 9; }
+.laser-arc-fond { stroke: rgba(57, 224, 255, .18); stroke-width: 4; }
+.laser-arc { stroke: #39e0ff; stroke-width: 4; stroke-linecap: round; }
+.laser-pointes path { fill: #d8fbff; }
+.laser-texte { position: absolute; left: 0; right: 0; top: calc(100% + 2px); text-align: center; font: 800 15px/1 system-ui, sans-serif; color: #d8fbff; letter-spacing: .08em; text-shadow: 0 0 8px #39e0ff, 0 0 2px #000; }
+.laser-hud.plein .laser-anneau1, .laser-hud.plein .laser-arc { stroke: #ff7af0; }
+.laser-hud.plein .laser-anneau2 { stroke: #fff; }
+.laser-hud.plein .laser-reacteur { filter: drop-shadow(0 0 9px rgba(255, 90, 230, 1)); }
+.laser-hud.plein .laser-texte { color: #ffe0fb; text-shadow: 0 0 10px #ff5ae6, 0 0 2px #000; }
+.laser-lueur { position: fixed; inset: 0; pointer-events: none; z-index: 5; opacity: 0;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(57, 224, 255, .25) 72%, rgba(120, 90, 255, .55) 100%); mix-blend-mode: screen; }
+.laser-lueur.plein { background: radial-gradient(ellipse at center, transparent 40%, rgba(255, 90, 230, .3) 70%, rgba(255, 255, 255, .5) 100%); }
+.laser-flash { position: fixed; inset: 0; pointer-events: none; z-index: 7; opacity: 0;
+  background: radial-gradient(circle at center, #fff 0%, rgba(190, 250, 255, .9) 35%, rgba(57, 224, 255, .5) 70%, rgba(120, 90, 255, .3) 100%); }
+.laser-flash.boum { animation: laser-boum .55s ease-out; }
+@keyframes laser-boum { 0% { opacity: var(--force, .6); } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .laser-flash.boum { animation-duration: .25s; } }
+
+/* ---------- Pouvoirs d'admin qui changent l'écran (js/pouvoirs-ecran.js) ---------- */
+.radar-admin { position: fixed; left: 12px; top: 30px; width: 180px; height: 180px; border-radius: 50%; z-index: 6; pointer-events: none;
+  box-shadow: 0 0 0 2px rgba(57, 255, 136, .7), 0 0 18px rgba(57, 255, 136, .35); }
+@media (max-width: 700px) { .radar-admin { width: 120px; height: 120px; } }
+body.tactile .radar-admin { left: auto; right: 12px; top: 38%; width: 130px; height: 130px; }
+.vision-nocturne { position: fixed; inset: 0; z-index: 4; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .18) 0 1px, transparent 1px 3px), radial-gradient(ellipse at center, transparent 50%, rgba(0, 20, 0, .85) 100%); }
+.vision-matrix { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; opacity: .5; mix-blend-mode: screen; }

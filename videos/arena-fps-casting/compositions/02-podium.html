@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head><meta charset="UTF-8"></head>
+  <body>
+    <template>
+      <style>
+        @font-face { font-family: "Archivo Black"; font-weight: 400; src: url("assets/fonts/ArchivoBlack-400.woff2") format("woff2"); }
+        #root { position: absolute; inset: 0; }
+        #s02-titre { position: absolute; left: 96px; top: 250px; width: 900px; margin: 0;
+          font: italic 400 168px/0.92 "Archivo Black", sans-serif; letter-spacing: -0.04em; color: #eef4ff; text-shadow: 0 10px 0 #1d2a4d, 0 24px 48px rgba(0, 0, 0, .45); }
+        #s02-titre span { display: block; }
+        #s02-titre .o { color: #ff8a1f; text-shadow: 0 10px 0 #a14e0a, 0 24px 48px rgba(0, 0, 0, .45); }
+      </style>
+      <div data-hf-id="hf-m6ce" id="root" data-composition-id="s02" data-width="1920" data-height="1080">
+        <h1 data-hf-id="hf-4cdb" id="s02-titre"><span data-hf-id="hf-uzfi" id="s02-l1">CRÉE</span><span data-hf-id="hf-4nzf" id="s02-l2">TON <span data-hf-id="hf-wd09" class="o">PERSO</span></span></h1>
+      </div>
+      <script>
+        // Deux coups sur la musique : « CRÉE », puis « TON PERSO »
+        const tl = gsap.timeline({ paused: true });
+        tl.fromTo("#s02-l1", { opacity: 0, scale: 1.9, x: -60 }, { opacity: 1, scale: 1, x: 0, duration: 0.32, ease: "power4.out", transformOrigin: "0% 50%" }, 1.04);
+        tl.fromTo("#s02-l2", { opacity: 0, x: -220 }, { opacity: 1, x: 0, duration: 0.36, ease: "expo.out" }, 1.7);
+        tl.fromTo("#s02-titre", { y: 0 }, { y: -14, duration: 2.6, ease: "sine.inOut", immediateRender: false }, 1.9);
+        tl.to("#s02-titre", { opacity: 0, x: -80, duration: 0.3, ease: "power2.in" }, 4.2);
+        window.__timelines["s02"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

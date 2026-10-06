@@ -1,0 +1,22 @@
+# Ne JAMAIS envoyer sur GitHub :
+# - la base des joueurs et les créations enregistrées sur le site
+data/
+*.db
+*.db-shm
+*.db-wal
+# - les clés du tunnel Cloudflare et de Tailscale
+cloudflared/
+tailscale/
+tailscale-nas/
+.env
+*.pem
+
+# Fichiers reconstruits ou trop gros
+node_modules/
+*.log
+videos/*/renders/
+videos/*/snapshots/
+videos/*/.media/
+videos/*/.hyperframes/
+# Musique du catalogue HeyGen : utilisable dans la bande-annonce, mais pas à redistribuer telle quelle
+videos/*/assets/audio/musique.mp3

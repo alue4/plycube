@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Affiche Plycube</title>
+<style>
+  /* Affiche A4 « scanne pour jouer » : imprimée en PDF avec Chrome (voir LISEZMOI.md). */
+  @font-face { font-family: "Archivo Black"; src: url("fonts/ArchivoBlack-400.woff2") format("woff2"); }
+  @font-face { font-family: "Space Mono"; font-weight: 400; src: url("fonts/SpaceMono-400.woff2") format("woff2"); }
+  @font-face { font-family: "Space Mono"; font-weight: 700; src: url("fonts/SpaceMono-700.woff2") format("woff2"); }
+  @page { size: A4; margin: 0; }
+  :root {
+    --nuit: #0a0f1d; --panneau: #16203b; --texte: #eef4ff; --gris: #9fb0cc;
+    --orange: #ff8a1f; --orange-ombre: #a14e0a; --cyan: #7fe8ff; --bleu: #3d8bff; --ombre: #1d2a4d;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 210mm; height: 297mm; background: var(--nuit); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { position: relative; overflow: hidden; color: var(--texte); font-family: "Space Mono", monospace; }
+
+  .visuel { position: absolute; left: 0; top: 0; width: 210mm; height: 132mm; overflow: hidden; }
+  /* image-podium.jpg : rendue avec le moteur 3D de la bande-annonce (2480 × 1460 px, perso au centre) */
+  .visuel img { position: absolute; left: 0; bottom: 0; width: 210mm; height: 123.6mm;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22mm, #000 98mm, transparent 123.6mm);
+            mask-image: linear-gradient(to bottom, transparent 0, #000 22mm, #000 98mm, transparent 123.6mm); }
+
+  .surtitre { position: absolute; left: 0; right: 0; top: 8mm; text-align: center; font: 700 4.2mm/1 "Space Mono", monospace;
+    letter-spacing: 0.32em; text-transform: uppercase; color: var(--cyan); }
+  .titre { position: absolute; left: 0; right: 0; top: 13.5mm; text-align: center; font: italic 400 30mm/1 "Archivo Black", sans-serif;
+    letter-spacing: -0.04em; color: var(--texte); text-shadow: 0 2mm 0 var(--ombre), 0 4mm 9mm rgba(0, 0, 0, .55); white-space: nowrap; }
+  .titre .o { color: var(--orange); text-shadow: 0 2mm 0 var(--orange-ombre), 0 4mm 9mm rgba(0, 0, 0, .55); }
+
+  .appel { position: absolute; left: 0; right: 0; top: 128mm; text-align: center; font: italic 400 13mm/1 "Archivo Black", sans-serif;
+    letter-spacing: -0.03em; color: var(--texte); text-shadow: 0 1.1mm 0 var(--ombre); white-space: nowrap; }
+  .appel .o { color: var(--orange); text-shadow: 0 1.1mm 0 var(--orange-ombre); }
+
+  .cadre { position: absolute; left: 50%; top: 149mm; width: 96mm; height: 96mm; transform: translateX(-50%); }
+  .carte { position: absolute; inset: 4mm; background: #fff; border-radius: 5mm; padding: 2mm;
+    box-shadow: 0 0 0 1.2mm var(--cyan), 0 0 14mm rgba(127, 232, 255, .35); }
+  .carte img { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+  .coin { position: absolute; width: 14mm; height: 14mm; border: 0 solid var(--orange); }
+  .coin.hg { left: -3mm; top: -3mm; border-left-width: 2.2mm; border-top-width: 2.2mm; border-top-left-radius: 4mm; }
+  .coin.hd { right: -3mm; top: -3mm; border-right-width: 2.2mm; border-top-width: 2.2mm; border-top-right-radius: 4mm; }
+  .coin.bg { left: -3mm; bottom: -3mm; border-left-width: 2.2mm; border-bottom-width: 2.2mm; border-bottom-left-radius: 4mm; }
+  .coin.bd { right: -3mm; bottom: -3mm; border-right-width: 2.2mm; border-bottom-width: 2.2mm; border-bottom-right-radius: 4mm; }
+
+  .ou { position: absolute; left: 0; right: 0; top: 252mm; text-align: center; font: 400 4mm/1 "Space Mono", monospace; color: var(--gris); letter-spacing: 0.08em; }
+  .url { position: absolute; left: 0; right: 0; top: 257.5mm; text-align: center; font: 700 12mm/1 "Space Mono", monospace; letter-spacing: -0.02em; color: var(--texte); }
+
+  .infos { position: absolute; left: 14mm; right: 14mm; bottom: 9mm; display: flex; align-items: center; justify-content: center; gap: 4mm;
+    padding-top: 4mm; border-top: 0.4mm solid #26345a; font: 400 3.6mm/1.35 "Space Mono", monospace; color: var(--gris); }
+  .pastille { flex: none; padding: 1.6mm 3mm 1.4mm; border-radius: 1.5mm; background: var(--panneau); border: 0.35mm solid #2b3a66;
+    font: italic 400 4.6mm/1 "Archivo Black", sans-serif; color: var(--texte); letter-spacing: -0.01em; }
+  .pastille span { color: var(--orange); }
+  .infos strong { color: var(--texte); font-weight: 700; }
+</style>
+</head>
+<body>
+  <div class="visuel"><img src="image-podium.jpg" alt=""></div>
+  <p class="surtitre">Jeux en ligne entre potes</p>
+  <h1 class="titre">PLY<span class="o">CUBE</span></h1>
+
+  <p class="appel">SCANNE POUR <span class="o">JOUER</span></p>
+  <div class="cadre">
+    <div class="carte"><img src="qr-plycube.svg" alt="QR code vers https://plycube.fr"></div>
+    <i class="coin hg"></i><i class="coin hd"></i><i class="coin bg"></i><i class="coin bd"></i>
+  </div>
+
+  <p class="ou">ou tape dans ton navigateur</p>
+  <p class="url">plycube.fr</p>
+
+  <div class="infos">
+    <span class="pastille">ARENA <span>FPS</span></span>
+    <span class="pastille">CAMÉ<span>LÉON</span></span>
+    <span><strong>Tir en blocs · cache-cache en blocs</strong><br>Gratuit, rien à installer.</span>
+  </div>
+</body>
+</html>

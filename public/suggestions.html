@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#05070d">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Idées et feuille de route · Plycube</title>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/animations/animations.css">
+  <script src="/assets/animations/animations.js"></script>
+</head>
+<body data-page="suggestions">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/"><img class="brand-logo" src="/assets/img/logo.svg" alt=""><span>Plycube</span><span class="beta">BÊTA</span></a>
+      <button class="menu-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false"></button>
+      <nav class="nav" aria-label="Navigation principale">
+        <a href="/">Jeux</a>
+        <a href="/personnage">Mon personnage</a>
+        <a href="/amis" data-friends-link>Amis</a>
+        <a href="/suggestions">Idées &amp; feuille de route</a>
+        <a href="/admin" class="hidden" data-admin-only>Admin</a>
+        <div class="user-chip">
+          <a href="/compte" class="name" data-me-name title="Mon compte"></a>
+          <button class="btn btn-ghost btn-sm" type="button" data-logout>Déconnexion</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <div class="page-head">
+      <h1>Feuille de route</h1>
+      <p>Ce sur quoi on travaille, ce qui arrive bientôt, et ce qui est déjà fait.</p>
+    </div>
+    <div class="roadmap" id="roadmap">
+      <section class="roadmap-col col-en_cours" data-anim="apparition"><h3><span class="pill"></span>En cours</h3><div data-col="en_cours"></div></section>
+      <section class="roadmap-col col-prochainement" data-anim="apparition"><h3><span class="pill"></span>Prochainement</h3><div data-col="prochainement"></div></section>
+      <section class="roadmap-col col-termine" data-anim="apparition"><h3><span class="pill"></span>Terminé</h3><div data-col="termine"></div></section>
+    </div>
+
+    <div class="page-head">
+      <h2>Suggestions</h2>
+      <p>Propose tes idées et vote pour celles des autres. Les plus populaires ont plus de chances d'arriver sur la feuille de route !</p>
+    </div>
+    <div class="suggestions-layout">
+      <section aria-label="Liste des suggestions" id="suggestions"><p class="empty">Chargement…</p></section>
+      <aside class="panel" aria-labelledby="titre-proposer">
+        <h2 id="titre-proposer">Proposer une idée</h2>
+        <form id="suggest-form" novalidate>
+          <div class="field">
+            <label for="s-title">Titre</label>
+            <input type="text" id="s-title" name="title" maxlength="80" required placeholder="Ex : un mode capture du drapeau">
+          </div>
+          <div class="field">
+            <label for="s-body">Explication <span class="muted">(facultatif)</span></label>
+            <textarea id="s-body" name="body" maxlength="500" placeholder="Comment ça marcherait ?"></textarea>
+            <div class="counter"><span id="s-count">0</span>/500</div>
+          </div>
+          <p class="tip">Reste poli, pas de liens, pas d'infos personnelles. 3 idées max par jour.</p>
+          <button class="btn btn-block" type="submit">Envoyer mon idée</button>
+        </form>
+      </aside>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="container">
+      <span>Plycube · version bêta · <span data-year></span></span>
+      <span>Aucune donnée personnelle : juste un pseudo. Reste poli et fair-play 🎮</span>
+    </div>
+  </footer>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <script src="/assets/js/platform.js"></script>
+  <script src="/assets/js/common.js"></script>
+  <script src="/assets/js/pages/suggestions.js"></script>
+</body>
+</html>

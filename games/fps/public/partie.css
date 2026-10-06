@@ -1,0 +1,18 @@
+/* Pendant la partie : bandeau d'échauffement (salle d'attente) et éblouissement (lance-fusée). */
+#bandeau-attente { position: fixed; top: 96px; left: 50%; transform: translateX(-50%); z-index: 6; pointer-events: none;
+  background: rgba(255, 138, 31, .92); color: #1a0d00; font-weight: 800; padding: 8px 16px; border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .35); max-width: 92vw; text-align: center; }
+#eblouissement { position: fixed; inset: 0; z-index: 7; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle at 50% 50%, #ffffff 0, #fff7e0 45%, rgba(255, 240, 210, .92) 100%); }
+
+/* Écran "Éliminé" : bouton pour changer d'armes avant de réapparaître */
+#mort #btn-changer-armes { pointer-events: auto; margin-top: 14px; text-shadow: none; }
+#mort #btn-changer-armes kbd { margin: 0 0 0 6px; }
+/* Les réglages passent au-dessus de la salle d'attente */
+#reglages { z-index: 32; }
+#reglages .credits { margin: 12px 0 0; color: var(--gris); font-size: .75rem; line-height: 1.35; }
+/* Salle d'attente : le bouton Quitter prend toute la largeur ; liste des amis à inviter */
+.actions-attente .danger { grid-column: 1 / -1; }
+.salle-attente .liste-amis { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow: auto; }
+.salle-attente .liste-amis li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--bord); }
+.salle-attente .liste-amis .btn { padding: 4px 10px; font-size: .85rem; }

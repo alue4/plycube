@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#05070d">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Inscription · Plycube</title>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/animations/animations.css">
+  <script src="/assets/animations/animations.js"></script>
+</head>
+<body data-page="inscription">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/connexion"><img class="brand-logo" src="/assets/img/logo.svg" alt=""><span>Plycube</span><span class="beta">BÊTA</span></a>
+    </div>
+  </header>
+  <main class="container">
+    <div class="auth-wrap" data-anim="apparition">
+      <div class="panel">
+        <img class="auth-logo" src="/assets/img/logo.svg" alt="">
+        <h1>Créer mon compte</h1>
+        <p class="sub">Il te faut un code d'invitation.</p>
+        <p class="tip">🔒 Choisis un <strong>pseudo</strong> : n'utilise pas ton vrai nom ni ton prénom. On ne te demandera jamais d'e-mail ni d'informations personnelles.</p>
+        <form id="register-form" novalidate>
+          <div class="field"><label for="code">Code d'invitation</label><input type="text" id="code" name="code" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" required placeholder="Ex : K7PQ2MXA"></div>
+          <div class="field"><label for="username">Pseudo</label><input type="text" id="username" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="16" required>
+            <div class="hint">3 à 16 caractères : lettres sans accents, chiffres, « _ » ou « - ».</div></div>
+          <div class="field"><label for="password">Mot de passe</label><input type="password" id="password" name="password" autocomplete="new-password" minlength="8" required>
+            <div class="hint">8 caractères minimum. Ne le donne à personne.</div></div>
+          <div class="field"><label for="password2">Confirme le mot de passe</label><input type="password" id="password2" autocomplete="new-password" required></div>
+          <button class="btn btn-block" type="submit">Créer mon compte</button>
+        </form>
+        <p class="auth-foot">Déjà un compte ? <a href="/connexion">Se connecter</a></p>
+      </div>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="container">
+      <span>Plycube · version bêta · <span data-year></span></span>
+      <span>Aucune donnée personnelle : juste un pseudo. Reste poli et fair-play 🎮</span>
+    </div>
+  </footer>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <script src="/assets/js/platform.js"></script>
+  <script src="/assets/js/common.js"></script>
+  <script src="/assets/js/pages/inscription.js"></script>
+</body>
+</html>

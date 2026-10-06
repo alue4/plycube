@@ -1,0 +1,112 @@
+# Lancement :  docker compose up -d --build
+# Arrêt :      docker compose down
+services:
+  site:
+    build: .
+    image: arcade-college:latest
+    container_name: arcade-college
+    restart: unless-stopped
+    init: true
+    ports:
+      # Le site est accessible depuis ton réseau local : http://IP-DU-NAS:3000
+      # (pas depuis internet tant que ta box ne redirige pas ce port).
+      # Pour le réserver au NAS seul (derrière ton reverse proxy), remplace par :  - "127.0.0.1:3000:3000"
+      - "3000:3000"
+    volumes:
+      # La base de données (comptes, amis...) est dans le dossier ./data du projet.
+      - ./data:/app/data
+      # Les animations et les jeux sont lus directement depuis ton dossier :
+      # tu peux les modifier sans reconstruire l'image (recharge juste la page).
+      - ./public/assets/animations:/app/public/assets/animations:ro
+      - ./games:/app/games:ro
+    environment:
+      # 'auto' : cookies "Secure" dès que le site est ouvert en HTTPS via ton proxy.
+      # Mets 'true' quand ton lien public HTTPS fonctionne (recommandé).
+      - COOKIE_SECURE=auto
+      - SITE_NAME=Plycube
+      # Adresse officielle : seule sa page de connexion peut apparaître dans Google (enlève la ligne pour rester invisible).
+      - PUBLIC_URL=https://plycube.fr
+      # Ancienne adresse : renvoyée automatiquement vers plycube.fr (les anciennes affiches et liens marchent encore).
+      - ANCIENNES_ADRESSES=jeux-sjdc.fr
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  # ---- Accès depuis partout : Tailscale Funnel ----
+  # Donne au site une adresse publique en HTTPS (https://jeu-sjdc.<ton-tailnet>.ts.net),
+  # sans ouvrir de port sur ta box et sans VPN pour les visiteurs. Mode d'emploi : README, « Accès depuis partout ».
+  tailscale:
+    image: tailscale/tailscale:stable
+    container_name: jeu-sjdc-tailscale
+    hostname: jeu-sjdc            # devient le début de l'adresse publique
+    restart: unless-stopped
+    depends_on:
+      - site
+    environment:
+      - TS_HOSTNAME=jeu-sjdc
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_SOCKET=/var/run/tailscale/tailscaled.sock
+      - TS_USERSPACE=true         # pas besoin de droits spéciaux sur le NAS
+    volumes:
+      # Les clés de connexion de Tailscale (à ne jamais partager) restent dans ./tailscale
+      - ./tailscale:/var/lib/tailscale
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  # ---- Accès privé au NAS depuis partout (seulement toi) : Tailscale ----
+  # Remplace UGREENlink : depuis ton téléphone ou ton PC (application Tailscale connectée à TON compte),
+  # tu ouvres l'interface du NAS (http://nas-maison:9999) ou tu te connectes en SSH (ssh Marcel@nas-maison).
+  # Rien n'est ouvert sur internet : seuls tes appareils Tailscale y ont accès. Mode d'emploi : README.
+  tailscale-nas:
+    image: tailscale/tailscale:stable
+    container_name: nas-tailscale
+    network_mode: host            # il voit le NAS lui-même (SSH, interface UGREEN), pas seulement le site
+    restart: unless-stopped
+    environment:
+      - TS_HOSTNAME=nas-maison
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_SOCKET=/var/run/tailscale/tailscaled.sock
+      - TS_USERSPACE=true         # pas besoin de droits spéciaux sur le NAS
+    volumes:
+      # Les clés de connexion (à ne jamais partager) restent dans ./tailscale-nas
+      - ./tailscale-nas:/var/lib/tailscale
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  # ---- Adresse officielle avec ton nom de domaine : Cloudflare Tunnel ----
+  # Le site est servi sur https://plycube.fr (l'ancienne adresse jeux-sjdc.fr y renvoie), HTTPS fourni par Cloudflare, sans ouvrir de port sur ta box.
+  # Le tunnel et ses clés sont dans le dossier ./cloudflared (jamais partagé, pas copié dans l'image).
+  # Mode d'emploi : README, « Ton nom de domaine (Cloudflare Tunnel) ». Tailscale reste en secours.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: jeu-sjdc-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --config /home/sjdc/.cloudflared/config.yml run
+    user: "1000:10"               # ton utilisateur du NAS : c'est lui qui a le droit de lire le dossier ./cloudflared
+    environment:
+      - HOME=/home/sjdc           # là où cloudflared cherche son dossier .cloudflared (pas /home/nonroot : il est verrouillé dans l'image)
+    depends_on:
+      - site
+    volumes:
+      - ./cloudflared:/home/sjdc/.cloudflared
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"

@@ -1,0 +1,19 @@
+/* =====================================================================
+   ANIMATIONS — fichier principal
+   ---------------------------------------------------------------------
+   Ce fichier ne fait que charger les autres. Pour désactiver une famille
+   d'animations, mets la ligne correspondante en commentaire :
+       /* @import url("fond.css"); *\/
+   Fichiers :
+     reglages.css       -> vitesses, distances, intensités (COMMENCE ICI)
+     apparition.css     -> les éléments qui "glissent" en arrivant sur la page
+     survol.css         -> effets au passage de la souris / au toucher
+     fond.css           -> les lueurs bleues qui bougent doucement en fond
+     notifications.css  -> notifications, pastilles "en ligne", badges
+     animations.js      -> déclenche les apparitions au bon moment
+   ===================================================================== */
+@import url("reglages.css");
+@import url("apparition.css");
+@import url("survol.css");
+@import url("fond.css");
+@import url("notifications.css");

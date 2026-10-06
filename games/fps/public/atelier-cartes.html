@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Éditeur de cartes · Arena FPS</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="atelier-cartes.css">
+</head>
+<body>
+  <header class="barre">
+    <a class="retour" href="atelier-animations.html">← Atelier</a>
+    <h1>ÉDITEUR <span>DE CARTES</span></h1>
+    <div class="barre-droite">
+      <span id="etat" class="etat"></span>
+      <button id="btn-tester" class="btn gris" type="button" title="Enregistrer puis aller jouer sur cette carte">▶ Tester</button>
+      <button id="btn-enregistrer" class="btn" type="button">💾 Enregistrer</button>
+    </div>
+  </header>
+
+  <main class="editeur">
+    <!-- Outils, matières, apparitions -->
+    <aside class="panneau gauche">
+      <h2>Mes cartes</h2>
+      <select id="liste-cartes"><option value="">— Nouvelle carte —</option></select>
+      <div class="boutons">
+        <button id="btn-nouvelle" class="btn petit gris" type="button">✚ Nouvelle</button>
+        <button id="btn-partir" class="btn petit gris" type="button" title="Copier une carte du jeu pour la modifier">⧉ Partir d'une carte</button>
+        <button id="btn-supprimer" class="btn petit danger" type="button">🗑 Supprimer</button>
+      </div>
+
+      <h2>Outil</h2>
+      <div id="outils" class="liste-outils" role="group" aria-label="Outil">
+        <button class="choix actif" data-outil="bloc" type="button" title="Ajouter un bloc (clic sur une face ou le sol)">🧱 Bloc</button>
+        <button class="choix" data-outil="boite" type="button" title="Deux clics : les deux coins d'une boîte">⬛ Boîte</button>
+        <button class="choix" data-outil="gomme" type="button" title="Supprimer le bloc cliqué">🧽 Gomme</button>
+        <button class="choix" data-outil="apparition" type="button" title="Poser un point d'apparition">🎯 Apparition</button>
+      </div>
+      <label class="ligne" id="bloc-hauteur"><span>Hauteur</span><span><input id="hauteur" type="number" min="1" max="20" value="1"> blocs</span></label>
+      <label class="ligne" id="bloc-decor" title="Un décor n'arrête pas les balles et n'a pas de collision"><span>Décor (sans collision)</span><input id="decor" type="checkbox"></label>
+      <div id="bloc-equipe" class="ligne" hidden><span>Équipe</span>
+        <select id="equipe"><option value="">Chacun pour soi</option><option value="0">Bleus</option><option value="1">Rouges</option></select>
+      </div>
+      <p class="aide petite" id="aide-outil"></p>
+
+      <h2>Matière</h2>
+      <div id="matieres" class="matieres"></div>
+    </aside>
+
+    <!-- Vue 3D -->
+    <section class="vue">
+      <canvas id="vue3d"></canvas>
+      <p id="aide-vue" class="aide-vue">Clic : poser · clic droit (maintenu) : tourner · molette : zoom · clic droit : déplacer</p>
+      <p id="compteur" class="compteur"></p>
+    </section>
+
+    <!-- Réglages de la carte -->
+    <aside class="panneau droite">
+      <h2>Carte</h2>
+      <label class="ligne"><span>Nom</span><input id="nom" type="text" maxlength="30" placeholder="Ma carte"></label>
+      <label class="ligne"><span>Taille</span><span><input id="taille" type="number" min="16" max="90" value="30"> m</span></label>
+      <label class="ligne"><span>Ambiance</span>
+        <select id="ambiance">
+          <option value="jour">Jour</option>
+          <option value="soir">Soir</option>
+          <option value="nuit">Nuit</option>
+          <option value="plage">Plage</option>
+        </select>
+      </label>
+      <label class="ligne"><span>Eau</span><input id="eau" type="checkbox"></label>
+      <label class="ligne" id="bloc-niveau-eau" hidden><span>Niveau de l'eau</span><span><input id="niveau-eau" type="number" step="0.5" value="0"> m</span></label>
+      <p class="aide petite">La taille, c'est le demi-côté du terrain. Les murs invisibles du bord empêchent de sortir. Il faut au moins un point d'apparition.</p>
+
+      <h2>Raccourcis</h2>
+      <div class="boutons colonne">
+        <button id="btn-sol" class="btn petit gris" type="button">▦ Remettre le sol et les bords</button>
+        <button id="btn-vider" class="btn petit gris" type="button">🧹 Tout effacer</button>
+        <button id="btn-annuler" class="btn petit gris" type="button" title="Ctrl+Z">↶ Annuler</button>
+      </div>
+      <p id="statut" class="statut"></p>
+    </aside>
+  </main>
+
+  <div id="bloque" class="bloque" hidden>
+    <div class="carte">
+      <h2 id="bloque-titre">Éditeur de cartes</h2>
+      <p id="bloque-texte"></p>
+      <a class="btn" href="./">Retour au jeu</a>
+    </div>
+  </div>
+
+  <script type="module" src="js/atelier-cartes.js"></script>
+</body>
+</html>

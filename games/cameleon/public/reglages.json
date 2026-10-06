@@ -1,0 +1,18 @@
+{
+  "_aide": "Réglages de Caméléon (lus par le serveur au démarrage et par les navigateurs). Durées en secondes ou en millisecondes (Ms). Après une modification : sudo docker compose restart",
+  "attenteSecondes": 20,
+  "cachetteSecondes": 60,
+  "rechercheSecondes": 180,
+  "finSecondes": 10,
+  "chercheursPour": 4,
+  "joueursMax": 12,
+  "botsSolo": 4,
+  "cadenceMs": 600,
+  "porteeTir": 70,
+  "penaliteRateMs": 2500,
+  "penaliteLeurreMs": 3500,
+  "siffletSecondes": 30,
+  "radarMs": 2000,
+  "joueur": { "vitesse": 6.2, "vitesseAccroupi": 2.4, "vitesseAllonge": 1.1, "forceSaut": 8.2, "gravite": 24, "forceTrampoline": 16 },
+  "points": { "trouve": 100, "survie10s": 10, "survieFin": 50, "leurre": 25 }
+}

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#05070d">
+  <meta name="description" content="Plycube (plycube.fr) : connecte-toi pour jouer avec tes potes.">
+  <title>Connexion · Plycube</title>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/animations/animations.css">
+  <script src="/assets/animations/animations.js"></script>
+</head>
+<body data-page="connexion">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/connexion"><img class="brand-logo" src="/assets/img/logo.svg" alt=""><span>Plycube</span><span class="beta">BÊTA</span></a>
+    </div>
+  </header>
+  <main class="container">
+    <div class="auth-wrap" data-anim="apparition">
+      <div class="panel">
+        <img class="auth-logo" src="/assets/img/logo.svg" alt="">
+        <h1>Connexion</h1>
+        <p class="sub">Content de te revoir !</p>
+        <form id="login-form" novalidate>
+          <div class="field"><label for="username">Pseudo</label><input type="text" id="username" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="16" required></div>
+          <div class="field"><label for="password">Mot de passe</label><input type="password" id="password" name="password" autocomplete="current-password" required></div>
+          <button class="btn btn-block" type="submit">Se connecter</button>
+        </form>
+        <p class="auth-foot">Pas encore de compte ? <a href="/inscription">J'ai un code d'invitation</a></p>
+      </div>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="container">
+      <span>Plycube · version bêta · <span data-year></span></span>
+      <span>Aucune donnée personnelle : juste un pseudo. Reste poli et fair-play 🎮</span>
+    </div>
+  </footer>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <script src="/assets/js/platform.js"></script>
+  <script src="/assets/js/common.js"></script>
+  <script src="/assets/js/pages/connexion.js"></script>
+</body>
+</html>

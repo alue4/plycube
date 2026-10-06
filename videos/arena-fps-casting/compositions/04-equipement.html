@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head><meta charset="UTF-8"></head>
+  <body>
+    <template>
+      <style>
+        @font-face { font-family: "Archivo Black"; font-weight: 400; src: url("assets/fonts/ArchivoBlack-400.woff2") format("woff2"); }
+        @font-face { font-family: "Space Mono"; font-weight: 700; src: url("assets/fonts/SpaceMono-700.woff2") format("woff2"); }
+        #root { position: absolute; inset: 0; }
+        #s04-titre { position: absolute; left: 77px; top: 70px; margin: 0; font: italic 400 150px/1 "Archivo Black", sans-serif; letter-spacing: -0.04em; color: #eef4ff; text-shadow: 0 10px 0 #1d2a4d; }
+        #s04-nombre { display: inline-block; min-width: 1.25em; color: #ff8a1f; text-shadow: 0 10px 0 #a14e0a; font-variant-numeric: tabular-nums; }
+        #s04-sous { position: absolute; left: 82px; top: 248px; font: 700 34px/1 "Space Mono", monospace; letter-spacing: .06em; color: #9fb0cc; }
+        .s04-carte { position: absolute; top: 380px; width: 403px; height: 520px; border: 4px solid #2a3b6b; border-radius: 24px; }
+        .s04-carte.mise { border-color: #ff8a1f; }
+        .s04-tete { height: 118px; background: #16203b; border-radius: 20px 20px 0 0; padding: 18px 24px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+        .s04-tete small { font: 700 26px/1 "Space Mono", monospace; letter-spacing: .08em; color: #9fb0cc; }
+        .s04-tete strong { font: italic 400 40px/1 "Archivo Black", sans-serif; letter-spacing: -0.02em; color: #eef4ff; }
+        .s04-socle { position: absolute; left: 50%; bottom: 46px; width: 230px; height: 26px; margin-left: -115px; border-radius: 50%; background: radial-gradient(closest-side, rgba(127, 232, 255, .45), rgba(127, 232, 255, 0)); }
+        #s04-c1 { left: 77px; } #s04-c2 { left: 528px; } #s04-c3 { left: 979px; } #s04-c4 { left: 1430px; }
+      </style>
+      <div data-hf-id="hf-h6so" id="root" data-composition-id="s04" data-width="1920" data-height="1080">
+        <h2 data-hf-id="hf-d8da" id="s04-titre"><span data-hf-id="hf-o5fs" id="s04-nombre">21</span> ARMES</h2>
+        <div data-hf-id="hf-jnsz" id="s04-sous">4 catégories · une arme de chaque</div>
+        <div data-hf-id="hf-dzbh" class="s04-carte" id="s04-c1"><div data-hf-id="hf-8fso" class="s04-tete"><small data-hf-id="hf-0jjf">1 · PRINCIPALE</small><strong data-hf-id="hf-kz83">Fusil d'assaut</strong></div><div data-hf-id="hf-a1k8" class="s04-socle"></div></div>
+        <div data-hf-id="hf-hxfi" class="s04-carte" id="s04-c2"><div data-hf-id="hf-r5qo" class="s04-tete"><small data-hf-id="hf-k3ru">2 · SECONDAIRE</small><strong data-hf-id="hf-hyy5">Revolver</strong></div><div data-hf-id="hf-wqjk" class="s04-socle"></div></div>
+        <div data-hf-id="hf-x8bb" class="s04-carte mise" id="s04-c3"><div data-hf-id="hf-pytl" class="s04-tete"><small data-hf-id="hf-z2n3">3 · MÊLÉE</small><strong data-hf-id="hf-bup6">Poêle à frire</strong></div><div data-hf-id="hf-vjmh" class="s04-socle"></div></div>
+        <div data-hf-id="hf-ptnk" class="s04-carte" id="s04-c4"><div data-hf-id="hf-qd4m" class="s04-tete"><small data-hf-id="hf-hdzz">4 · GADGET</small><strong data-hf-id="hf-9g39">Grappin</strong></div><div data-hf-id="hf-vxxi" class="s04-socle"></div></div>
+      </div>
+      <script>
+        const tl = gsap.timeline({ paused: true });
+        const n = { v: 0 };
+        const el = document.getElementById("s04-nombre");
+        tl.fromTo("#s04-titre", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, 0.1);
+        tl.fromTo(n, { v: 0 }, { v: 21, duration: 1.1, ease: "power2.out", onUpdate: () => { el.textContent = String(Math.round(n.v)); } }, 0.2);
+        tl.fromTo("#s04-nombre", { scale: 1 }, { scale: 1.18, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1, transformOrigin: "50% 60%", immediateRender: false }, 1.3);
+        tl.fromTo("#s04-sous", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.5);
+        ["#s04-c1", "#s04-c2", "#s04-c3", "#s04-c4"].forEach((c, i) => {
+          tl.fromTo(c, { opacity: 0, y: 90 }, { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.7)" }, 0.3 + i * 0.18);
+        });
+        tl.to(["#s04-titre", "#s04-sous", ".s04-carte"], { opacity: 0, duration: 0.25, ease: "power2.in" }, 5.75);
+        window.__timelines["s04"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

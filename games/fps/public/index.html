@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Arena FPS · Plycube</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="jeu.css">
+  <link rel="stylesheet" href="panneau-admin.css">
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <!-- ===== Affichage pendant la partie (HUD) ===== -->
+  <div id="hud" hidden>
+    <div id="viseur"><i class="h"></i><i class="b"></i><i class="g"></i><i class="d"></i><i class="centre"></i></div>
+    <div id="marqueur"></div>
+    <div id="haut">
+      <div id="score-a" class="score"></div>
+      <div id="chrono">8:00</div>
+      <div id="score-b" class="score"></div>
+    </div>
+    <div id="objectif"></div>
+    <ul id="fil"></ul>
+    <div id="annonce"><div class="grand"></div><div class="petit"></div></div>
+    <div id="bas-gauche">
+      <div id="protege" hidden>🛡 Protégé</div>
+      <div class="vie">
+        <b id="pv">100</b>
+        <div class="barre"><span id="pv-barre"></span></div>
+      </div>
+    </div>
+    <div id="bas-droite">
+      <div class="arme-nom" id="arme-nom">Fusil d'assaut</div>
+      <div class="munitions"><b id="munitions">30</b><span id="chargeur">/ 30</span></div>
+      <div id="recharge" hidden><span>Rechargement</span><div class="barre"><i id="recharge-barre"></i></div></div>
+    </div>
+    <ol id="barre-armes"></ol>
+    <div id="indicateurs"></div>
+    <div id="flash-degats"></div>
+    <div id="infos"></div>
+  </div>
+
+  <!-- Menu des danses (touche B) : rempli par js/main.js -->
+  <div id="menu-danses" class="menu-danses" hidden>
+    <h3>💃 Danses</h3>
+    <ol id="liste-danses"></ol>
+    <p class="aide-clavier" id="aide-danses">Appuie sur le chiffre de la danse · <kbd>B</kbd> pour fermer</p>
+    <p class="aide-tactile">Touche une danse</p>
+  </div>
+
+  <!-- Commandes tactiles (tablette) : remplies par js/tactile.js -->
+  <div id="tactile" hidden></div>
+  <div id="tourne" aria-hidden="true">↻ Tourne ta tablette en mode paysage</div>
+
+  <!-- Vue dans la lunette du sniper -->
+  <div id="lunette" hidden><div class="verre"></div><i class="lh"></i><i class="lv"></i></div>
+
+  <div id="mort" hidden>
+    <div class="titre">Éliminé !</div>
+    <div class="par"></div>
+    <div class="compte"></div>
+    <button id="btn-changer-armes" class="btn" type="button">🔫 Changer d'armes <kbd id="kbd-changer-armes">C</kbd></button>
+  </div>
+
+  <div id="tableau" hidden>
+    <h2>Scores</h2>
+    <div id="tableau-contenu"></div>
+  </div>
+
+  <div id="fin" hidden>
+    <div class="carte">
+      <div class="titre" id="fin-titre"></div>
+      <div id="fin-classement"></div>
+      <div class="petit" id="fin-compte"></div>
+    </div>
+  </div>
+
+  <!-- ===== Menu pause ===== -->
+  <div id="pause" class="ecran" hidden>
+    <div class="carte">
+      <h2>Partie <span id="pause-code" class="code"></span></h2>
+      <p class="sous" id="pause-mode"></p>
+      <button id="btn-reprendre" class="btn gros" data-premier>▶ Cliquer pour jouer</button>
+      <div class="rangee">
+        <button id="btn-armes-pause" class="btn">🔫 Changer d'armes</button>
+        <button id="btn-inviter" class="btn">👥 Inviter des amis</button>
+        <button id="btn-reglages-pause" class="btn">⚙ Réglages</button>
+        <button id="btn-quitter" class="btn danger">Quitter la partie</button>
+      </div>
+      <button id="btn-disposition-pause" class="btn lien aide-tactile">✥ Personnaliser les boutons</button>
+      <ul id="liste-amis" hidden></ul>
+      <!-- aides remplies par js/main.js (avec les touches choisies dans les réglages) -->
+      <div class="aide aide-clavier" id="aide-clavier-pause"></div>
+      <div class="aide aide-manette" id="aide-manette-pause"></div>
+      <div class="aide aide-tactile">
+        <span>🕹 Joystick à gauche : se déplacer</span>
+        <span>☝ Glisser le doigt sur l'écran : regarder</span>
+        <span>TIRER (on peut aussi glisser dessus pour viser)</span>
+        <span>VISER : plus précis, avec zoom</span>
+        <span>1 à 4 en bas : principale, secondaire, mêlée, gadget</span>
+        <span>↻ recharger · ☰ menu · 🏆 scores</span>
+        <span>Couteau : VISER dans le dos d'un adversaire = élimination d'un coup !</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Hall : l'écran d'accueil (ton personnage en 3D derrière) ===== -->
+  <div id="hall" class="ecran">
+    <div class="hall-accueil">
+      <header class="hall-barre">
+        <a href="/" class="retour">← Retour au site</a>
+        <h1>ARENA <span>FPS</span></h1>
+        <span class="beta">Bêta</span>
+      </header>
+      <nav class="hall-gauche" aria-label="Menu principal">
+        <button id="btn-jouer" class="btn-jouer" type="button" data-premier>
+          <span class="jouer-titre">JOUER</span>
+          <small>Choisir une carte et une partie</small>
+        </button>
+        <div id="hall-perso"></div>
+        <button id="btn-armes" class="bouton-hall" type="button">
+          <span class="icone" aria-hidden="true">🔫</span>
+          <span><b>Mes armes</b><small>Principale, secondaire, mêlée, gadget</small></span>
+        </button>
+        <button id="btn-reglages" class="bouton-hall" type="button">
+          <span class="icone" aria-hidden="true">⚙</span>
+          <span><b>Réglages</b><small>Commandes, son, graphismes</small></span>
+        </button>
+        <a id="btn-atelier-anim" class="bouton-hall" href="atelier-animations.html" hidden>
+          <span class="icone" aria-hidden="true">🎬</span>
+          <span><b>Atelier d'animations</b><small>Admin : animer les armes</small></span>
+        </a>
+        <a id="btn-atelier-cartes" class="bouton-hall" href="atelier-cartes.html" hidden>
+          <span class="icone" aria-hidden="true">🗺️</span>
+          <span><b>Éditeur de cartes</b><small>Admin : créer ses cartes</small></span>
+        </a>
+      </nav>
+      <aside class="hall-droite" aria-label="Amis en ligne">
+        <h2>Amis en ligne</h2>
+        <ul id="amis-hall"><li class="vide">Chargement…</li></ul>
+      </aside>
+      <details class="hall-aide">
+        <summary>Commandes</summary>
+        <div class="aide aide-clavier" id="aide-clavier-hall"></div>
+        <div class="aide aide-manette" id="aide-manette-hall"></div>
+        <div class="aide aide-tactile">
+          <span>🕹 Joystick à gauche : se déplacer</span>
+          <span>☝ Glisser le doigt sur l'écran : regarder</span>
+          <span>TIRER : appuie (et glisse dessus pour viser en tirant)</span>
+          <span>VISER : plus précis, avec zoom</span>
+          <span>1 à 4 en bas de l'écran : principale, secondaire, mêlée, gadget</span>
+          <span>Les boutons se déplacent dans ⚙ Réglages → Personnaliser les boutons.</span>
+          <span>Les blocs bleus fléchés sont des <b>trampolines</b> !</span>
+        </div>
+      </details>
+    </div>
+
+    <!-- Panneau "Jouer" : choisir la carte, le mode, ou rejoindre une partie -->
+    <div id="panneau-jouer" class="panneau-jouer" aria-hidden="true" role="dialog" aria-label="Jouer">
+      <div class="panneau-entete">
+        <h2>Jouer</h2>
+        <button id="btn-fermer-jouer" class="btn-fermer-panneau" type="button" aria-label="Fermer" data-retour>✕</button>
+      </div>
+      <div class="panneau-contenu">
+        <section class="bloc-jouer">
+          <h3>Nouvelle partie</h3>
+          <div class="sous">1. Choisis la carte</div>
+          <div id="choix-cartes" role="radiogroup" aria-label="Carte"></div>
+          <div class="sous">2. Choisis le mode</div>
+          <button class="btn gros" data-mode="solo">⚔ Chacun pour soi</button>
+          <button class="btn gros bleu-rouge" data-mode="equipes">Équipes : Bleus contre Rouges</button>
+          <p id="carte-choisie" class="carte-choisie"></p>
+        </section>
+        <section class="bloc-jouer">
+          <h3>Parties en cours</h3>
+          <ul id="salons"><li class="vide">Chargement…</li></ul>
+          <form id="form-code" autocomplete="off">
+            <input id="code" maxlength="4" placeholder="CODE" aria-label="Code de la partie">
+            <button class="btn" type="submit">Rejoindre</button>
+          </form>
+        </section>
+        <p id="hall-erreur" class="erreur" role="alert"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Réglages ===== -->
+  <div id="reglages" class="ecran" hidden>
+    <div class="carte">
+      <h2>Réglages</h2>
+      <label>Commandes
+        <select id="r-commandes">
+          <option value="auto">Automatique</option>
+          <option value="tactile">Tactile (tablette)</option>
+          <option value="clavier">Clavier et souris</option>
+        </select></label>
+      <button id="btn-disposition" type="button" class="btn">✥ Personnaliser les boutons tactiles</button>
+      <label>Sensibilité tactile <output id="o-sensibilite-tactile"></output>
+        <input type="range" id="r-sensibilite-tactile" min="0.2" max="3" step="0.05"></label>
+      <label>Sensibilité de la souris <output id="o-sensibilite"></output>
+        <input type="range" id="r-sensibilite" min="0.2" max="3" step="0.05"></label>
+      <button id="btn-touches" type="button" class="btn">⌨ 🎮 Changer les touches (clavier, souris, manette)</button>
+      <div class="reglages-manette">
+        <h3>🎮 Manette</h3>
+        <p class="sous" id="etat-manette"></p>
+        <label>Sensibilité de la manette <output id="o-sensibilite-manette"></output>
+          <input type="range" id="r-sensibilite-manette" min="0.2" max="3" step="0.05"></label>
+        <label class="case"><input type="checkbox" id="r-inverser"> Inverser haut / bas (stick droit)</label>
+        <label class="case"><input type="checkbox" id="r-vibrations"> Vibrations</label>
+      </div>
+      <label>Aide à la visée (manette et tablette)
+        <select id="r-aide-visee">
+          <option value="non">Désactivée</option>
+          <option value="legere">Légère</option>
+          <option value="normale">Normale</option>
+          <option value="forte">Forte</option>
+        </select></label>
+      <p class="sous">Le viseur ralentit sur un adversaire, le suit un peu quand il bouge, et se rapproche de lui quand tu commences à viser. Jamais avec la souris.</p>
+      <label>Volume des effets <output id="o-volume"></output>
+        <input type="range" id="r-volume" min="0" max="1" step="0.05"></label>
+      <label>Volume de la musique <output id="o-musique"></output>
+        <input type="range" id="r-musique" min="0" max="1" step="0.05"></label>
+      <label>Champ de vision <output id="o-fov"></output>
+        <input type="range" id="r-fov" min="65" max="100" step="1"></label>
+      <label>Style des armes
+        <select id="r-armes">
+          <option value="simple">Réaliste simplifié</option>
+          <option value="texture">Réaliste avec textures (plus lourd)</option>
+          <option value="classique">Classique en blocs (le plus léger)</option>
+        </select></label>
+      <p class="sous" id="armes-note" hidden>Les nouvelles armes apparaîtront à ta prochaine partie.</p>
+      <label class="case"><input type="checkbox" id="r-ombres"> Ombres (désactive-les si le jeu rame)</label>
+      <!-- Admin du site seulement : ouvre le panneau d'admin (js/panneau-admin.js) -->
+      <div id="reglages-admin" class="reglages-admin" hidden>
+        <button id="btn-admin-panel" class="btn-admin-panel" type="button">&gt;_ ADMIN PANEL <small id="etat-admin-panel"></small></button>
+      </div>
+      <p class="sous" id="reglages-note" hidden>Les ombres changeront au prochain chargement de la page.</p>
+      <button id="btn-fermer-reglages" class="btn gros" data-retour>OK</button>
+      <p class="credits">Sons : Freesound, Kenney et OpenGameArt (CC0). « Flare gun 5-2 » par OGsoundFX et « Grenade Throw » par ryanconway (freesound.org, licence CC BY 4.0).</p>
+      <p class="credits">Modèles 3D des armes : Quaternius, Pichuliru, CreativeTrio, Poly Haven et d'autres auteurs (CC0). Style « textures » : « MDR », « Mpa », « MK14 » et « SR1MP » par austincford (poly.pizza, CC BY 3.0), « M60 machine gun » par mightydinosaurcol et « Submachine Gun (Scorpion-inspired) » par Kutejnikov (OpenGameArt, CC BY 4.0), modifiés. Détails : modeles/armes/LICENCES.md.</p>
+    </div>
+  </div>
+
+  <!-- ===== Changer les touches (rempli par js/main.js) ===== -->
+  <div id="ecran-touches" class="ecran" hidden>
+    <div class="carte">
+      <h2>Touches</h2>
+      <div class="onglets-touches" role="tablist">
+        <button id="onglet-clavier" class="onglet" type="button" role="tab">⌨ Clavier et souris</button>
+        <button id="onglet-manette" class="onglet" type="button" role="tab">🎮 Manette</button>
+      </div>
+      <p class="sous" id="aide-touches"></p>
+      <p class="info-touches" id="info-touches" role="status"></p>
+      <div id="liste-touches" class="liste-touches"></div>
+      <div class="rangee">
+        <button id="btn-touches-defaut" class="btn danger" type="button">Remettre les touches d'origine</button>
+        <button id="btn-fermer-touches" class="btn" type="button" data-retour>OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="message" class="ecran" hidden>
+    <div class="carte">
+      <h2 id="message-titre"></h2>
+      <p id="message-texte"></p>
+      <a href="/" class="btn">Retour au site</a>
+      <button id="message-recharger" class="btn" hidden>Recharger</button>
+    </div>
+  </div>
+
+  <div id="toasts"></div>
+
+  <script src="/assets/js/platform.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

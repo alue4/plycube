@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#05070d">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Administration · Plycube</title>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/animations/animations.css">
+  <script src="/assets/animations/animations.js"></script>
+</head>
+<body data-page="admin">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/"><img class="brand-logo" src="/assets/img/logo.svg" alt=""><span>Plycube</span><span class="beta">BÊTA</span></a>
+      <button class="menu-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false"></button>
+      <nav class="nav" aria-label="Navigation principale">
+        <a href="/">Jeux</a>
+        <a href="/personnage">Mon personnage</a>
+        <a href="/amis" data-friends-link>Amis</a>
+        <a href="/suggestions">Idées &amp; feuille de route</a>
+        <a href="/admin" class="hidden" data-admin-only>Admin</a>
+        <div class="user-chip">
+          <a href="/compte" class="name" data-me-name title="Mon compte"></a>
+          <button class="btn btn-ghost btn-sm" type="button" data-logout>Déconnexion</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <div class="page-head"><h1>Administration</h1></div>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="dashboard">Tableau de bord</button>
+      <button role="tab" aria-selected="false" data-tab="invites">Codes d'invitation</button>
+      <button role="tab" aria-selected="false" data-tab="users">Joueurs</button>
+      <button role="tab" aria-selected="false" data-tab="suggestions">Suggestions</button>
+      <button role="tab" aria-selected="false" data-tab="roadmap">Feuille de route</button>
+    </div>
+
+    <section data-panel="dashboard">
+      <div class="stats" id="stats"></div>
+    </section>
+
+    <section data-panel="invites" class="hidden">
+      <div class="panel">
+        <h2>Créer des codes</h2>
+        <form id="invite-form" class="grid-form" novalidate>
+          <div class="field"><label for="i-uses">Utilisations par code</label><input type="number" id="i-uses" min="1" max="500" value="1"></div>
+          <div class="field"><label for="i-count">Nombre de codes</label><input type="number" id="i-count" min="1" max="50" value="1"></div>
+          <div class="field"><label for="i-note">Note (pour toi)</label><input type="text" id="i-note" maxlength="60" placeholder="Ex : 4e B"></div>
+          <div class="field"><button class="btn btn-block" type="submit">Créer</button></div>
+        </form>
+        <p class="hint small muted mt-8">Astuce : un code à 30 utilisations pour une classe entière, ou des codes à 1 utilisation à distribuer un par un.</p>
+      </div>
+      <div class="panel"><div class="table-wrap"><table><thead><tr><th>Code</th><th>Note</th><th>Utilisé</th><th>État</th><th>Créé</th><th></th></tr></thead><tbody id="invites"></tbody></table></div></div>
+    </section>
+
+    <section data-panel="users" class="hidden">
+      <div class="panel">
+        <div class="panel-head"><h2>Joueurs</h2><input type="text" id="user-search" placeholder="Rechercher un pseudo…" class="search-input"></div>
+        <div class="table-wrap"><table><thead><tr><th>Pseudo</th><th>Statut</th><th>Inscrit</th><th>Dernière visite</th><th>Code</th><th></th></tr></thead><tbody id="users"></tbody></table></div>
+      </div>
+    </section>
+
+    <section data-panel="suggestions" class="hidden">
+      <div class="panel">
+        <h2>Suggestions des joueurs</h2>
+        <p class="muted small">« Masquer » cache une idée aux joueurs. « → Feuille de route » l'ajoute dans la colonne Prochainement.</p>
+        <div class="table-wrap"><table><thead><tr><th>Votes</th><th>Idée</th><th>Auteur</th><th>Statut</th><th></th></tr></thead><tbody id="admin-suggestions"></tbody></table></div>
+      </div>
+    </section>
+
+    <section data-panel="roadmap" class="hidden">
+      <div class="panel">
+        <h2>Ajouter un élément</h2>
+        <form id="roadmap-form" class="grid-form" novalidate>
+          <div class="field"><label for="r-title">Titre</label><input type="text" id="r-title" maxlength="100" required></div>
+          <div class="field"><label for="r-desc">Description</label><input type="text" id="r-desc" maxlength="500"></div>
+          <div class="field"><label for="r-col">Colonne</label>
+            <select id="r-col"><option value="en_cours">En cours</option><option value="prochainement" selected>Prochainement</option><option value="termine">Terminé</option></select></div>
+          <div class="field"><button class="btn btn-block" type="submit">Ajouter</button></div>
+        </form>
+      </div>
+      <div class="roadmap admin-roadmap mt-20" id="admin-roadmap">
+        <section class="roadmap-col col-en_cours"><h3><span class="pill"></span>En cours</h3><div data-col="en_cours"></div></section>
+        <section class="roadmap-col col-prochainement"><h3><span class="pill"></span>Prochainement</h3><div data-col="prochainement"></div></section>
+        <section class="roadmap-col col-termine"><h3><span class="pill"></span>Terminé</h3><div data-col="termine"></div></section>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container">
+      <span>Plycube · version bêta · <span data-year></span></span>
+      <span>Aucune donnée personnelle : juste un pseudo. Reste poli et fair-play 🎮</span>
+    </div>
+  </footer>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <script src="/assets/js/platform.js"></script>
+  <script src="/assets/js/common.js"></script>
+  <script src="/assets/js/pages/admin.js"></script>
+</body>
+</html>

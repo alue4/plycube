@@ -1,0 +1,78 @@
+/* Éditeur de cartes (réservé à l'admin). Mêmes couleurs que l'atelier d'animations. */
+:root {
+  --bleu: #3d8bff; --bleu-clair: #7fe8ff; --rouge: #ff5a5a; --orange: #ff8a1f;
+  --fond: #0f1730; --fond-2: #16203b; --bord: rgba(127, 232, 255, 0.22);
+  --texte: #eef4ff; --gris: #9fb0cc; --nuit: #0a0f1d;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; background: var(--nuit); color: var(--texte);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 14px; }
+body { display: grid; grid-template-rows: auto minmax(0, 1fr); height: 100vh; overflow: hidden; }
+h1, h2 { margin: 0; }
+h2 { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--bleu-clair); margin: 14px 0 6px; }
+h2:first-child { margin-top: 0; }
+input, select, button { font: inherit; color: inherit; }
+input[type="number"], input[type="text"], select { background: var(--nuit); border: 1px solid var(--bord); border-radius: 6px; padding: 5px 7px; color: var(--texte); }
+input[type="number"] { width: 70px; }
+select { max-width: 100%; }
+
+.btn { font-weight: 700; color: #fff; background: linear-gradient(180deg, #4b97ff, #2d6fe0); border: 0; border-bottom: 3px solid #1d4ea8;
+  border-radius: 9px; padding: 8px 14px; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; white-space: nowrap; }
+.btn:hover { filter: brightness(1.12); }
+.btn:active { transform: translateY(1px); }
+.btn[disabled] { opacity: .45; cursor: default; filter: none; }
+.btn.petit { padding: 5px 9px; font-size: .9rem; border-bottom-width: 2px; }
+.btn.gris { background: linear-gradient(180deg, #2c3a60, #222d4c); border-bottom-color: #141b30; }
+.btn.danger { background: linear-gradient(180deg, #ff6b6b, #d93c3c); border-bottom-color: #9e2626; }
+.choix { background: rgba(10, 15, 29, .75); border: 1px solid var(--bord); color: var(--gris); padding: 7px 8px; cursor: pointer; border-radius: 8px; text-align: left; }
+.choix.actif { background: var(--bleu); border-color: var(--bleu); color: #fff; }
+
+.barre { display: flex; align-items: center; gap: 16px; padding: 8px 14px; background: var(--fond); border-bottom: 1px solid var(--bord); }
+.barre h1 { font: italic 900 1.15rem/1 system-ui, sans-serif; }
+.barre h1 span { color: var(--orange); }
+.retour { color: var(--gris); text-decoration: none; font-weight: 600; }
+.retour:hover { color: var(--texte); }
+.barre-droite { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.etat { color: var(--gris); font-size: .85rem; }
+.etat.modifie { color: var(--orange); }
+.etat.ok { color: #4ade80; }
+
+.editeur { display: grid; grid-template-columns: 220px minmax(0, 1fr) 240px; min-height: 0; }
+.panneau { background: var(--fond); padding: 12px; overflow-y: auto; min-height: 0; }
+.panneau.gauche { border-right: 1px solid var(--bord); }
+.panneau.droite { border-left: 1px solid var(--bord); }
+.panneau select { display: block; width: 100%; }
+
+.vue { position: relative; min-width: 0; min-height: 0; background: #1a2440; }
+#vue3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.aide-vue { position: absolute; left: 10px; bottom: 8px; margin: 0; padding: 4px 8px; border-radius: 6px; background: rgba(10, 15, 29, .7); color: var(--gris); font-size: .8rem; pointer-events: none; }
+.compteur { position: absolute; right: 10px; top: 10px; margin: 0; padding: 4px 8px; border-radius: 6px; background: rgba(10, 15, 29, .7); color: var(--gris); font-size: .8rem; pointer-events: none; }
+
+.liste-outils { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.boutons { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.boutons.colonne { flex-direction: column; align-items: stretch; }
+.ligne { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 0; }
+.ligne input[type="text"] { flex: 1; min-width: 0; }
+.aide { color: var(--gris); margin: 6px 0; line-height: 1.35; }
+.aide.petite { font-size: .8rem; }
+.statut { margin: 8px 0 0; padding: 6px 8px; border-radius: 7px; background: var(--fond-2); color: var(--gris); font-size: .85rem; min-height: 1.2em; }
+.statut.erreur { color: #ffb4b4; }
+.statut.ok { color: #4ade80; }
+
+.matieres { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 5px; }
+.matiere { aspect-ratio: 1; border: 2px solid transparent; border-radius: 7px; cursor: pointer; background-size: cover; image-rendering: pixelated; position: relative; }
+.matiere.actif { border-color: var(--orange); box-shadow: 0 0 0 2px rgba(255, 138, 31, .4); }
+.matiere .nom { position: absolute; left: 0; right: 0; bottom: 0; font-size: .55rem; text-align: center; background: rgba(0, 0, 0, .55); border-radius: 0 0 5px 5px; padding: 1px 0; white-space: nowrap; overflow: hidden; }
+.matiere.invisible { background: repeating-conic-gradient(#2b3a5c 0 25%, #1a2440 0 50%) 0 / 12px 12px; }
+
+.bloque { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(5, 8, 16, .9); z-index: 10; padding: 16px; }
+.carte { max-width: 420px; background: var(--fond); border: 1px solid var(--bord); border-radius: 16px; padding: 24px; text-align: center; }
+.carte p { color: var(--gris); line-height: 1.45; }
+
+@media (max-width: 920px) {
+  body { grid-template-rows: auto auto; height: auto; overflow: auto; }
+  .editeur { grid-template-columns: 1fr; }
+  .vue { height: 60vh; }
+  .panneau.gauche, .panneau.droite { border: 0; border-bottom: 1px solid var(--bord); }
+}

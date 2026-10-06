@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head><meta charset="UTF-8"></head>
+  <body>
+    <template>
+      <style>
+        @font-face { font-family: "Archivo Black"; font-weight: 400; src: url("assets/fonts/ArchivoBlack-400.woff2") format("woff2"); }
+        @font-face { font-family: "Space Mono"; font-weight: 700; src: url("assets/fonts/SpaceMono-700.woff2") format("woff2"); }
+        #root { position: absolute; inset: 0; }
+        #s06-titre { position: absolute; right: 90px; top: 70px; width: 1100px; margin: 0; text-align: right;
+          font: italic 400 140px/0.95 "Archivo Black", sans-serif; letter-spacing: -0.04em; color: #eef4ff; text-shadow: 0 10px 0 #1d2a4d, 0 24px 48px rgba(0, 0, 0, .5); }
+        #s06-titre span { display: block; }
+        #s06-titre .o { color: #ff8a1f; text-shadow: 0 10px 0 #a14e0a, 0 24px 48px rgba(0, 0, 0, .5); }
+        #s06-cartes { position: absolute; left: 90px; bottom: 80px; display: flex; gap: 14px; align-items: center; }
+        #s06-cartes b { font: 700 40px/1 "Space Mono", monospace; letter-spacing: .08em; color: #0a0f1d; background: #7fe8ff; padding: 14px 22px; border-radius: 14px; }
+        .s06-nom { font: 700 30px/1 "Space Mono", monospace; letter-spacing: .06em; color: #eef4ff; background: rgba(10, 15, 29, .78); padding: 14px 18px; border-radius: 12px; border: 3px solid rgba(127, 232, 255, .45); }
+      </style>
+      <div data-hf-id="hf-utsa" id="root" data-composition-id="s06" data-width="1920" data-height="1080">
+        <h2 data-hf-id="hf-qoy0" id="s06-titre" data-layout-allow-overlap=""><span data-hf-id="hf-ckz4" id="s06-l1">FONCE DANS</span><span data-hf-id="hf-vsd5" id="s06-l2" class="o">L'ARÈNE</span></h2>
+        <div data-hf-id="hf-dt6x" id="s06-cartes"><b data-hf-id="hf-2br0" id="s06-quatre">4 CARTES</b><span data-hf-id="hf-y0hb" class="s06-nom" id="s06-m1">Arène</span><span data-hf-id="hf-ndfg" class="s06-nom" id="s06-m2">Château</span><span data-hf-id="hf-jibd" class="s06-nom" id="s06-m3">Ville</span><span data-hf-id="hf-omqd" class="s06-nom" id="s06-m4">Île</span></div>
+      </div>
+      <script>
+        const tl = gsap.timeline({ paused: true });
+        tl.fromTo("#s06-quatre", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.4)" }, 3.9);
+        tl.fromTo(["#s06-m1", "#s06-m2", "#s06-m3", "#s06-m4"], { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out", stagger: 0.09 }, 4.1);
+        tl.fromTo("#s06-l1", { opacity: 0, x: 200 }, { opacity: 1, x: 0, duration: 0.35, ease: "expo.out" }, 4.75);
+        tl.fromTo("#s06-l2", { opacity: 0, scale: 1.8, transformOrigin: "100% 50%" }, { opacity: 1, scale: 1, duration: 0.3, ease: "power4.out" }, 5.05);
+        tl.to(["#s06-titre", "#s06-cartes"], { opacity: 0, duration: 0.2, ease: "power2.in" }, 6.3);
+        window.__timelines["s06"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

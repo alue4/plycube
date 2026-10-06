@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head><meta charset="UTF-8"></head>
+  <body>
+    <template>
+      <style>
+        @font-face { font-family: "Archivo Black"; font-weight: 400; src: url("assets/fonts/ArchivoBlack-400.woff2") format("woff2"); }
+        #root { position: absolute; inset: 0; }
+        #s09-ding { position: absolute; left: 1150px; top: 70px; width: 760px; height: 320px; }
+        #s09-texte { position: absolute; inset: 0; margin: 0; display: flex; align-items: center; justify-content: center;
+          white-space: nowrap; font: italic 400 200px/1 "Archivo Black", sans-serif; color: #ffd84a; text-shadow: 0 14px 0 #a15c00, 0 0 60px rgba(255, 216, 74, .6); }
+        .s09-trait { position: absolute; left: 50%; top: 50%; width: 120px; height: 16px; margin: -8px 0 0 0; background: #ffd84a; border-radius: 8px; transform-origin: 0 50%; }
+      </style>
+      <div data-hf-id="hf-eu53" id="root" data-composition-id="s09" data-width="1920" data-height="1080">
+        <div data-hf-id="hf-izqu" id="s09-ding">
+          <div data-hf-id="hf-8jxx" class="s09-trait" id="s09-t1"></div><div data-hf-id="hf-ci1y" class="s09-trait" id="s09-t2"></div><div data-hf-id="hf-gg5z" class="s09-trait" id="s09-t3"></div>
+          <div data-hf-id="hf-kea0" class="s09-trait" id="s09-t4"></div><div data-hf-id="hf-l5xt" class="s09-trait" id="s09-t5"></div><div data-hf-id="hf-rbnm" class="s09-trait" id="s09-t6"></div>
+          <h2 data-hf-id="hf-8y78" id="s09-texte">DING !</h2>
+        </div>
+      </div>
+      <script>
+        const tl = gsap.timeline({ paused: true });
+        tl.fromTo("#s09-texte", { opacity: 0, scale: 0.2, rotation: -20 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.28, ease: "back.out(3)" }, 0.6);
+        tl.fromTo("#s09-texte", { y: 0 }, { y: -6, duration: 0.05, yoyo: true, repeat: 3, ease: "none", immediateRender: false }, 0.9);
+        // traits d'impact autour du texte (rayons)
+        [0, 60, 120, 180, 240, 300].forEach((a, i) => {
+          tl.fromTo(`#s09-t${i + 1}`, { rotation: a - 10, x: Math.cos(a * Math.PI / 180) * 220, y: Math.sin(a * Math.PI / 180) * 150, scaleX: 0, opacity: 1 },
+            { scaleX: 1, opacity: 0, x: Math.cos(a * Math.PI / 180) * 360, y: Math.sin(a * Math.PI / 180) * 240, duration: 0.45, ease: "power2.out" }, 0.62);
+        });
+        tl.to("#s09-ding", { opacity: 0, scale: 0.85, duration: 0.18, ease: "power2.in" }, 1.42);
+        window.__timelines["s09"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

@@ -1,0 +1,1020 @@
+{
+  "simple": {
+    "fusil": {
+      "fichier": "simple/fusil.glb",
+      "nom": "Assault Rifle",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/K2lXTYFSLC",
+      "longueurReelle": 0.88,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 71,
+      "bornes": {
+        "min": [
+          -1.6048,
+          -0.7415,
+          -0.098
+        ],
+        "max": [
+          3.8168,
+          0.8598,
+          0.098
+        ]
+      },
+      "echelle": 0.162312,
+      "notes": "Fusil d'assaut type AK (Ultimate Guns Pack)."
+    },
+    "rafale": {
+      "fichier": "simple/rafale.glb",
+      "nom": "Bullpup",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/iKAlIbHUFD",
+      "longueurReelle": 0.75,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 137,
+      "bornes": {
+        "min": [
+          -2.5289,
+          -0.4209,
+          -0.1551
+        ],
+        "max": [
+          2.7192,
+          1.12,
+          0.1551
+        ]
+      },
+      "echelle": 0.14291,
+      "notes": "Bullpup (Ultimate Guns Pack)."
+    },
+    "smg": {
+      "fichier": "simple/smg.glb",
+      "nom": "Submachine Gun",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/7ehatxr7FY",
+      "longueurReelle": 0.6,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 68,
+      "bornes": {
+        "min": [
+          -1.7951,
+          -0.8607,
+          -0.1593
+        ],
+        "max": [
+          2.2489,
+          0.9866,
+          0.1593
+        ]
+      },
+      "echelle": 0.14837,
+      "notes": "Mitraillette crosse repliable (Ultimate Guns Pack)."
+    },
+    "mitrailleuse": {
+      "fichier": "simple/mitrailleuse.glb",
+      "nom": "WW1 MG08/15 Portable LP",
+      "auteur": "aaronw (Wiggilytuff)",
+      "licence": "CC0",
+      "source": "https://opengameart.org/content/ww1-mg0515-portable-lp",
+      "longueurReelle": 1.4,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 47,
+      "bornes": {
+        "min": [
+          -0.5832,
+          0.0177,
+          -0.033
+        ],
+        "max": [
+          0.5577,
+          2.0072,
+          7.9631
+        ]
+      },
+      "echelle": 0.175084,
+      "notes": "Mitrailleuse legere WW1 avec bipied (OBJ converti, couleurs unies ajoutees : metal/bois ; fond de scene supprime)."
+    },
+    "pompe": {
+      "fichier": "simple/pompe.glb",
+      "nom": "Shotgun",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/ZmPTnh7njL",
+      "longueurReelle": 1.0,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 53,
+      "bornes": {
+        "min": [
+          -1.4771,
+          -0.5633,
+          -0.1233
+        ],
+        "max": [
+          4.3078,
+          0.3794,
+          0.1233
+        ]
+      },
+      "echelle": 0.172864,
+      "notes": "Fusil a pompe (Ultimate Guns Pack)."
+    },
+    "precision": {
+      "fichier": "simple/precision.glb",
+      "nom": "Sniper Rifle",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/XCIC2Ae4Rb",
+      "longueurReelle": 1.1,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 72,
+      "bornes": {
+        "min": [
+          -1.3775,
+          -0.7137,
+          -0.155
+        ],
+        "max": [
+          4.9581,
+          0.6345,
+          0.3044
+        ]
+      },
+      "echelle": 0.173622,
+      "notes": "Fusil de precision noir a lunette courte, utilise comme DMR (Ultimate Guns Pack)."
+    },
+    "sniper": {
+      "fichier": "simple/sniper.glb",
+      "nom": "Sniper Rifle",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/TKaBjAEofL",
+      "longueurReelle": 1.25,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 92,
+      "bornes": {
+        "min": [
+          -1.9332,
+          -0.3836,
+          -0.1414
+        ],
+        "max": [
+          5.3115,
+          0.8172,
+          0.3044
+        ]
+      },
+      "echelle": 0.172541,
+      "notes": "Fusil de precision a verrou avec lunette (Ultimate Guns Pack)."
+    },
+    "arbalete": {
+      "fichier": "simple/arbalete.glb",
+      "nom": "Crossbow",
+      "auteur": "CreativeTrio",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/kHb0kA11oD",
+      "longueurReelle": 0.9,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 128,
+      "bornes": {
+        "min": [
+          -0.538,
+          -0.2644,
+          -0.961
+        ],
+        "max": [
+          0.538,
+          0.183,
+          0.9154
+        ]
+      },
+      "echelle": 0.479648,
+      "notes": "Arbalete moderne avec crosse et lunette. Petite texture palette (32 Ko) au lieu de couleurs pures. Branches de l'arc le long de x."
+    },
+    "roquette": {
+      "fichier": "simple/roquette.glb",
+      "nom": "Bazooka",
+      "auteur": "CreativeTrio",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/eJNzLpBsEt",
+      "longueurReelle": 0.95,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 122,
+      "bornes": {
+        "min": [
+          -0.3063,
+          -0.1187,
+          -1.5704
+        ],
+        "max": [
+          0.3063,
+          0.1187,
+          1.5704
+        ]
+      },
+      "echelle": 0.302468,
+      "notes": "Lance-roquettes type RPG-7 (texture palette 32 Ko)."
+    },
+    "revolver": {
+      "fichier": "simple/revolver.glb",
+      "nom": "Revolver",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/XrnLUz6kQj",
+      "longueurReelle": 0.3,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 71,
+      "bornes": {
+        "min": [
+          -0.1833,
+          -0.2623,
+          -0.1472
+        ],
+        "max": [
+          1.7178,
+          0.7004,
+          0.1472
+        ]
+      },
+      "echelle": 0.157803,
+      "notes": "Revolver (Ultimate Guns Pack)."
+    },
+    "pistolet": {
+      "fichier": "simple/pistolet.glb",
+      "nom": "Pistol",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/J3i9KDQ3kt",
+      "longueurReelle": 0.2,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 52,
+      "bornes": {
+        "min": [
+          -0.3668,
+          -0.4768,
+          -0.1372
+        ],
+        "max": [
+          1.4525,
+          0.7218,
+          0.1372
+        ]
+      },
+      "echelle": 0.109932,
+      "notes": "Pistolet (Ultimate Guns Pack)."
+    },
+    "uzi": {
+      "fichier": "simple/uzi.glb",
+      "nom": "Smg Compact East",
+      "auteur": "Pichuliru",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/7IK1O1FfXu",
+      "longueurReelle": 0.47,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 89,
+      "bornes": {
+        "min": [
+          -0.0261,
+          -0.1858,
+          -0.1911
+        ],
+        "max": [
+          0.0253,
+          0.0623,
+          0.3254
+        ]
+      },
+      "echelle": 0.910014,
+      "notes": "Mini-mitraillette type Uzi avec crosse repliable (Pichuliru, pack Flat Guns East)."
+    },
+    "canon_scie": {
+      "fichier": "simple/canon_scie.glb",
+      "nom": "Shotgun Sawed Off",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/29FXKu7G91",
+      "longueurReelle": 0.5,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 53,
+      "bornes": {
+        "min": [
+          -0.403,
+          -0.4554,
+          -0.2112
+        ],
+        "max": [
+          3.2852,
+          0.5647,
+          0.2112
+        ]
+      },
+      "echelle": 0.135567,
+      "notes": "Fusil a canon scie juxtapose (Ultimate Guns Pack)."
+    },
+    "lance_fusee": {
+      "fichier": "simple/lance_fusee.glb",
+      "nom": "Flare Gun",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/44H9OBUqTC",
+      "longueurReelle": 0.25,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 30,
+      "bornes": {
+        "min": [
+          -0.4151,
+          -0.5325,
+          -0.3038
+        ],
+        "max": [
+          2.0901,
+          1.1237,
+          0.2995
+        ]
+      },
+      "echelle": 0.09979,
+      "notes": "Pistolet lance-fusee ; materiau 'Red' recolore en orange."
+    },
+    "couteau": {
+      "fichier": "simple/couteau.glb",
+      "nom": "Knife",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/N9bfPFP1hr",
+      "longueurReelle": 0.3,
+      "axe": "y",
+      "bouche": "+",
+      "haut": "+x",
+      "tailleFichierKo": 27,
+      "bornes": {
+        "min": [
+          -0.1096,
+          -0.3636,
+          -0.0389
+        ],
+        "max": [
+          0.1559,
+          1.1993,
+          0.0389
+        ]
+      },
+      "echelle": 0.191955,
+      "notes": "Couteau de combat : pointe vers +y, dos de lame (cran/dents) vers +x, tranchant vers -x."
+    },
+    "batte": {
+      "fichier": "simple/batte.glb",
+      "nom": "Baseball Bat",
+      "auteur": "Pichuliru",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/POXTjdMP2c",
+      "longueurReelle": 0.8,
+      "axe": "y",
+      "bouche": "+",
+      "haut": "+z",
+      "tailleFichierKo": 11,
+      "bornes": {
+        "min": [
+          -0.0351,
+          -0.3519,
+          -0.0351
+        ],
+        "max": [
+          0.0351,
+          0.4273,
+          0.0351
+        ]
+      },
+      "echelle": 1.026703,
+      "notes": "Batte de baseball (metal gris, poignee noire) ; tete vers +y. Objet symetrique : haut=+z arbitraire."
+    },
+    "poele": {
+      "fichier": "simple/poele.glb",
+      "nom": "Pan",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/f9my9iJZMv",
+      "longueurReelle": 0.45,
+      "axe": "z",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 15,
+      "bornes": {
+        "min": [
+          -0.8615,
+          -0.2735,
+          -0.4714
+        ],
+        "max": [
+          0.8615,
+          0.0685,
+          2.3533
+        ]
+      },
+      "echelle": 0.159313,
+      "notes": "Poele a frire : manche vers -z, poele vers +z, interieur vers +y."
+    },
+    "grenade": {
+      "fichier": "simple/grenade.glb",
+      "nom": "Frag Grenade West",
+      "auteur": "Pichuliru",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/1aIZys4mhg",
+      "longueurReelle": 0.1,
+      "axe": "y",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 30,
+      "bornes": {
+        "min": [
+          -0.0336,
+          -0.0306,
+          -0.0442
+        ],
+        "max": [
+          0.0336,
+          0.0682,
+          0.0336
+        ]
+      },
+      "echelle": 1.011834,
+      "notes": "Grenade a main (Pichuliru, Frag Grenade West) ; cuillere/goupille en haut (+y)."
+    },
+    "fumigene": {
+      "fichier": "simple/fumigene.glb",
+      "nom": "Smoke Grenade West",
+      "auteur": "Pichuliru",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/GbhfKcTiF9",
+      "longueurReelle": 0.16,
+      "axe": "y",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 29,
+      "bornes": {
+        "min": [
+          -0.025,
+          -0.0656,
+          -0.0399
+        ],
+        "max": [
+          0.0262,
+          0.0943,
+          0.025
+        ]
+      },
+      "echelle": 1.000262,
+      "notes": "Grenade fumigene cylindrique (Pichuliru, Smoke Grenade West)."
+    },
+    "grappin": {
+      "fichier": "simple/grappin.glb",
+      "nom": "Pistol + Anchor (assemblage)",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/Jyn9qex4ba + https://poly.pizza/m/ejWQny9Gcz",
+      "longueurReelle": 0.35,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 84,
+      "bornes": {
+        "min": [
+          -0.3396,
+          -0.4079,
+          -0.1616
+        ],
+        "max": [
+          2.1891,
+          0.888,
+          0.1616
+        ]
+      },
+      "echelle": 0.13841,
+      "notes": "Pas de lance-grappin libre trouve : assemblage pistolet Quaternius + ancre Quaternius (recoloree acier) fixee a la bouche, crochet vers +x."
+    },
+    "kit_soin": {
+      "fichier": "simple/kit_soin.glb",
+      "nom": "First Aid Kit",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/wP00rePSRD",
+      "longueurReelle": 0.35,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 43,
+      "bornes": {
+        "min": [
+          -0.7807,
+          -0.6023,
+          -0.3667
+        ],
+        "max": [
+          0.7824,
+          0.757,
+          0.3667
+        ]
+      },
+      "echelle": 0.223912,
+      "notes": "Trousse de soin rouge avec croix (poignee vers +y)."
+    }
+  },
+  "texture": {
+    "fusil": {
+      "fichier": "texture/fusil.glb",
+      "nom": "M4A1 Assault Rifle",
+      "auteur": "nisu",
+      "licence": "CC0",
+      "source": "https://opengameart.org/content/m4a1-assault-rifle",
+      "longueurReelle": 0.86,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 420,
+      "bornes": {
+        "min": [
+          -0.0316,
+          -0.1783,
+          -0.5359
+        ],
+        "max": [
+          0.032,
+          0.088,
+          0.323
+        ]
+      },
+      "echelle": 1.001347,
+      "notes": "M4A1 PBR (FBX converti, textures base color + normal reduites a 1024 px)."
+    },
+    "rafale": {
+      "fichier": "texture/rafale.glb",
+      "nom": "MDR",
+      "auteur": "austincford",
+      "licence": "CC BY 3.0",
+      "source": "https://poly.pizza/m/DdK4yHu7fi",
+      "longueurReelle": 0.7,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 676,
+      "bornes": {
+        "min": [
+          -0.0137,
+          -0.0753,
+          -0.1296
+        ],
+        "max": [
+          0.0137,
+          0.0329,
+          0.1316
+        ]
+      },
+      "echelle": 2.680049,
+      "notes": "Bullpup type MDR. Echelle d origine tres petite (0,26 unite)."
+    },
+    "smg": {
+      "fichier": "texture/smg.glb",
+      "nom": "Mpa",
+      "auteur": "austincford",
+      "licence": "CC BY 3.0",
+      "source": "https://poly.pizza/m/ipEY7cn831",
+      "longueurReelle": 0.68,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 334,
+      "bornes": {
+        "min": [
+          -0.012,
+          -0.0706,
+          -0.0956
+        ],
+        "max": [
+          0.0112,
+          0.0477,
+          0.1492
+        ]
+      },
+      "echelle": 2.777351,
+      "notes": "Mitraillette type MP5 avec viseur point rouge. Echelle d origine tres petite."
+    },
+    "mitrailleuse": {
+      "fichier": "texture/mitrailleuse.glb",
+      "nom": "M60 machine gun",
+      "auteur": "mightydinosaurcol",
+      "licence": "CC BY 4.0 (double licence CC BY 4.0 / GPL 3.0, on retient CC BY 4.0)",
+      "source": "https://opengameart.org/content/m60-machine-gun",
+      "longueurReelle": 1.1,
+      "axe": "z",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 496,
+      "bornes": {
+        "min": [
+          -0.2491,
+          0.002,
+          -0.746
+        ],
+        "max": [
+          0.2819,
+          0.4869,
+          0.7554
+        ]
+      },
+      "echelle": 0.732676,
+      "notes": "Mitrailleuse M60 avec bipied (FBX converti)."
+    },
+    "pompe": {
+      "fichier": "texture/pompe.glb",
+      "nom": "Lightning Pump Action Rifle",
+      "auteur": "LonesomeDucky",
+      "licence": "CC0",
+      "source": "https://opengameart.org/content/lightning-pump-action-rifle",
+      "longueurReelle": 1.0,
+      "axe": "z",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 458,
+      "bornes": {
+        "min": [
+          -0.0172,
+          -0.1689,
+          -0.3915
+        ],
+        "max": [
+          0.0172,
+          0.0196,
+          0.5765
+        ]
+      },
+      "echelle": 1.033085,
+      "notes": "Arme a pompe (carabine Colt Lightning, pas un vrai fusil a pompe de chasse) : aucun fusil a pompe texture libre trouve. Bouche corrigée après essai dans le jeu."
+    },
+    "precision": {
+      "fichier": "texture/precision.glb",
+      "nom": "MK14",
+      "auteur": "austincford",
+      "licence": "CC BY 3.0",
+      "source": "https://poly.pizza/m/lNGPW2NGPZ",
+      "longueurReelle": 1.1,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 625,
+      "bornes": {
+        "min": [
+          -0.0068,
+          -0.0209,
+          -0.0887
+        ],
+        "max": [
+          0.0113,
+          0.022,
+          0.1237
+        ]
+      },
+      "echelle": 5.177135,
+      "notes": "Fusil de precision semi-auto type MK14 / DMR avec lunette. Echelle d origine tres petite."
+    },
+    "sniper": {
+      "fichier": "texture/sniper.glb",
+      "nom": "Bolt Action Rifle 7.62",
+      "auteur": "Mateusz Sadek",
+      "licence": "CC0",
+      "source": "https://polyhaven.com/a/bolt_action_rifle_7_62",
+      "longueurReelle": 1.23,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 1009,
+      "bornes": {
+        "min": [
+          -0.6351,
+          -0.1088,
+          -0.0264
+        ],
+        "max": [
+          0.5959,
+          0.0957,
+          0.0402
+        ]
+      },
+      "echelle": 0.999208,
+      "notes": "Fusil a verrou avec lunette, PBR (textures reduites a 512 px ; balle et 2e verrou supprimes). ~20k triangles (le plus lourd)."
+    },
+    "roquette": {
+      "fichier": "texture/roquette.glb",
+      "nom": "Low poly RPG7",
+      "auteur": "Lucian Pavel",
+      "licence": "CC0",
+      "source": "https://opengameart.org/content/low-poly-rpg7",
+      "longueurReelle": 0.95,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 60,
+      "bornes": {
+        "min": [
+          -1.0955,
+          -0.1463,
+          -0.0855
+        ],
+        "max": [
+          1.2345,
+          0.2472,
+          0.1024
+        ]
+      },
+      "echelle": 0.407727,
+      "notes": "RPG-7 texture (FBX converti). Le modele d'origine etait incline (22 degres + roulis 14 degres) : redresse (rotation ajoutee sur un noeud racine)."
+    },
+    "revolver": {
+      "fichier": "texture/revolver.glb",
+      "nom": "Revolver Game Asset",
+      "auteur": "loafbrr_1",
+      "licence": "CC0",
+      "source": "https://opengameart.org/content/revolver-game-asset",
+      "longueurReelle": 0.34,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 301,
+      "bornes": {
+        "min": [
+          -0.0425,
+          -0.0611,
+          -0.0254
+        ],
+        "max": [
+          0.3021,
+          0.1156,
+          0.0254
+        ]
+      },
+      "echelle": 0.986626,
+      "notes": "Revolver PBR (variante de texture Revolver_1)."
+    },
+    "pistolet": {
+      "fichier": "texture/pistolet.glb",
+      "nom": "Service Pistol",
+      "auteur": "Mateusz Sadek",
+      "licence": "CC0",
+      "source": "https://polyhaven.com/a/service_pistol",
+      "longueurReelle": 0.2,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 819,
+      "bornes": {
+        "min": [
+          -0.0481,
+          -0.051,
+          -0.0161
+        ],
+        "max": [
+          0.1738,
+          0.0785,
+          0.0157
+        ]
+      },
+      "echelle": 0.901238,
+      "notes": "Pistolet PBR ; extrait du fichier Poly Haven (qui contient 2 pistolets + chargeurs) : seul le pistolet \"a\" est garde."
+    },
+    "uzi": {
+      "fichier": "texture/uzi.glb",
+      "nom": "Submachine Gun (Scorpion-inspired)",
+      "auteur": "Kutejnikov",
+      "licence": "CC BY 4.0",
+      "source": "https://opengameart.org/content/submachine-gun-scorpion-inspired",
+      "longueurReelle": 0.5,
+      "axe": "z",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 394,
+      "bornes": {
+        "min": [
+          -0.915,
+          -3.5375,
+          -5.4114
+        ],
+        "max": [
+          0.9189,
+          3.3553,
+          5.4114
+        ]
+      },
+      "echelle": 0.046199,
+      "notes": "Mini-mitraillette type Skorpion (pas d Uzi texture libre trouve). OBJ converti, textures 4096 px reduites a 1024 px."
+    },
+    "canon_scie": {
+      "fichier": "texture/canon_scie.glb",
+      "nom": "Double Barrel Shotgun",
+      "auteur": "Jean PFP",
+      "licence": "CC0",
+      "source": "https://opengameart.org/content/double-barrel-shotgun",
+      "longueurReelle": 0.55,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 180,
+      "bornes": {
+        "min": [
+          -2.6944,
+          -0.9579,
+          -0.3181
+        ],
+        "max": [
+          1.8338,
+          0.3767,
+          0.1068
+        ]
+      },
+      "echelle": 0.121461,
+      "notes": "Fusil a canon scie, 2 canons, poignee pistolet (OBJ converti)."
+    },
+    "couteau": {
+      "fichier": "texture/couteau.glb",
+      "nom": "Kabar Combat knife",
+      "auteur": "gamekorp",
+      "licence": "CC0",
+      "source": "https://opengameart.org/content/kabar-combat-knife",
+      "longueurReelle": 0.32,
+      "axe": "x",
+      "bouche": "-",
+      "haut": "-z",
+      "tailleFichierKo": 140,
+      "bornes": {
+        "min": [
+          -1.4647,
+          -0.1669,
+          -0.3078
+        ],
+        "max": [
+          1.4647,
+          0.1669,
+          0.3078
+        ]
+      },
+      "echelle": 0.109236,
+      "notes": "Couteau de combat type Ka-Bar (FBX converti) ; la lame est a plat dans le plan XZ : pointe vers -x, dos de lame vers -z."
+    },
+    "batte": {
+      "fichier": "texture/batte.glb",
+      "nom": "Old Wooden Baseball Bat",
+      "auteur": "LonesomeDucky",
+      "licence": "CC0",
+      "source": "https://opengameart.org/content/old-wooden-baseball-bat",
+      "longueurReelle": 0.81,
+      "axe": "y",
+      "bouche": "+",
+      "haut": "+z",
+      "tailleFichierKo": 143,
+      "bornes": {
+        "min": [
+          -0.0356,
+          -0.139,
+          -0.0356
+        ],
+        "max": [
+          0.0356,
+          0.6731,
+          0.0356
+        ]
+      },
+      "echelle": 0.997418,
+      "notes": "Batte en bois usee, PBR (textures 256x1024) ; tete vers +y. Objet symetrique : haut=+z arbitraire."
+    },
+    "poele": {
+      "fichier": "texture/poele.glb",
+      "nom": "Brass Pan 01",
+      "auteur": "Rico Cilliers",
+      "licence": "CC0",
+      "source": "https://polyhaven.com/a/brass_pan_01",
+      "longueurReelle": 0.45,
+      "axe": "z",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 384,
+      "bornes": {
+        "min": [
+          -0.0951,
+          0.0,
+          -0.3522
+        ],
+        "max": [
+          0.0961,
+          0.0525,
+          0.0975
+        ]
+      },
+      "echelle": 1.000746,
+      "notes": "Poele en laiton a long manche, PBR."
+    },
+    "grenade": {
+      "fichier": "texture/grenade.glb",
+      "nom": "Mk2 Grenade",
+      "auteur": "LonesomeDucky",
+      "licence": "CC0",
+      "source": "https://opengameart.org/content/mk2-grenade",
+      "longueurReelle": 0.11,
+      "axe": "y",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 426,
+      "bornes": {
+        "min": [
+          -0.0358,
+          -0.0604,
+          -0.0358
+        ],
+        "max": [
+          0.0497,
+          0.0797,
+          0.0358
+        ]
+      },
+      "echelle": 0.785217,
+      "notes": "Grenade quadrillee Mk2, PBR."
+    },
+    "grappin": {
+      "fichier": "texture/grappin.glb",
+      "nom": "SR1MP + Anchor (assemblage)",
+      "auteur": "austincford (pistolet) + Quaternius (ancre)",
+      "licence": "CC BY 3.0 (pistolet) + CC0 (ancre)",
+      "source": "https://poly.pizza/m/ZgOWcYfOt7 + https://poly.pizza/m/ejWQny9Gcz",
+      "longueurReelle": 0.35,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 186,
+      "bornes": {
+        "min": [
+          -0.0082,
+          -0.049,
+          -0.1245
+        ],
+        "max": [
+          0.0082,
+          0.0633,
+          0.0634
+        ]
+      },
+      "echelle": 1.862502,
+      "notes": "Pas de lance-grappin libre trouve : assemblage pistolet texture SR1MP (austincford) + ancre Quaternius en acier, crochet a la bouche (-z)."
+    },
+    "kit_soin": {
+      "fichier": "texture/kit_soin.glb",
+      "nom": "Medical Box",
+      "auteur": "Ulan Cabanilla",
+      "licence": "CC0",
+      "source": "https://polyhaven.com/a/medical_box",
+      "longueurReelle": 0.5,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 526,
+      "bornes": {
+        "min": [
+          -0.2627,
+          0.0,
+          -0.1723
+        ],
+        "max": [
+          0.2627,
+          0.0975,
+          0.1779
+        ]
+      },
+      "echelle": 0.951508,
+      "notes": "Boite de premiers secours militaire verte, PBR (inscription FIRST AID sur le dessus +y)."
+    }
+  }
+}

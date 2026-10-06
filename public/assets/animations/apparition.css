@@ -1,0 +1,46 @@
+/* =====================================================================
+   APPARITION DES ÉLÉMENTS
+   ---------------------------------------------------------------------
+   Tout élément avec l'attribut data-anim="apparition" glisse doucement
+   vers le haut quand il arrive à l'écran. animations.js ajoute la classe
+   "anim-visible" au bon moment, avec un petit décalage entre éléments
+   voisins (effet "cascade").
+
+   Le masquage de départ n'a lieu que si animations.js tourne (classe
+   "anim-pret" sur <html>) : sans JavaScript, tout reste visible.
+   ===================================================================== */
+
+/* Mouvement : de "un peu plus bas et transparent" à "à sa place". */
+@keyframes apparition-monte {
+  from {
+    opacity: 0;
+    transform: translateY(var(--anim-apparition-distance)) scale(var(--anim-apparition-echelle));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Simple fondu (utilisé pour le contenu des pages). */
+@keyframes apparition-fondu {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Avant l'apparition : invisible. */
+.anim-pret [data-anim="apparition"]:not(.anim-visible) {
+  opacity: 0;
+}
+
+/* Au moment où l'élément devient visible. */
+.anim-pret [data-anim="apparition"].anim-visible {
+  animation: apparition-monte var(--anim-apparition-duree) var(--anim-courbe) both;
+  /* --anim-delai est calculé par animations.js pour l'effet cascade */
+  animation-delay: var(--anim-delai, 0ms);
+}
+
+/* Le contenu principal de chaque page apparaît en fondu. */
+.anim-pret main {
+  animation: apparition-fondu 300ms ease-out both;
+}

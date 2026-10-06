@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>Arena FPS · Le casting</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Space Mono"; font-weight: 700; src: url("assets/fonts/SpaceMono-700.woff2") format("woff2"); }
+      @font-face { font-family: "Space Mono"; font-weight: 400; src: url("assets/fonts/SpaceMono-400.woff2") format("woff2"); }
+      @font-face { font-family: "Archivo Black"; font-weight: 400; src: url("assets/fonts/ArchivoBlack-400.woff2") format("woff2"); }
+      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #0a0f1d; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; }
+      #vue3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+      [data-composition-id="main"] > div[data-composition-src] { position: absolute; inset: 0; }
+    </style>
+  </head>
+  <body>
+    <!--
+      Bande-annonce « Le casting » d'Arena FPS.
+      Piste 0 : la 3D (assets/moteur.js, construit depuis src/moteur.js avec les vrais modules du jeu).
+      Piste 1 : les textes de chaque scène (compositions/). Piste 3 : les transitions en pixels.
+      Les moments doivent correspondre à T dans src/moteur.js.
+    -->
+    <div data-hf-id="hf-vnw1" id="root" data-composition-id="main" data-start="0" data-duration="50" data-fps="60" data-width="1920" data-height="1080">
+      <canvas data-hf-id="hf-65mu" id="vue3d" data-layout-allow-overflow="" class="clip" data-start="0" data-duration="50" data-track-index="0"></canvas>
+
+      <div data-hf-id="hf-y3y7" id="el-s01" data-composition-id="s01" data-composition-src="compositions/01-tete-vide.html" data-start="0" data-duration="3.5" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-273o" id="el-s02" data-composition-id="s02" data-composition-src="compositions/02-podium.html" data-start="3.5" data-duration="4.5" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-u6bh" id="el-s03" data-composition-id="s03" data-composition-src="compositions/03-garde-robe.html" data-start="8" data-duration="7" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-hgn6" id="el-s04" data-composition-id="s04" data-composition-src="compositions/04-equipement.html" data-start="15" data-duration="6" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-g802" id="el-s05" data-composition-id="s05" data-composition-src="compositions/05-compte-a-rebours.html" data-start="21" data-duration="3.5" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-nwcp" id="el-s06" data-composition-id="s06" data-composition-src="compositions/06-grand-saut.html" data-start="24.5" data-duration="6.5" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-pl6q" id="el-s08" data-composition-id="s08" data-composition-src="compositions/08-dans-le-dos.html" data-start="34" data-duration="3" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-7wzb" id="el-s09" data-composition-id="s09" data-composition-src="compositions/09-ding.html" data-start="37" data-duration="3" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-1rvz" id="el-s10" data-composition-id="s10" data-composition-src="compositions/10-que-du-fun.html" data-start="40" data-duration="3.5" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-m3cl" id="el-s11" data-composition-id="s11" data-composition-src="compositions/11-logo.html" data-start="43.5" data-duration="6.5" data-track-index="1" data-width="1920" data-height="1080"></div>
+
+      <!-- La musique (catalogue HeyGen, « fast-paced energetic gaming montage ») -->
+      <audio data-hf-id="hf-m7ey" id="el-music" data-timeline-role="music" src="assets/audio/musique.mp3" data-start="0" data-duration="50" data-track-index="11" data-volume="0.6"></audio>
+
+      <!-- Les vrais bruitages du jeu, mixés à leurs moments (src/bruitages.py) -->
+      <audio data-hf-id="hf-ogrd" id="el-bruitages" src="assets/audio/bruitages.mp3" data-start="0" data-duration="50" data-track-index="10" data-volume="1"></audio>
+
+      <div data-hf-id="hf-rvs6" id="el-pixels" data-composition-id="pixels" data-composition-src="compositions/pixels.html" data-start="0" data-duration="50" data-track-index="3" data-width="1920" data-height="1080"></div>
+    </div>
+    <script src="assets/moteur.js"></script>
+    <script>window.__timelines["main"] = gsap.timeline({ paused: true });</script>
+  </body>
+</html>

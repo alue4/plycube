@@ -1,0 +1,83 @@
+{
+  "_aide": "Catalogue de la personnalisation des personnages. Pour ajouter une couleur à une palette, ajoute-la dans la liste. Les identifiants (id) ne doivent pas changer : ils sont enregistrés dans la base. Après une modification : sudo docker compose restart.",
+  "peaux": ["#ffdbac", "#f1c7a0", "#e0ac69", "#c68642", "#a8714a", "#8d5524", "#6b3e1f", "#4a2a14", "#9be37a", "#7fc8ff"],
+  "cheveux": ["#121212", "#2b1d0e", "#4a2c17", "#7a4a1e", "#b5442b", "#d9a441", "#f2e6b5", "#c9c9c9", "#ff5fa2", "#6a3d9a", "#1f7ae0", "#2bd46c"],
+  "yeux": ["#2d6cdf", "#3b7a2a", "#5a3a1a", "#222222", "#7a7a7a", "#c9a227", "#d93a3a", "#9b4dff"],
+  "couleurs": ["#ff3b3b", "#ff8a1f", "#ffd21f", "#7ed957", "#22c55e", "#14b8a6", "#2fb5ff", "#3d6bff", "#8b5cf6", "#ec4899", "#ffffff", "#c9ced6", "#6b7280", "#2a2a2a", "#7b4a25", "#2b3a67"],
+  "coupes": [
+    { "id": "courts", "nom": "Courts" },
+    { "id": "frange", "nom": "Frange" },
+    { "id": "longs", "nom": "Longs" },
+    { "id": "queue", "nom": "Queue de cheval" },
+    { "id": "herisses", "nom": "Hérissés" },
+    { "id": "chauve", "nom": "Chauve" }
+  ],
+  "hauts": [
+    { "id": "tshirt", "nom": "T-shirt" },
+    { "id": "debardeur", "nom": "Débardeur" },
+    { "id": "sweat", "nom": "Sweat à capuche" },
+    { "id": "veste", "nom": "Veste ouverte" },
+    { "id": "maillot", "nom": "Maillot de sport" },
+    { "id": "chemise", "nom": "Chemise" },
+    { "id": "pull", "nom": "Pull rayé" }
+  ],
+  "motifs": [
+    { "id": "uni", "nom": "Uni" },
+    { "id": "eclair", "nom": "Éclair" },
+    { "id": "etoile", "nom": "Étoile" },
+    { "id": "coeur", "nom": "Cœur" },
+    { "id": "smiley", "nom": "Smiley" },
+    { "id": "bande", "nom": "Bande" },
+    { "id": "numero", "nom": "Numéro 10" }
+  ],
+  "bas": [
+    { "id": "jean", "nom": "Jean" },
+    { "id": "short", "nom": "Short" },
+    { "id": "jogging", "nom": "Jogging" },
+    { "id": "cargo", "nom": "Cargo" }
+  ],
+  "chaussures": [
+    { "id": "baskets", "nom": "Baskets" },
+    { "id": "montantes", "nom": "Montantes" },
+    { "id": "bottes", "nom": "Bottes" }
+  ],
+  "chapeaux": [
+    { "id": "aucun", "nom": "Aucun" },
+    { "id": "casquette", "nom": "Casquette" },
+    { "id": "casquette_envers", "nom": "Casquette à l'envers" },
+    { "id": "bonnet", "nom": "Bonnet" },
+    { "id": "couronne", "nom": "Couronne" },
+    { "id": "chantier", "nom": "Casque de chantier" },
+    { "id": "astronaute", "nom": "Casque d'astronaute" },
+    { "id": "cowboy", "nom": "Chapeau de cowboy" },
+    { "id": "haut_de_forme", "nom": "Haut-de-forme" },
+    { "id": "pirate", "nom": "Chapeau de pirate" },
+    { "id": "viking", "nom": "Casque viking" },
+    { "id": "oreilles_chat", "nom": "Oreilles de chat" }
+  ],
+  "accessoires": {
+    "visage": [
+      { "id": "aucun", "nom": "Rien" },
+      { "id": "lunettes_soleil", "nom": "Lunettes de soleil" },
+      { "id": "lunettes_rondes", "nom": "Lunettes rondes" },
+      { "id": "masque_ski", "nom": "Masque de ski" },
+      { "id": "moustache", "nom": "Moustache" }
+    ],
+    "oreilles": [
+      { "id": "aucun", "nom": "Rien" },
+      { "id": "casque_audio", "nom": "Casque audio" }
+    ],
+    "dos": [
+      { "id": "aucun", "nom": "Rien" },
+      { "id": "sac_a_dos", "nom": "Sac à dos" },
+      { "id": "cape", "nom": "Cape" },
+      { "id": "jetpack", "nom": "Jetpack" },
+      { "id": "ailes", "nom": "Ailes" }
+    ],
+    "cou": [
+      { "id": "aucun", "nom": "Rien" },
+      { "id": "echarpe", "nom": "Écharpe" },
+      { "id": "noeud_papillon", "nom": "Nœud papillon" }
+    ]
+  }
+}

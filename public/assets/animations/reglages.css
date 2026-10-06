@@ -1,0 +1,46 @@
+/* =====================================================================
+   RÉGLAGES DES ANIMATIONS
+   ---------------------------------------------------------------------
+   Modifie les valeurs ci-dessous, enregistre, puis recharge la page
+   (Ctrl + F5 pour être sûr de vider le cache). Pas besoin de redémarrer.
+
+   Unités : "ms" = millisecondes (1000ms = 1 seconde), "px" = pixels.
+   ===================================================================== */
+:root {
+  /* --- Apparition des éléments (cartes de jeux, suggestions...) --- */
+  --anim-apparition-duree: 520ms;     /* durée de l'apparition */
+  --anim-apparition-distance: 18px;   /* de combien de pixels l'élément "monte" en apparaissant (0px = simple fondu) */
+  --anim-apparition-echelle: 0.98;    /* taille de départ (1 = pas de zoom, 0.9 = zoom plus marqué) */
+
+  /* --- Survol des cartes et boutons --- */
+  --anim-survol-duree: 220ms;         /* rapidité de la réaction au survol */
+  --anim-survol-hauteur: -6px;        /* de combien la carte se soulève (0px = ne bouge pas) */
+  --anim-survol-lueur: 0 14px 40px rgba(59, 130, 246, 0.28); /* lueur bleue sous la carte */
+  --anim-bouton-appui: 0.97;          /* le bouton "s'enfonce" quand on clique (1 = rien) */
+
+  /* --- Fond animé --- */
+  --anim-fond-duree: 26s;             /* durée d'un cycle des lueurs de fond (plus grand = plus lent) */
+  --anim-fond-opacite: 0.55;          /* intensité des lueurs (0 = invisibles, 1 = maximum) */
+
+  /* --- Notifications --- */
+  --anim-notif-duree: 320ms;          /* entrée / sortie des notifications */
+  --anim-pulsation-duree: 2.2s;       /* pulsation de la pastille "en ligne" et des badges */
+
+  /* --- Courbes de mouvement (facultatif) ---
+     ease-out = démarre vite puis ralentit. Essaie aussi : ease, linear, ease-in-out,
+     ou une courbe "élastique" : cubic-bezier(.34, 1.56, .64, 1) */
+  --anim-courbe: cubic-bezier(.2, .8, .2, 1);
+}
+
+/* Si l'utilisateur a demandé moins d'animations (réglage du système),
+   ou si animations.js les a désactivées : on coupe tout mouvement. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
+.sans-animations *, .sans-animations *::before, .sans-animations *::after {
+  animation: none !important;
+}

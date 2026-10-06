@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Atelier d'animations · Arena FPS</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="atelier-animations.css">
+</head>
+<body>
+  <header class="barre">
+    <a class="retour" href="./">← Retour au jeu</a>
+    <h1>ATELIER <span>D'ANIMATIONS</span></h1>
+    <div class="groupe-mode" role="group" aria-label="Que veux-tu animer ?">
+      <button id="mode-armes" class="choix actif" type="button">🔫 Armes</button>
+      <button id="mode-danses" class="choix" type="button">💃 Danses</button>
+    </div>
+    <a class="retour" href="atelier-cartes.html" title="Créer tes propres cartes">🗺️ Éditeur de cartes</a>
+    <div class="barre-droite">
+      <span id="etat-sauvegarde" class="etat"></span>
+      <button id="btn-annuler" class="btn petit" type="button" title="Annuler (Ctrl+Z)">↶</button>
+      <button id="btn-retablir" class="btn petit" type="button" title="Rétablir (Ctrl+Y)">↷</button>
+      <button id="btn-enregistrer" class="btn" type="button">💾 Enregistrer</button>
+    </div>
+  </header>
+
+  <main class="atelier">
+    <!-- Choix de l'arme et de l'animation -->
+    <aside class="panneau gauche">
+      <h2 id="titre-liste1">Arme</h2>
+      <div id="liste-armes" class="liste"></div>
+      <h2 id="titre-liste2">Animation</h2>
+      <div id="liste-anims" class="liste"></div>
+      <input id="fichier-son" type="file" accept="audio/*,.mp3,.ogg,.wav,.m4a" multiple hidden>
+    </aside>
+
+    <!-- Aperçu 3D -->
+    <section class="vue">
+      <canvas id="vue3d"></canvas>
+      <div class="outils-vue">
+        <div class="groupe" role="group" aria-label="Caméra">
+          <button id="vue-joueur" class="choix actif" type="button" title="Exactement comme dans le jeu">👁 Vue joueur</button>
+          <button id="vue-libre" class="choix" type="button" title="Tourner autour : clic gauche ; zoom : molette ; déplacer : clic droit">🔄 Vue libre</button>
+        </div>
+        <div class="groupe" role="group" aria-label="Outil">
+          <button id="outil-deplacer" class="choix actif" type="button" title="Déplacer (touche G)">✥ Déplacer</button>
+          <button id="outil-tourner" class="choix" type="button" title="Tourner (touche R)">⟳ Tourner</button>
+        </div>
+      </div>
+      <p id="aide-vue" class="aide-vue"></p>
+    </section>
+
+    <!-- Réglages de l'animation et de la pièce choisie -->
+    <aside class="panneau droite">
+      <h2 id="titre-anim">Animation</h2>
+      <p id="aide-anim" class="aide"></p>
+      <label class="ligne" id="bloc-nom"><span>Nom</span><input id="nom-danse" type="text" maxlength="30"></label>
+      <div class="ligne">
+        <span>Durée</span>
+        <span id="duree-fixe" class="valeur"></span>
+        <label id="duree-libre" hidden><input id="duree" type="number" step="0.05" min="0.05"> s</label>
+      </div>
+      <p id="aide-duree" class="aide petite"></p>
+      <label class="ligne">
+        <span>Mouvement</span>
+        <select id="mouvement">
+          <option value="fluide">Fluide</option>
+          <option value="doux">Doux (arrêt à chaque clé)</option>
+        </select>
+      </label>
+      <label class="ligne" id="bloc-musique"><span>Musique</span>
+        <select id="musique"><option value="">(aucune)</option></select>
+      </label>
+      <div id="bloc-options-danse">
+        <label class="ligne"><span>On peut avancer en dansant</span><input id="opt-marcher" type="checkbox"></label>
+        <label class="ligne" id="bloc-vitesse-danse"><span>Vitesse de marche</span><span><input id="opt-vitesse" type="number" min="0.2" max="1" step="0.05"> ×</span></label>
+        <label class="ligne"><span>Garder l'arme en main</span><input id="opt-arme" type="checkbox"></label>
+        <p class="aide petite">« Avancer en dansant » : comme le Griddy, le joueur peut marcher sans arrêter la danse (la caméra passe derrière lui). « Garder l'arme » : pour une danse qui joue avec son arme.</p>
+      </div>
+      <p id="aide-musique" class="aide petite">La musique tourne en boucle tant qu'on danse. Envoie tes sons à gauche (MP3 conseillé : il marche partout, même sur iPad).</p>
+      <p id="statut-anim" class="statut"></p>
+
+      <h2 id="titre-piste">Pièce</h2>
+      <div id="reglages-piste">
+        <div class="trio" id="bloc-position">
+          <span class="etiquette">Position (cm)</span>
+          <label>X <input id="px" type="number" step="0.5"></label>
+          <label>Y <input id="py" type="number" step="0.5"></label>
+          <label>Z <input id="pz" type="number" step="0.5"></label>
+        </div>
+        <div class="trio" id="bloc-rotation">
+          <span class="etiquette">Rotation (°)</span>
+          <label>X <input id="rx" type="number" step="1"></label>
+          <label>Y <input id="ry" type="number" step="1"></label>
+          <label>Z <input id="rz" type="number" step="1"></label>
+        </div>
+        <label class="ligne" id="bloc-visible"><span id="texte-visible">Visible</span><input id="visible" type="checkbox"></label>
+        <label class="ligne" id="bloc-attachee" title="Décoche pour que la main reste en place à l'écran quand l'arme bouge (ex. lancer la poêle en l'air)"><span id="texte-attachee">Main attachée à l'arme</span><input id="attachee" type="checkbox"></label>
+        <label class="ligne" id="bloc-corde"><span>Corde tendue</span><input id="corde" type="range" min="0" max="100" step="1"></label>
+        <label class="ligne" id="bloc-arret" title="La pièce ralentit et s'arrête un instant sur cette clé (carré dans la frise)"><span id="texte-arret">Arrêt sur cette clé</span><input id="arret" type="checkbox"></label>
+        <p class="aide petite">Les valeurs sont des décalages par rapport à la position normale. Changer une valeur ajoute une clé au temps actuel.</p>
+        <div class="boutons">
+          <button id="btn-cle" class="btn petit" type="button" title="Touche K">◆ Clé ici</button>
+          <button id="btn-suppr-cle" class="btn petit danger" type="button" title="Touche Suppr">Supprimer la clé</button>
+          <button id="btn-copier" class="btn petit gris" type="button" title="Ctrl+C">Copier la pose</button>
+          <button id="btn-coller" class="btn petit gris" type="button" title="Ctrl+V">Coller la pose</button>
+        </div>
+      </div>
+
+      <h2>Toute l'animation</h2>
+      <div class="boutons colonne">
+        <button id="btn-importer" class="btn petit gris" type="button">↺ Repartir de l'animation du jeu</button>
+        <button id="btn-tours" class="btn petit gris" type="button" title="Une pièce qui fait un tour complet repart dans l'autre sens ? Ce bouton la remet dans le bon sens">↻ Réparer les tours</button>
+        <button id="btn-effacer" class="btn petit gris" type="button">🧹 Tout effacer</button>
+        <button id="btn-origine" class="btn petit danger" type="button">Supprimer mon animation (remettre celle du jeu)</button>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Ligne de temps -->
+  <footer class="temps">
+    <div class="transport">
+      <button id="btn-debut" class="btn petit gris" type="button" title="Début (Origine)">⏮</button>
+      <button id="btn-lecture" class="btn petit" type="button" title="Lecture / pause (Espace)">▶</button>
+      <button id="btn-fin" class="btn petit gris" type="button" title="Fin">⏭</button>
+      <span id="temps-actuel" class="chrono">0,00 s</span>
+      <label class="option"><input id="boucle" type="checkbox" checked> En boucle</label>
+      <label class="option">Vitesse
+        <select id="vitesse">
+          <option value="0.1">× 0,1</option>
+          <option value="0.25">× 0,25</option>
+          <option value="0.5">× 0,5</option>
+          <option value="1" selected>× 1</option>
+        </select>
+      </label>
+      <span class="separateur"></span>
+      <label class="option">Son
+        <select id="choix-son"></select>
+      </label>
+      <button id="btn-ajout-son" class="btn petit gris" type="button">♪ Ajouter ici</button>
+      <button id="btn-ecouter" class="btn petit gris" type="button" title="Écouter">🔊</button>
+    </div>
+    <div class="frise">
+      <div id="noms-pistes" class="noms"></div>
+      <div id="zone-pistes" class="zone" title="Clic : choisir · Maj+clic : ajouter à la sélection · glisser dans le vide : cadre de sélection">
+        <div class="interieur">
+          <div id="regle" class="regle"></div>
+          <div id="pistes" class="pistes"></div>
+          <div id="tete" class="tete"></div>
+          <div id="cadre-selection" class="cadre-selection" hidden></div>
+        </div>
+      </div>
+    </div>
+    <p class="aide-frise">Clic sur une clé : la choisir · <b>Maj+clic</b> : en ajouter · <b>glisser dans le vide</b> : cadre de sélection · glisser une clé choisie : tout le groupe bouge · <b>Suppr</b> : effacer · <b>Ctrl+A</b> : tout · <b>Ctrl+C / Ctrl+V</b> : copier-coller à la tête de lecture · Alt : sans arrondi</p>
+  </footer>
+
+  <div id="bloque" class="bloque" hidden>
+    <div class="carte">
+      <h2 id="bloque-titre">Atelier d'animations</h2>
+      <p id="bloque-texte"></p>
+      <a class="btn" href="./">Retour au jeu</a>
+    </div>
+  </div>
+
+  <script type="module" src="js/atelier-animations.js"></script>
+</body>
+</html>

@@ -14,6 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const { Partie } = require('./serveur/partie');
 const apparences = require('./serveur/apparences');
+const classementMod = require('./serveur/classement');
 const animations = require('./serveur/animations');
 const sonsPerso = require('./serveur/sons-perso');
 const dansesPerso = require('./serveur/danses');
@@ -37,6 +38,14 @@ module.exports = function ({ app, realtime, game, db, auth, security }) {
   }
   if (!stock) console.error('FPS : les personnages ne pourront pas être enregistrés (base de données introuvable).');
   const styleDe = (id) => (stock ? stock.lire(id) : null);
+  // Mode classé : les points de rang de chaque compte (même rang sur tous les appareils)
+  let classement = null;
+  try {
+    classement = base ? classementMod.stockage(base) : null;
+  } catch (e) {
+    console.error(`FPS : impossible de préparer l'enregistrement des rangs (${e.message})`);
+  }
+  const pointsDe = (id) => (classement ? classement.lire(id) : 0);
 
   const lire = (f) => JSON.parse(fs.readFileSync(path.join(__dirname, 'public', f), 'utf8'));
   const reglages = lire('reglages.json');
@@ -151,13 +160,13 @@ module.exports = function ({ app, realtime, game, db, auth, security }) {
     }
     if (data.t === 'creer') {
       const mode = ['equipes', 'classe'].includes(data.mode) ? data.mode : 'solo';
-      // Mode classé : le niveau de départ des bots (le rang du joueur, gardé dans son navigateur), de 1 à 20.
-      const niveau = Math.max(1, Math.min(20, Math.round(Number(data.niveau)) || 1));
+      // Mode classé : les bots commencent au niveau du rang du joueur (lu dans la base, pas envoyé par le navigateur).
+      const niveau = classementMod.niveauDe(pointsDe(ws.user.id));
       if (parties.size >= MAX_PARTIES) return envoyer(ws, { t: 'erreur', message: 'Trop de parties en cours, rejoins-en une !' });
       const carte = trouverCarte(data.carte);
       const code = nouveauCode();
       const partie = new Partie({
-        code, mode, niveau, reglages, carte, danseExiste: (id) => danses.existe(id),
+        code, mode, niveau, reglages, carte, classement, danseExiste: (id) => danses.existe(id),
         surVide: (c) => { parties.delete(c); annoncerSalons(); },
       });
       parties.set(code, partie);
@@ -183,6 +192,7 @@ module.exports = function ({ app, realtime, game, db, auth, security }) {
     ws.compteur = 0;
     envoyer(ws, { t: 'salons', liste: listeSalons(), cartes: listeCartes(), moi: { id: user.id, nom: user.username } });
     envoyer(ws, { t: 'monStyle', style: styleDe(user.id) });
+    envoyer(ws, { t: 'rang', points: pointsDe(user.id) });
 
     ws.on('message', (raw) => {
       // Anti-abus : 120 messages par seconde au maximum.

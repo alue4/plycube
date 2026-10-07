@@ -287,7 +287,9 @@ function testerClasse() {
     apparitions: [{ x: -5, z: 0, angle: 0 }, { x: 5, z: 0, angle: 0 }, { x: 0, z: -12, angle: 0 }, { x: 0, z: 12, angle: 0 }, { x: -15, z: -15, angle: 0 }, { x: 15, z: 15, angle: 0 }] };
   const fauxWs = () => ({ readyState: 1, recus: [], send(x) { this.recus.push(JSON.parse(x)); } });
   const EQ = { principale: 'fusil', secondaire: 'pistolet', melee: 'couteau', gadget: 'grenade' };
-  const nouvelle = (mode, niveau) => { const p = new Partie({ code: 'CLAS', mode, niveau, reglages, carte, surVide: () => {} }); clearInterval(p.timer); return p; };
+  const memo = new Map(); // fausse base des rangs (comme serveur/classement.js)
+  const fauxClassement = { lire: (id) => memo.get(id) || 0, ajouter(id, g) { const avant = memo.get(id) || 0; const apres = Math.max(0, avant + g); memo.set(id, apres); return { avant, apres }; } };
+  const nouvelle = (mode, niveau) => { const p = new Partie({ code: 'CLAS', mode, niveau, reglages, carte, classement: fauxClassement, surVide: () => {} }); clearInterval(p.timer); return p; };
   const bots = (p) => [...p.joueurs.values()].filter((j) => j.bot);
 
   const p = nouvelle('classe', 3);
@@ -319,13 +321,36 @@ function testerClasse() {
   p.terminer();
   const fin = w.recus.find((m) => m.t === 'fin');
   check('classé : manche gagnée par le joueur → bots un niveau plus haut', p.niveau === 4 && fin && fin.niveau === 4, [p.niveau, fin && fin.niveau]);
+  const rang1 = w.recus.find((m) => m.t === 'rang');
+  check('classé : 1er → +30 points de rang, comptés et enregistrés par le serveur (avant le message de fin)', rang1 && rang1.gain === 30 && rang1.avant === 0 && rang1.points === 30 && memo.get(1) === 30
+    && w.recus.indexOf(rang1) < w.recus.indexOf(fin), rang1);
+  check('classé : les bots ne gagnent pas de points de rang', [...memo.keys()].every((id) => id > 0), [...memo.keys()]);
   p.nouvelleManche();
   bots(p)[0].kills = 50; // un bot gagne la manche
+  w.recus.length = 0;
   p.terminer();
+  const fin2 = w.recus.find((m) => m.t === 'fin'); const rang2 = w.recus.find((m) => m.t === 'rang');
+  const place2 = fin2 ? fin2.classement.findIndex((c) => c.id === 1) + 1 : 0;
+  const attendu2 = [30, 15, 5][place2 - 1] !== undefined ? [30, 15, 5][place2 - 1] : -10;
+  check('classé : les points dépendent de la place (' + place2 + 'e)', rang2 && rang2.gain === attendu2 && memo.get(1) === 30 + attendu2, [place2, rang2, memo.get(1)]);
   check('classé : manche gagnée par un bot → bots un niveau plus bas', p.niveau === 3, p.niveau);
   const fort = nouvelle('classe', 20); const faible = nouvelle('classe', 1);
   for (const x of [fort, faible]) { x.ajouter(fauxWs(), { id: 1, username: 'Solo' }); x.bots.gerer(Date.now(), 0.05); }
   check('classé : bots de niveau 20 bien plus précis que ceux du niveau 1', fort.bots.r.precisionDegres < faible.bots.r.precisionDegres - 4, [fort.bots.r.precisionDegres, faible.bots.r.precisionDegres]);
+
+  // Le rang est enregistré dans la base (avec le compte) : même rang sur tous les appareils, jamais en dessous de 0
+  const classementMod = require(path.join(ROOT, 'games/fps/serveur/classement.js'));
+  const Database = require(path.join(ROOT, 'node_modules/better-sqlite3'));
+  const base = new Database(':memory:');
+  base.exec('CREATE TABLE users (id INTEGER PRIMARY KEY)'); base.exec('INSERT INTO users (id) VALUES (7)');
+  const st = classementMod.stockage(base);
+  const r0 = st.lire(7); const ajout = st.ajouter(7, 30);
+  check('classé : rang enregistré dans la base (0 au début, puis +30)', r0 === 0 && ajout.avant === 0 && ajout.apres === 30, [r0, ajout]);
+  check('classé : le rang est relu tel quel (autre appareil, redémarrage)', classementMod.stockage(base).lire(7) === 30);
+  check('classé : jamais en dessous de 0 points', st.ajouter(7, -50).apres === 0 && st.lire(7) === 0);
+  check('classé : points selon la place et niveau selon les points', [1, 2, 3, 4, 9].map(classementMod.gainPourPlace).join() === '30,15,5,-10,-10'
+    && classementMod.niveauDe(0) === 1 && classementMod.niveauDe(160) === 4 && classementMod.niveauDe(99999) === 20);
+  base.close();
 
   // Chacun pour soi : les bots d'entraînement partent quand la vraie partie commence (inchangé)
   const s = nouvelle('solo', 1);
@@ -1030,6 +1055,8 @@ async function main() {
     };
     check('le hall du jeu envoie la liste des parties', !!(await attendre('salons')));
     const monStyle = await attendre('monStyle');
+    const rangHall = await attendre('rang');
+    check('classé : le serveur envoie le rang du compte à la connexion', rangHall && rangHall.points === 0, rangHall);
     check('apparence : rien d\'enregistré au début', monStyle && monStyle.style === null, monStyle);
     const visage = 'ff0000'.repeat(64);
     wsJeu.send(JSON.stringify({ t: 'sauverStyle', style: { peau: '#C68642', haut: 'sweat', chapeau: 'couronne', visage, pirate: 'oui', hautC1: 'rouge' } }));
@@ -1057,7 +1084,7 @@ async function main() {
     check('quitter : la partie vide est supprimée', apres && apres.liste.length === 0, apres);
     wsJeu.send(JSON.stringify({ t: 'creer', mode: 'classe', niveau: 99 }));
     const bClasse = await attendre('bienvenue');
-    check('classé : création d\'une partie, niveau des bots limité à 20', bClasse && bClasse.mode === 'classe' && bClasse.niveauBots === 20, bClasse && [bClasse.mode, bClasse.niveauBots]);
+    check('classé : le niveau de départ vient du rang enregistré, pas du navigateur', bClasse && bClasse.mode === 'classe' && bClasse.niveauBots === 1, bClasse && [bClasse.mode, bClasse.niveauBots]);
     wsJeu.send(JSON.stringify({ t: 'quitter' }));
     const apresClasse = await attendre('salons');
     check('classé : la partie vide est supprimée (avec ses bots)', apresClasse && apresClasse.liste.length === 0, apresClasse);

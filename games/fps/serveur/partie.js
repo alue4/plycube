@@ -18,6 +18,7 @@
 // Chaque joueur a 4 emplacements : arme principale, secondaire, mêlée, gadget.
 const G = require('./geometrie');
 const { Bots } = require('./bots');
+const { gainPourPlace } = require('./classement');
 
 const TICK_MS = 50;            // 20 mises à jour par seconde envoyées aux joueurs
 const HISTORIQUE_MS = 1000;    // on garde 1 s de positions passées (pour être juste avec le ping)
@@ -56,10 +57,11 @@ function degatsBalle(arme, distance, tete) {
 const devant = (j) => [-Math.sin(j.yaw), 0, -Math.cos(j.yaw)];
 
 class Partie {
-  constructor({ code, mode, reglages, carte, surVide, danseExiste = () => false, niveau = 1 }) {
+  constructor({ code, mode, reglages, carte, surVide, danseExiste = () => false, niveau = 1, classement = null }) {
     this.code = code;
     this.mode = mode; // 'solo' (chacun pour soi), 'equipes' ou 'classe' (chacun pour soi contre des bots)
     this.niveau = mode === 'classe' ? niveau : 1; // classé : niveau de départ des bots (1 à 20)
+    this.classement = classement; // classé : points de rang des comptes (serveur/classement.js)
     this.r = reglages;
     this.armes = reglages.armes;
     this.indexArme = new Map(this.armes.map((a, i) => [a.id, i]));
@@ -949,6 +951,17 @@ class Partie {
     if (this.mode === 'classe' && gagnant) {
       const premier = this.joueurs.get(gagnant.id);
       this.niveau = premier && !premier.bot ? Math.min(20, this.niveau + 1) : Math.max(1, this.niveau - 1);
+    }
+    // Classé : chaque vrai joueur gagne (ou perd) des points de rang selon sa place, enregistrés sur son compte.
+    if (this.mode === 'classe' && this.classement) {
+      classement.forEach((c, i) => {
+        const j = this.joueurs.get(c.id);
+        if (!j || j.bot || !j.equipement) return; // (pas ceux qui n'ont jamais joué la manche)
+        try {
+          const { avant, apres } = this.classement.ajouter(j.id, gainPourPlace(i + 1));
+          this.envoyer(j, { t: 'rang', points: apres, avant, gain: apres - avant });
+        } catch (e) { console.error(`FPS : rang non enregistré (${e.message})`); }
+      });
     }
     this.diffuser({
       t: 'fin', gagnant, classement, scores: this.scoresEquipes,

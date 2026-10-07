@@ -27,7 +27,7 @@ import * as Menus from './menus-manette.js';
 import { PanneauAdmin, POUVOIRS } from './panneau-admin.js';
 import { RadarHud, EcranVisions } from './pouvoirs-ecran.js';
 import { icone } from './icones.js';
-import { rang, finDeManche } from './classe.js';
+import { rang, resultat } from './classe.js';
 
 const $ = (id) => document.getElementById(id);
 const DELAI_INTERPOLATION = 100; // on affiche les autres joueurs avec 0,1 s de retard : c'est plus fluide
@@ -343,7 +343,7 @@ async function demarrer() {
     musiqueMenu(false);
     majClasseHud();
     if (E.mode === 'equipes') hud.annonce(`ÉQUIPE ${NOMS_EQUIPES[moi().equipe].toUpperCase()}`, `Partie ${E.code}`);
-    if (E.mode === 'classe') hud.annonce('CLASSÉ', `Bots niveau ${E.niveauBots} · ton rang : ${rang().nom}`);
+    if (E.mode === 'classe') hud.annonce('CLASSÉ', `Bots niveau ${E.niveauBots} · ton rang : ${rang(E.pointsClasse).nom}`);
     history.replaceState(null, '', `?room=${E.code}`);
     if (window.Plateforme) Plateforme.definirActivite({ jeu: 'fps', salle: E.code, rejoignable: true });
     // Carte déjà cassée par le laser quand on arrive
@@ -1577,6 +1577,12 @@ async function demarrer() {
     if (!j || msg.id === E.moiId) return;
     if (msg.d) commencerDanseDe(j, msg.d); else arreterDanseDe(j);
   });
+  // Mode classé : les points de rang, gardés par le serveur avec le compte (à la connexion et après chaque manche classée)
+  reseau.on('rang', (msg) => {
+    E.pointsClasse = Math.max(0, Number(msg.points) || 0);
+    if (typeof msg.gain === 'number') E.resultatClasse = resultat(msg.avant, E.pointsClasse);
+    majBadgeClasse();
+  });
   reseau.on('monStyle', (msg) => {
     E.monStyle = msg.style;
     boutonPerso.majVignette(monStyle());
@@ -2028,7 +2034,8 @@ async function demarrer() {
     // Classé : on gagne (ou perd) des points de rang selon sa place
     const place = msg.classement.findIndex((c) => c.id === E.moiId) + 1;
     if (E.mode === 'classe' && place > 0) {
-      const r = finDeManche(place);
+      const r = E.resultatClasse || resultat(E.pointsClasse || 0, E.pointsClasse || 0); // (reçu juste avant, message « rang »)
+      E.resultatClasse = null;
       if (msg.niveau) E.niveauBots = msg.niveau;
       majBadgeClasse();
       hud.fin(true, { titre, couleur, contenu: el('div', {}, resultatClasse(place, r, msg.niveau), tableau) });
@@ -2130,15 +2137,15 @@ async function demarrer() {
       son('clic');
       $('hall-erreur').textContent = '';
       const mode = b.dataset.mode;
-      // Classé : les bots commencent au niveau de ton rang (gardé dans ce navigateur)
-      reseau.envoyer({ t: 'creer', mode, carte: E.carteChoisie, ...(mode === 'classe' ? { niveau: rang().niveau } : {}) });
+      // (classé : le serveur lit ton rang lui-même, les bots commencent à ton niveau)
+      reseau.envoyer({ t: 'creer', mode, carte: E.carteChoisie });
     });
   }
 
   // ---------- Mode classé ----------
   // Le badge du rang, dans le panneau « Jouer »
   function majBadgeClasse() {
-    const r = rang();
+    const r = rang(E.pointsClasse);
     const box = $('badge-classe');
     box.style.setProperty('--couleur-rang', r.couleur);
     box.replaceChildren(

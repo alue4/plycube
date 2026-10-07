@@ -241,7 +241,7 @@ Bouton **Classé** dans le panneau « Jouer ». C'est du chacun pour soi, mais :
 - des **bots complètent la partie** jusqu'à 6 joueurs, pendant toute la manche (tes amis peuvent venir avec le code : un bot leur laisse sa place) ;
 - les bots deviennent **de plus en plus forts** : ils commencent au niveau de ton rang, gagnent **+1 niveau toutes les 3 éliminations** du meilleur joueur, et **+1 à chaque manche gagnée** par un vrai joueur (−1 si un bot gagne). Niveau 1 à 20 : visée plus précise (6° d'erreur → 0,6°), réaction plus rapide (0,7 s → 0,15 s), un peu plus rapides, et de meilleures armes (sniper au niveau 16).
 
-**Ton rang** (Bronze, Argent, Or, Platine, Diamant de I à III, puis Champion) est affiché dans le panneau « Jouer ». Fin de manche : 1er **+30** points, 2e **+15**, 3e **+5**, sinon **−10** ; un niveau tous les 50 points. Il est gardé **dans le navigateur seulement** (rien dans la base du site) : sur un autre appareil, on recommence en Bronze.
+**Ton rang** (Bronze, Argent, Or, Platine, Diamant de I à III, puis Champion) est affiché dans le panneau « Jouer ». Fin de manche : 1er **+30** points, 2e **+15**, 3e **+5**, sinon **−10** ; un niveau tous les 50 points. Il est **enregistré avec ton compte** (table `fps_classe` de la base du site) : c'est le même sur tous tes appareils. C'est le serveur qui compte les points à la fin de chaque manche (`games/fps/serveur/classement.js`), le navigateur ne fait que les afficher : impossible de tricher en modifiant son navigateur.
 
 Réglages dans `games/fps/public/reglages.json` (`partie.objectifClasse`, `partie.attenteClasseSecondes`) ; la force des bots par niveau est dans `games/fps/serveur/bots.js` (`forceDuNiveau`).
 

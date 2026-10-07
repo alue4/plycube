@@ -843,6 +843,11 @@ class Partie {
       tueur.kills++;
       tueur.serie++;
       if (this.mode === 'equipes') this.scoresEquipes[tueur.equipe]++;
+      // Chaque élimination remet la vie du tueur à 100 % (réglage joueur.vieAuMaxApresElimination)
+      if (tueur.vivant && this.r.joueur.vieAuMaxApresElimination !== false && tueur.pv < this.r.joueur.pointsDeVie) {
+        tueur.pv = this.r.joueur.pointsDeVie;
+        this.envoyer(tueur, { t: 'pv', pv: tueur.pv, elim: 1 });
+      }
     }
     this.diffuser({
       t: 'elim', tueur: tueur && tueur !== victime ? tueur.id : null, victime: victime.id, tete: tete ? 1 : 0,

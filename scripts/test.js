@@ -362,7 +362,21 @@ function testerClasse() {
   const avantDebut = bots(s).length;
   s.nouvelleManche();
   check('chacun pour soi : les bots d\'entraînement partent au début de la vraie partie', avantDebut > 0 && bots(s).length === 0, [avantDebut, bots(s).length]);
-  for (const x of [p, fort, faible, s]) clearInterval(x.timer);
+  // Une élimination remet la vie du tueur à 100 %
+  const v = nouvelle('solo', 1);
+  const wTueur = fauxWs();
+  const tueur = v.ajouter(wTueur, { id: 1, username: 'Tueur' }); const victime = v.ajouter(fauxWs(), { id: 2, username: 'Cible' });
+  for (const j of [tueur, victime]) v.message(j, { t: 'equipement', e: EQ });
+  v.nouvelleManche();
+  tueur.pv = 23;
+  wTueur.recus.length = 0;
+  v.eliminer(victime, tueur, [0, 0, 1], false, tueur.arme);
+  const msgPv = wTueur.recus.find((m) => m.t === 'pv');
+  check('élimination : la vie du tueur remonte à 100 %', tueur.pv === reglages.joueur.pointsDeVie && msgPv && msgPv.pv === reglages.joueur.pointsDeVie && msgPv.elim === 1, [tueur.pv, msgPv]);
+  victime.vivant = true; tueur.pv = 40;
+  v.eliminer(tueur, tueur, [0, 0, 1], false, tueur.arme); // se tuer soi-même ne rend pas la vie
+  check('élimination : se tuer soi-même ne rend pas la vie', tueur.pv === 0 && tueur.kills === 1, [tueur.pv, tueur.kills]);
+  for (const x of [p, fort, faible, s, v]) clearInterval(x.timer);
 }
 
 // Caméléon (cache-cache) : rôles, chercheurs figés pendant la cachette, tir qui touche / rate / leurre,

@@ -5,6 +5,7 @@
     "forceSaut": 8.6,
     "gravite": 24,
     "pointsDeVie": 100,
+    "vieAuMaxApresElimination": true,
     "reapparitionSecondes": 4,
     "protectionSecondes": 1.5,
     "forceTrampoline": 17

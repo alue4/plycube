@@ -1844,6 +1844,7 @@ async function demarrer() {
     E.pv = msg.pv;
     if (msg.soin) { E.soinFin = 0; son('soin_fini', { vol: 0.7 }); hud.toast('Vie rendue : +50 !'); }
     if (msg.admin) { son('soin_fini', { vol: 0.7 }); hud.toast('Vie au maximum'); }
+    if (msg.elim) { son('soin_fini', { vol: 0.5 }); hud.toast('Élimination : vie à 100 % !'); }
   });
   // Pouvoirs de l'admin visibles par tous : géant, mini, invisible, traînée arc-en-ciel, aura dorée
   reseau.on('look', (msg) => {

@@ -204,6 +204,8 @@ Chaque joueur choisit **4 armes**, une par catégorie, en arrivant dans la parti
 | **Mêlée** (3) | **Couteau** (on court plus vite ; *dans le dos d'un adversaire en visant* : élimination en un coup, avec une animation spéciale), Batte de baseball (projette l'adversaire), Poêle à frire (BOING ! et dans ton dos, elle arrête les balles qui arrivent par derrière) |
 | **Gadget** (4) | Grenade (rebondit, explose après 3 s), Fumigène (gros nuage pour se cacher), Grappin (tire vers un mur ou un toit), Kit de soin (+50 points de vie). Chaque gadget a un **temps de recharge**. |
 
+**Chaque élimination remet ta vie à 100 %** (pour tout le monde, bots compris ; se tuer soi-même ne compte pas). Pour l'enlever : `"vieAuMaxApresElimination": false` dans la partie `joueur` de `games/fps/public/reglages.json`, puis `sudo docker compose restart`.
+
 ### Pouvoirs d'admin
 
 Dans *Réglages*, l'admin du site a un bouton **>_ ADMIN PANEL** (les autres joueurs ne le voient pas). Il ouvre un panneau façon terminal de hacker : le menu des pouvoirs au milieu, rangés par catégorie (touche entre crochets pour activer / couper : <kbd>1</kbd> à <kbd>9</kbd> puis <kbd>A</kbd> à <kbd>Z</kbd> ; <kbd>0</kbd> pour tout couper ; flèches + Entrée ; Échap pour quitter ; à la manette : la croix, A, B) et, dans les coins, des fenêtres qui s'allument une par une : *Système*, *Journal*, *Session* et un *Radar*. Le choix des pouvoirs reste sur cet ordinateur (code : `games/fps/public/js/panneau-admin.js`).

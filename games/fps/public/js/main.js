@@ -39,6 +39,7 @@ const PREFS_DEFAUT = {
   sensibiliteManette: 1, inverserY: false, vibrations: true, aideVisee: 'normale', // manette (et aide à la visée sur tablette)
   touches: null, // touches changées dans les réglages (voir commandes.js)
   pouvoirs: Object.fromEntries(POUVOIRS.map((p) => [p.cle, false])), // admin seulement (Réglages → ADMIN PANEL)
+  accesAdminFacile: false, // admin : bouton transparent « >_ ADMIN » en jeu (option ACCÈS FACILE du panneau)
 };
 const prefs = (() => {
   try { return { ...PREFS_DEFAUT, ...JSON.parse(localStorage.getItem('fps-reglages') || '{}') }; } catch { return { ...PREFS_DEFAUT }; }
@@ -595,6 +596,11 @@ async function demarrer() {
     libelle: (action) => commandes.libelle(action, { type: 'clavier' }) || '?',
     aideVol: () => `Voler : ${commandes.libelle('voler', { type: 'clavier' }) || '—'} pour activer ou couper en jeu, ${commandes.libelle('sauter', { type: 'clavier' }) || '—'} pour monter, ${commandes.libelle('descendre', { type: 'clavier' }) || '—'} pour descendre.`,
     son: (nom) => son(nom, { vol: 0.4 }),
+    facile: {
+      etat: () => !!prefs.accesAdminFacile,
+      changer: (oui) => { prefs.accesAdminFacile = oui; sauverPrefs(); majBoutonAdminFacile(); },
+      aide: () => `Un bouton transparent « >_ ADMIN » en haut à droite de l'écran ouvre ce panneau pendant la partie (un clic, ou un toucher sur iPad). Clavier : ${commandes.libelle('panneauAdmin', { type: 'clavier' }) || '—'}. Manette : Affichage + Menu en même temps (Share + Options sur PlayStation).`,
+    },
     infos: () => {
       const vivant = E.enPartie && joueur.vivant;
       const p = joueur.pos;
@@ -626,7 +632,41 @@ async function demarrer() {
       return { points };
     },
   });
-  $('btn-admin-panel').addEventListener('click', () => panneauAdmin.ouvrir());
+  $('btn-admin-panel').addEventListener('click', () => { panneauAdmin.surFermer = null; panneauAdmin.ouvrir(); });
+  // ---------- Accès facile à l'admin panel ----------
+  // Bouton transparent en haut à droite pendant la partie (souris, iPad), touche ² au clavier,
+  // Affichage + Menu en même temps à la manette. On revient au jeu en fermant (tablette, manette).
+  const btnAdminFacile = el('button', { id: 'btn-admin-facile', class: 'btn-admin-facile', type: 'button', hidden: true, 'aria-label': 'Ouvrir l\'admin panel' },
+    el('span', { class: 'baf-invite', text: '>_' }), ' ADMIN', el('kbd', { class: 'baf-touche', hidden: true }));
+  btnAdminFacile.addEventListener('click', (e) => { e.preventDefault(); ouvrirPanneauFacile(); });
+  document.body.append(btnAdminFacile);
+  function accesAdminFacile() { return E.admin && !!prefs.accesAdminFacile; }
+  // La manette : le bouton Affichage (8) est tenu pendant qu'on appuie sur Menu (9)
+  function comboAdminManette() { return accesAdminFacile() && !!commandes.pad.boutons[8]; }
+  function ouvrirPanneauFacile() {
+    if (!accesAdminFacile() || panneauAdmin.ouvert) return;
+    const reprendre = E.enPartie && joueur.actif; // on jouait : on y retourne en fermant le panneau
+    if (reprendre) mettreEnPause();
+    hud.montrerTableau(false);
+    panneauAdmin.surFermer = () => {
+      // (avec la souris, il faut un clic pour la recapturer : on reste sur le menu pause)
+      if (reprendre && E.enPartie && (modeTactile() || commandes.saisie === 'manette')) jouer();
+    };
+    panneauAdmin.ouvrir();
+    majBoutonAdminFacile();
+  }
+  // Visible en partie : quand on joue, sur le menu pause ou dans la salle d'attente (pas par-dessus les autres écrans)
+  function majBoutonAdminFacile() {
+    const ecran = Menus.ecranActif();
+    const voir = accesAdminFacile() && E.enPartie && !panneauAdmin.ouvert && (!ecran || ecran === $('pause') || ecran === salle.racine);
+    if (btnAdminFacile.hidden === voir) btnAdminFacile.hidden = !voir;
+    // Au clavier, la souris est capturée pendant qu'on joue : on rappelle la touche (²)
+    const touche = commandes.saisie === 'clavier' && !modeTactile() ? (commandes.libelle('panneauAdmin', { type: 'clavier' }) || '') : '';
+    const k = btnAdminFacile.lastChild;
+    if (k.textContent !== touche) { k.textContent = touche; k.hidden = !touche; }
+    document.body.classList.toggle('admin-facile', voir); // (le fil des éliminations descend un peu)
+  }
+  setInterval(majBoutonAdminFacile, 250);
   // Visée automatique : quand on vise ou qu'on tire, le viseur se cale sur la tête (sinon le corps) de
   // l'adversaire visible le plus proche du centre de l'écran. instantane = au moment du tir.
   function viseeAuto(dt, instantane) {
@@ -938,13 +978,18 @@ async function demarrer() {
   commandes.actifSouris = () => joueur.actif && !modeTactile() && document.pointerLockElement === canvas;
   const SLOTS = { arme1: 0, arme2: 1, arme3: 2, arme4: 3 };
   commandes.surAppui = (a, { source, code, evenement }) => {
+    if (a === 'panneauAdmin') { if (accesAdminFacile()) { if (evenement) evenement.preventDefault(); ouvrirPanneauFacile(); } return; }
     if (!E.enPartie) return;
     if (a === 'scores') {
       if (evenement) evenement.preventDefault();
       hud.montrerTableau(true, hud.tableau([...E.joueurs.values()], E.mode, E.moiId));
       return;
     }
-    if (a === 'menu') { if (joueur.actif) mettreEnPause(); return; } // bouton Menu de la manette
+    if (a === 'menu') { // bouton Menu de la manette (avec Affichage tenu : admin panel, si l'accès facile est activé)
+      if (source === 'manette' && comboAdminManette()) { ouvrirPanneauFacile(); return; }
+      if (joueur.actif) mettreEnPause();
+      return;
+    }
     if (!joueur.actif) return;
     if (a === 'changerArmes' && !joueur.vivant) { if (E.equipement) demanderEquipement(false); return; }
     // menu des danses ouvert : les chiffres choisissent une danse (pas une arme)
@@ -988,6 +1033,7 @@ async function demarrer() {
   });
   // Un bouton de la manette : dans les menus, il sert à choisir ; en jouant, aux actions
   commandes.surBoutonMenu = (i) => {
+    if (i === 9 && comboAdminManette() && !panneauAdmin.ouvert && !(E.enPartie && joueur.actif)) { ouvrirPanneauFacile(); return true; }
     if (E.enPartie && joueur.actif) return E.menuDanse ? boutonMenuDanses(i) : false;
     // Menu (Start) : reprendre la partie depuis le menu pause ou la salle d'attente
     if (i === 9 && E.enPartie && Menus.ecranActif() && ($('pause') === Menus.ecranActif() || salle.racine === Menus.ecranActif())) { jouer(); return true; }

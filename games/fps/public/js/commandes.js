@@ -35,6 +35,8 @@ export const ACTIONS = [
   { id: 'descendre', nom: 'Descendre en vol', groupe: 'Admin', clavier: ['KeyC'], manette: [1], admin: true },
   { id: 'teleporter', nom: 'Se téléporter là où on vise', groupe: 'Admin', clavier: ['KeyT'], manette: [], admin: true },
   { id: 'frappe', nom: 'Frappe orbitale', groupe: 'Admin', clavier: ['KeyG'], manette: [], admin: true },
+  // (accès facile activé dans l'admin panel ; à la manette : Affichage + Menu en même temps, voir main.js)
+  { id: 'panneauAdmin', nom: 'Ouvrir l\'admin panel (accès facile)', groupe: 'Admin', clavier: ['Backquote'], manette: [], admin: true, quand: 'partout' },
 ];
 export const ACTION = Object.fromEntries(ACTIONS.map((a) => [a.id, a]));
 

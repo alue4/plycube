@@ -210,6 +210,8 @@ Chaque joueur choisit **4 armes**, une par catégorie, en arrivant dans la parti
 
 Dans *Réglages*, l'admin du site a un bouton **>_ ADMIN PANEL** (les autres joueurs ne le voient pas). Il ouvre un panneau façon terminal de hacker : le menu des pouvoirs au milieu, rangés par catégorie (touche entre crochets pour activer / couper : <kbd>1</kbd> à <kbd>9</kbd> puis <kbd>A</kbd> à <kbd>Z</kbd> ; <kbd>0</kbd> pour tout couper ; flèches + Entrée ; Échap pour quitter ; à la manette : la croix, A, B) et, dans les coins, des fenêtres qui s'allument une par une : *Système*, *Journal*, *Session* et un *Radar*. Le choix des pouvoirs reste sur cet ordinateur (code : `games/fps/public/js/panneau-admin.js`).
 
+**Accès facile** : tout en haut du panneau, l'option **ACCÈS FACILE** ajoute en partie un bouton transparent **>_ ADMIN** en haut à droite de l'écran, qui ouvre le panneau d'un clic (ordinateur : d'abord Échap pour libérer la souris) ou d'un toucher (iPad). Raccourcis : touche **²** au clavier (modifiable dans *Changer les touches*), **Affichage + Menu** en même temps à la manette (Share + Options sur PlayStation). En fermant le panneau, on revient directement au jeu (tablette, manette).
+
 | Catégorie | Pouvoirs |
 |---|---|
 | **Mouvement** | **Voler** (<kbd>V</kbd>, <kbd>Espace</kbd> monter, <kbd>C</kbd> descendre) · **Super vitesse** · **Super saut** · **Triple saut** (deux sauts de plus en l'air) · **Gravité lunaire** · **Passe-muraille** (on traverse les murs, le sol porte toujours) · **Téléportation** (<kbd>T</kbd> : on apparaît là où on vise, jusqu'à 300 m) |

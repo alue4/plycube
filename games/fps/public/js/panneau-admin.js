@@ -67,8 +67,11 @@ export class PanneauAdmin {
   // infos() : { nom, partie, carte, mode, joueurs, bots, ping, fps, position, pv, arme, commandes, manette, ecran }
   // radar() : null (pas de partie) ou { points: [{ x, z, ennemi }] } (x vers ma droite, z devant moi, en mètres)
   // agir(cle) : bouton d'action · libelle(action) : nom de la touche du jeu (ex. « T »)
-  constructor({ etat, changer, aideVol, infos, radar, son, agir, libelle }) {
-    Object.assign(this, { etat, changer, aideVol, infos, radar, son: son || (() => {}), agir: agir || (() => {}), libelle: libelle || (() => '?') });
+  // facile : { etat(), changer(oui), aide() } : l'option « accès facile » (bouton transparent en jeu)
+  // surFermer : appelé à la fermeture (posé par celui qui ouvre le panneau, ou null)
+  constructor({ etat, changer, aideVol, infos, radar, son, agir, libelle, facile }) {
+    Object.assign(this, { etat, changer, aideVol, infos, radar, son: son || (() => {}), agir: agir || (() => {}), libelle: libelle || (() => '?'), facile: facile || null });
+    this.surFermer = null;
     this.estOuvert = false;
     this.minuteur = null;
     this.prochainLog = 0;
@@ -91,6 +94,27 @@ export class PanneauAdmin {
     this.liste = []; // tous les boutons, dans l'ordre (flèches)
     let n = 0;
     const touche = () => TOUCHES[n++] || '·';
+    if (this.facile) {
+      this.options.append(el('div', { class: 'ap-section', text: '── PANNEAU ──' }));
+      const etat = el('span', { class: 'ap-etat' });
+      const b = el('button', { class: 'ap-option', type: 'button', role: 'switch', 'aria-checked': 'false' },
+        el('span', { class: 'ap-num', text: '[*]' }), el('span', { class: 'ap-nom', text: 'ACCÈS FACILE' }),
+        el('span', { class: 'ap-points', 'aria-hidden': 'true' }), etat);
+      b.addEventListener('click', () => {
+        const oui = !this.facile.etat();
+        this.facile.changer(oui);
+        this.journal(`accès facile → ${oui ? 'ACTIVÉ' : 'DÉSACTIVÉ'}`, true);
+        this.son('clic');
+        this.maj();
+        this.aide.textContent = `> ${this.facile.aide()}`;
+        b.classList.remove('ap-flash'); void b.offsetWidth; b.classList.add('ap-flash');
+      });
+      b.addEventListener('mouseenter', () => b.focus({ preventScroll: true }));
+      b.addEventListener('focus', () => { this.choisir(b); this.aide.textContent = `> ${this.facile.aide()}`; });
+      this.boutonFacile = { b, etat };
+      this.liste.push(b);
+      this.options.append(b);
+    }
     for (const section of SECTIONS) {
       this.options.append(el('div', { class: 'ap-section', text: `── ${section} ──` }));
       for (const p of POUVOIRS.filter((x) => x.section === section)) {
@@ -194,10 +218,18 @@ export class PanneauAdmin {
     clearInterval(this.minuteur);
     this.minuteur = null;
     this.son('clic');
+    const f = this.surFermer;
+    this.surFermer = null;
+    if (f) f();
   }
 
   // Les interrupteurs suivent l'état des pouvoirs (aussi quand on vole avec la touche V en jeu)
   maj() {
+    if (this.boutonFacile) {
+      const oui = !!this.facile.etat();
+      this.boutonFacile.b.setAttribute('aria-checked', String(oui));
+      this.boutonFacile.etat.textContent = oui ? '[  ACTIF  ]' : '[ INACTIF ]';
+    }
     for (const p of POUVOIRS) {
       const { b, etat } = this.boutons[p.cle];
       const oui = !!this.etat(p.cle);

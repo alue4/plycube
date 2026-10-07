@@ -167,6 +167,14 @@ export class Effets {
       g.fillStyle = grad;
       g.fillRect(0, 0, n, n);
     }, 128);
+    // ----- Nouvelles armes : éclairs, boules de lumière, anneaux, météores, zones (trou noir, pluie de météores) -----
+    this.geoTrait = new THREE.BoxGeometry(1, 1, 1).translate(0, 0, 0.5);
+    this.flashs = [];
+    this.anneaux = [];
+    this.eclairs = [];
+    this.meteores = [];
+    this.zones = new Map();
+    this.fabriqueMeteore = null; // donné par main.js (modèle du météore)
   }
 
   // Un fumigène éclate : le nuage grandit pendant quelques secondes puis se dissipe.
@@ -274,6 +282,7 @@ export class Effets {
     for (const cle of [...this.cordes.keys()]) this.enleverCorde(cle);
     for (const b of this.brulures) b.removeFromParent();
     this.brulures = [];
+    this.viderNouveaux();
   }
 
   // Petits pixels jaunes et roses quand un joueur est touché (pas de sang !).
@@ -472,9 +481,12 @@ export class Effets {
     b.feu.visible = true;
     b.onde.position.set(pos.x, pos.y + 0.05, pos.z);
     b.onde.visible = true;
+    this.lumiereExplosion.color.set(0xff9a40);
     this.lumiereExplosion.position.copy(pos).add(_v.set(0, 0.5, 0));
     this.lumiereExplosion.intensity = 60;
     this.explosionVie = 0.35;
+    this.explosionMax = 0.35;
+    this.explosionForce = 60;
     // étincelles, débris, fumée noire qui monte
     this.explosion(pos, ['#fff3b0', '#ffd27a', '#ff9a2e'], { nombre: 30, force: 11, taille: 0.06, vie: 0.6, haut: 3 });
     this.explosion(pos, ['#5a4a3a', '#7a6a5a', '#3a3a3a'], { nombre: 18, force: 7, taille: 0.13, vie: 1.4, haut: 5 });
@@ -495,7 +507,347 @@ export class Effets {
     }
   }
 
+  // ====================================================================================
+  // Effets des nouvelles armes
+  // ====================================================================================
+  // Petit outil : une boule de lumière (sprite) qui grandit et s'efface (vie en s)
+  boule(pos, couleur, taille, vie = 0.3, grandit = 1.5) {
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.texLueur, color: couleur, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
+    s.position.copy(pos);
+    s.scale.setScalar(taille);
+    this.scene.add(s);
+    this.flashs.push({ s, vie, max: vie, taille, grandit });
+  }
+
+  // Un anneau qui s'ouvre (au sol si sol = true, sinon face à la caméra : il suffit d'un lookAt plus tard)
+  anneauQuiSOuvre(pos, couleur, rayonMax, vie = 0.5, { sol = true, opacite = 0.9, ferme = false } = {}) {
+    const m = new THREE.Mesh(this.geoAnneau, new THREE.MeshBasicMaterial({
+      color: couleur, transparent: true, opacity: opacite, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+    }));
+    m.position.copy(pos);
+    if (sol) m.rotation.x = -Math.PI / 2;
+    m.scale.setScalar(ferme ? rayonMax : 0.05);
+    this.scene.add(m);
+    this.anneaux.push({ m, vie, max: vie, rayonMax, opacite, ferme });
+  }
+
+  lumierePour(pos, couleur, force, vie) {
+    this.lumiereExplosion.color.set(couleur);
+    this.lumiereExplosion.position.copy(pos).add(_v.set(0, 0.5, 0));
+    this.lumiereExplosion.intensity = force;
+    this.explosionVie = vie;
+    this.explosionMax = vie;
+    this.explosionForce = force;
+  }
+
+  // Pistolet à eau : un jet bleu (gouttes qui retombent) et une éclaboussure au bout
+  jetEau(a, b, touche = false) {
+    this.trait(a, b, { couleur: 0x8fd6ff, epaisseur: 0.014, duree: 0.08, opacite: 0.45 });
+    const n = 6;
+    for (let i = 0; i < n; i++) {
+      _s.copy(a).lerp(b, (i + Math.random()) / n);
+      _v.subVectors(b, a).normalize().multiplyScalar(2 + Math.random() * 3);
+      _v.y += 0.5;
+      this.particule(_s, _v, i % 2 ? '#bfe9ff' : '#3fb4ff', { taille: 0.035, vie: 0.35, gravite: 1.2, freine: 0.5 });
+    }
+    for (let i = 0; i < (touche ? 10 : 6); i++) {
+      _v.set((Math.random() - 0.5) * 3, Math.random() * 2.5, (Math.random() - 0.5) * 3);
+      this.particule(b, _v, ['#bfe9ff', '#3fb4ff', '#ffffff'][i % 3], { taille: 0.04, vie: 0.4, gravite: 1.2, freine: 1 });
+    }
+  }
+
+  // Petite gerbe de plasma (cyan et violet)
+  explosionPlasma(pos, rayon = 1.3) {
+    this.boule(pos, 0x7ff6ff, rayon * 1.2, 0.25, 2);
+    this.explosion(pos, ['#39e0ff', '#ffffff', '#b066ff'], { nombre: 18, force: 5, taille: 0.06, vie: 0.45, haut: 1, gravite: 0.4 });
+    this.anneauQuiSOuvre(_s.copy(pos).add(_v.set(0, 0.05, 0)), 0x5ff6ff, rayon * 1.1, 0.35);
+    this.lumierePour(pos, 0x39e0ff, 25, 0.2);
+  }
+
+  // Feu d'artifice : une gerbe d'étincelles de la couleur c (0 à 5) qui retombent doucement
+  explosionArtifice(pos, rayon = 4, c = 0) {
+    const PALETTES = [['#ff3b5c', '#ffd1dc', '#ffffff'], ['#ffd23f', '#fff2a8', '#ffffff'], ['#3fa9ff', '#b8e2ff', '#ffffff'],
+      ['#3fff7a', '#c8ffd8', '#ffffff'], ['#c77dff', '#ead4ff', '#ffffff'], ['#ff8a2a', '#ffd0a0', '#ffffff']];
+    const p = PALETTES[((c % 6) + 6) % 6];
+    const grand = rayon >= 3.5;
+    this.boule(pos, new THREE.Color(p[0]), rayon * (grand ? 1.1 : 0.8), 0.35, 1.6);
+    const n = grand ? 70 : 34;
+    for (let i = 0; i < n; i++) {
+      _v.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize().multiplyScalar((grand ? 9 : 6) * (0.6 + Math.random() * 0.5));
+      this.particule(pos, _v, p[i % 3], { taille: grand ? 0.07 : 0.055, vie: grand ? 1.3 : 0.9, gravite: 0.25, freine: 1.6 });
+    }
+    this.lumierePour(pos, p[0], grand ? 55 : 30, 0.35);
+  }
+
+  // Onde du marteau de Thor : un éclair tombe du ciel, puis une onde bleue au sol et de la poussière
+  eclairThor(pos, rayon = 5) {
+    const haut = _s.copy(pos).add(_v.set((Math.random() - 0.5) * 3, 45, (Math.random() - 0.5) * 3)).clone();
+    this.eclairZigzag(haut, pos.clone(), { couleur: 0xbff0ff, morceaux: 16, ecart: 1.6, vie: 0.35, epaisseur: 0.09 });
+    this.eclairZigzag(haut, pos.clone(), { couleur: 0x6fd8ff, morceaux: 12, ecart: 2.2, vie: 0.25, epaisseur: 0.05 });
+    this.boule(pos, 0x9fe8ff, rayon * 0.9, 0.3, 2);
+    this.anneauQuiSOuvre(_s.copy(pos).add(_v.set(0, 0.06, 0)), 0x6fd8ff, rayon * 1.2, 0.55);
+    this.anneauQuiSOuvre(_s.copy(pos).add(_v.set(0, 0.08, 0)), 0xffffff, rayon * 0.8, 0.4, { opacite: 0.6 });
+    this.explosion(pos, ['#8a7a66', '#6e6255', '#a8987f'], { nombre: 22, force: 6, taille: 0.12, vie: 1.1, haut: 3 });
+    this.explosion(pos, ['#bff0ff', '#6fd8ff', '#ffffff'], { nombre: 26, force: 9, taille: 0.05, vie: 0.5, haut: 2 });
+    this.lumierePour(pos, 0x8fe0ff, 70, 0.4);
+  }
+
+  // Fin du trou noir : un éclair violet qui implose puis souffle
+  implosion(pos, rayon = 6) {
+    this.anneauQuiSOuvre(pos, 0xc77dff, rayon * 1.3, 0.3, { sol: false, ferme: true });
+    this.boule(pos, 0xb066ff, rayon * 0.9, 0.5, 2.5);
+    this.anneauQuiSOuvre(_s.copy(pos).add(_v.set(0, 0.06, 0)), 0x9a4dff, rayon * 1.4, 0.7);
+    this.explosion(pos, ['#c77dff', '#ffffff', '#5a2a99'], { nombre: 50, force: 12, taille: 0.07, vie: 0.8, haut: 2, gravite: 0.3 });
+    this.lumierePour(pos, 0xa64dff, 65, 0.45);
+  }
+
+  // Grenade flash : un énorme éclair blanc (l'aveuglement lui-même vient du serveur : message « eblouir »)
+  flashBlanc(pos) {
+    this.boule(pos, 0xffffff, 6, 0.35, 2.5);
+    this.boule(pos, 0xfff6d0, 2.5, 0.6, 1.5);
+    this.explosion(pos, ['#ffffff', '#fff6d0'], { nombre: 16, force: 6, taille: 0.04, vie: 0.4, haut: 1 });
+    this.lumierePour(pos, 0xffffff, 120, 0.5);
+  }
+
+  // Un éclair en zigzag de a vers b (refait au hasard pendant sa courte vie)
+  eclairZigzag(a, b, { couleur = 0xcfeeff, morceaux = 10, ecart = 0.25, vie = 0.3, epaisseur = 0.025 } = {}) {
+    const traits = [];
+    for (let i = 0; i < morceaux; i++) {
+      const m = new THREE.Mesh(this.geoTrait, new THREE.MeshBasicMaterial({ color: couleur, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
+      m.frustumCulled = false;
+      this.scene.add(m);
+      traits.push(m);
+    }
+    const e = { a: a.clone(), b: b.clone(), traits, morceaux, ecart, vie, max: vie, epaisseur, prochain: 0 };
+    this.placerEclair(e);
+    this.eclairs.push(e);
+  }
+
+  placerEclair(e) {
+    const pts = [e.a.clone()];
+    const dir = new THREE.Vector3().subVectors(e.b, e.a);
+    for (let i = 1; i < e.morceaux; i++) {
+      const q = i / e.morceaux;
+      const d = Math.sin(q * Math.PI) * e.ecart;
+      pts.push(e.a.clone().addScaledVector(dir, q).add(_v.set((Math.random() - 0.5) * d, (Math.random() - 0.5) * d, (Math.random() - 0.5) * d)));
+    }
+    pts.push(e.b.clone());
+    e.traits.forEach((m, i) => {
+      const p0 = pts[i]; const p1 = pts[i + 1];
+      m.position.copy(p0);
+      m.lookAt(p1);
+      m.scale.set(e.epaisseur, e.epaisseur, Math.max(0.01, p0.distanceTo(p1)));
+    });
+  }
+
+  // Fusil Tesla : l'éclair saute de point en point (origine, puis chaque adversaire touché)
+  arcsTesla(points) {
+    for (let i = 0; i + 1 < points.length; i++) {
+      const L = points[i].distanceTo(points[i + 1]);
+      const morceaux = Math.max(6, Math.min(24, Math.round(L * 1.5)));
+      this.eclairZigzag(points[i], points[i + 1], { couleur: 0xe6f8ff, morceaux, ecart: Math.min(1.2, 0.15 + L * 0.06), vie: 0.32, epaisseur: 0.03 });
+      this.eclairZigzag(points[i], points[i + 1], { couleur: 0x6fc8ff, morceaux, ecart: Math.min(1.6, 0.25 + L * 0.08), vie: 0.25, epaisseur: 0.06 });
+    }
+    for (let i = 1; i < points.length; i++) {
+      this.boule(points[i], 0x9fdcff, 1.1, 0.3, 1.5);
+      this.explosion(points[i], ['#e6f8ff', '#6fc8ff', '#ffffff'], { nombre: 12, force: 5, taille: 0.04, vie: 0.35, haut: 1 });
+    }
+    const fin = points[points.length - 1];
+    this.lumierePour(fin, 0x9fdcff, 45, 0.25);
+  }
+
+  // Météore (pluie de météores) : un rocher en feu qui tombe de depart vers cible en ms
+  meteore(depart, cible, ms) {
+    const m = this.fabriqueMeteore ? this.fabriqueMeteore() : new THREE.Mesh(new THREE.IcosahedronGeometry(0.5, 0), new THREE.MeshBasicMaterial({ color: 0xff6a1a }));
+    m.position.copy(depart);
+    this.scene.add(m);
+    this.meteores.push({ m, a: depart.clone(), b: cible.clone(), vie: ms / 1000, max: ms / 1000 });
+  }
+
+  // Propulseur : une gerbe de feu sous les pieds, et un peu de fumée
+  flammes(pos) {
+    for (let i = 0; i < 26; i++) {
+      _v.set((Math.random() - 0.5) * 2.5, -2 - Math.random() * 4, (Math.random() - 0.5) * 2.5);
+      this.particule(pos, _v, ['#fff1a8', '#ffb347', '#ff6a1a', '#ff3b1a'][i % 4], { taille: 0.09, vie: 0.45, gravite: -0.2, freine: 2.5 });
+    }
+    this.fumee(pos, 8, '#bdbdbd', 0.22, { grandit: 0.5, vie: 1.2 });
+    this.boule(pos, 0xffa040, 1.4, 0.25, 1.5);
+  }
+
+  // Joueur qui flotte (rayon anti-gravité) : des étincelles violettes autour de lui
+  auraLev(pos) {
+    _s.copy(pos).add(_v.set((Math.random() - 0.5) * 0.9, Math.random() * 1.8, (Math.random() - 0.5) * 0.9));
+    this.particule(_s, _v.set(0, 0.6 + Math.random(), 0), Math.random() < 0.5 ? '#c77dff' : '#ead4ff', { taille: 0.05, vie: 0.6, gravite: -0.1, freine: 1 });
+  }
+
+  // ---------- Zones (trou noir, pluie de météores) ----------
+  zone(id, type, pos, ms, rayon) {
+    this.finZone(id, true);
+    const g = new THREE.Group();
+    g.position.copy(pos);
+    this.scene.add(g);
+    const z = { id, type, g, vie: ms / 1000, max: ms / 1000, rayon, mats: [], geos: [], t: 0 };
+    const additif = (couleur, opacite) => {
+      const m = new THREE.MeshBasicMaterial({ color: couleur, transparent: true, opacity: opacite, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+      z.mats.push(m);
+      return m;
+    };
+    if (type === 'trou_noir') {
+      // cœur noir, deux anneaux lumineux (horizon), un disque de particules qui tourne, un grand halo
+      const geoCoeur = new THREE.SphereGeometry(1, 28, 20);
+      z.geos.push(geoCoeur);
+      const noir = new THREE.MeshBasicMaterial({ color: 0x000000 });
+      z.mats.push(noir);
+      z.coeur = new THREE.Mesh(geoCoeur, noir);
+      g.add(z.coeur);
+      z.halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.texLueur, color: 0x9a4dff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
+      z.mats.push(z.halo.material);
+      g.add(z.halo);
+      const geoTore = new THREE.TorusGeometry(1.25, 0.06, 8, 64);
+      z.geos.push(geoTore);
+      z.horizon = new THREE.Mesh(geoTore, additif(0xffb36b, 0.9));
+      z.horizon.rotation.x = Math.PI / 2.3;
+      g.add(z.horizon);
+      z.horizon2 = new THREE.Mesh(geoTore, additif(0xc77dff, 0.8));
+      z.horizon2.rotation.set(Math.PI / 1.8, 0.4, 0);
+      g.add(z.horizon2);
+      const N = 220;
+      const geoGrain = new THREE.BoxGeometry(1, 1, 1);
+      z.geos.push(geoGrain);
+      z.disque = new THREE.InstancedMesh(geoGrain, additif(0xffffff, 1), N);
+      z.disque.frustumCulled = false;
+      const couleurs = [0xffb36b, 0xff6a3a, 0xc77dff, 0xffffff, 0x9a4dff];
+      z.grains = Array.from({ length: N }, (_, i) => {
+        z.disque.setColorAt(i, _c.set(couleurs[i % couleurs.length]));
+        return { r: 1.5 + Math.random() * (rayon * 0.55), a: Math.random() * Math.PI * 2, h: (Math.random() - 0.5) * 0.35, v: 0.6 + Math.random() * 0.8, t: 0.03 + Math.random() * 0.07 };
+      });
+      if (z.disque.instanceColor) z.disque.instanceColor.needsUpdate = true;
+      g.add(z.disque);
+      z.disque.rotation.x = 0.35;
+    } else if (type === 'meteores') {
+      // cercle rouge au sol qui pulse (là où les météores vont tomber)
+      z.cercle = new THREE.Mesh(this.geoAnneau, additif(0xff3322, 0.85));
+      z.cercle.rotation.x = -Math.PI / 2;
+      z.cercle.position.y = 0.08;
+      z.cercle.scale.setScalar(rayon);
+      g.add(z.cercle);
+      const geoDisque = new THREE.CircleGeometry(1, 40);
+      z.geos.push(geoDisque);
+      z.fond = new THREE.Mesh(geoDisque, additif(0xff5533, 0.18));
+      z.fond.rotation.x = -Math.PI / 2;
+      z.fond.position.y = 0.06;
+      z.fond.scale.setScalar(rayon);
+      g.add(z.fond);
+    }
+    this.zones.set(id, z);
+    return z;
+  }
+
+  finZone(id, immediat = false) {
+    const z = this.zones.get(id);
+    if (!z) return;
+    if (!immediat && z.vie > 0.3) { z.vie = 0.3; z.max = Math.max(z.max, 0.3); z.fin = true; return; } // petite disparition
+    this.zones.delete(id);
+    z.g.removeFromParent();
+    for (const m of z.mats) m.dispose();
+    for (const geo of z.geos) geo.dispose();
+  }
+
+  // Les zones encore là (pour faire trembler la caméra près d'un trou noir) : [{ type, pos, rayon }]
+  zonesActives() { return [...this.zones.values()].map((z) => ({ type: z.type, pos: z.g.position, rayon: z.rayon })); }
+
+  majNouveaux(dt) {
+    this.flashs = this.flashs.filter((f) => {
+      f.vie -= dt;
+      const k = 1 - Math.max(0, f.vie / f.max);
+      f.s.scale.setScalar(f.taille * (1 + k * f.grandit));
+      f.s.material.opacity = Math.max(0, 1 - k);
+      if (f.vie > 0) return true;
+      f.s.removeFromParent();
+      f.s.material.dispose();
+      return false;
+    });
+    this.anneaux = this.anneaux.filter((a) => {
+      a.vie -= dt;
+      const k = 1 - Math.max(0, a.vie / a.max);
+      a.m.scale.setScalar(a.ferme ? a.rayonMax * (1 - k) + 0.05 : 0.05 + a.rayonMax * Math.sqrt(k));
+      a.m.material.opacity = a.opacite * (1 - k);
+      if (a.vie > 0) return true;
+      a.m.removeFromParent();
+      a.m.material.dispose();
+      return false;
+    });
+    this.eclairs = this.eclairs.filter((e) => {
+      e.vie -= dt;
+      e.prochain -= dt;
+      if (e.prochain <= 0) { this.placerEclair(e); e.prochain = 0.04; }
+      const k = Math.max(0, e.vie / e.max);
+      for (const m of e.traits) m.material.opacity = 0.95 * k * (0.6 + Math.random() * 0.4);
+      if (e.vie > 0) return true;
+      for (const m of e.traits) { m.removeFromParent(); m.material.dispose(); }
+      return false;
+    });
+    this.meteores = this.meteores.filter((o) => {
+      o.vie -= dt;
+      const k = 1 - Math.max(0, o.vie / o.max);
+      o.m.position.lerpVectors(o.a, o.b, k);
+      o.m.rotation.x += dt * 4; o.m.rotation.y += dt * 3;
+      for (let i = 0; i < 3; i++) {
+        _v.set((Math.random() - 0.5) * 2, 2 + Math.random() * 2, (Math.random() - 0.5) * 2);
+        this.particule(o.m.position, _v, ['#fff1a8', '#ffb347', '#ff6a1a', '#5a4a3a'][(Math.random() * 4) | 0], { taille: 0.18 + Math.random() * 0.2, vie: 0.6, gravite: -0.1, freine: 2, grandit: 0.4 });
+      }
+      if (o.vie > 0) return true;
+      o.m.removeFromParent();
+      return false;
+    });
+    for (const z of [...this.zones.values()]) {
+      z.vie -= dt;
+      z.t += dt;
+      const entree = Math.min(1, z.t / 0.5);                      // apparition
+      const sortie = z.fin ? Math.max(0, z.vie / 0.3) : Math.min(1, Math.max(0, z.vie / 0.3)); // disparition
+      const k = entree * sortie;
+      if (z.type === 'trou_noir') {
+        const s = 0.9 + 0.08 * Math.sin(z.t * 7);
+        z.coeur.scale.setScalar(Math.max(0.01, s * k));
+        z.halo.scale.setScalar((4.5 + Math.sin(z.t * 3) * 0.4) * k);
+        z.halo.material.opacity = 0.7 * k;
+        z.horizon.rotation.z += dt * 2.5;
+        z.horizon2.rotation.z -= dt * 1.8;
+        z.horizon.scale.setScalar(k * (1 + Math.sin(z.t * 9) * 0.04));
+        z.horizon2.scale.setScalar(k);
+        for (const [i, gr] of z.grains.entries()) {
+          gr.a += dt * gr.v * (3 / Math.max(0.6, gr.r));
+          gr.r -= dt * gr.v * 1.4;                                   // les grains tombent vers le centre en spirale
+          if (gr.r < 1.05) { gr.r = 1.5 + Math.random() * (z.rayon * 0.55); gr.a = Math.random() * Math.PI * 2; }
+          _s.set(Math.cos(gr.a) * gr.r * k, gr.h * gr.r * 0.3, Math.sin(gr.a) * gr.r * k);
+          _m.compose(_s, _q.setFromEuler(_e.set(gr.a, gr.a * 0.7, 0)), _v.set(gr.t, gr.t, gr.t * 2.5));
+          z.disque.setMatrixAt(i, _m);
+        }
+        z.disque.instanceMatrix.needsUpdate = true;
+      } else if (z.type === 'meteores') {
+        const p = 0.6 + 0.4 * Math.sin(z.t * 10);
+        z.cercle.material.opacity = 0.85 * p * k;
+        z.fond.material.opacity = 0.18 * k;
+        z.cercle.rotation.z += dt * 1.5;
+        if (Math.random() < 0.4) {
+          const a = Math.random() * Math.PI * 2; const r = Math.random() * z.rayon;
+          _s.copy(z.g.position).add(_v.set(Math.cos(a) * r, 0.1, Math.sin(a) * r));
+          this.particule(_s, _v.set(0, 1.5 + Math.random(), 0), '#ff5533', { taille: 0.06, vie: 0.6, gravite: -0.1 });
+        }
+      }
+      if (z.vie <= 0) this.finZone(z.id, true);
+    }
+  }
+
+  // Remet tout à zéro (nouvelle manche, retour au hall)
+  viderNouveaux() {
+    for (const id of [...this.zones.keys()]) this.finZone(id, true);
+    for (const o of this.meteores) o.m.removeFromParent();
+    this.meteores = [];
+  }
+
   maj(dt) {
+    this.majNouveaux(dt);
     if (this.lasers.length || this.marques.length || this.laserLumiereVie > 0) this.majLasers(dt);
     for (let i = 0; i < MAX_PARTICULES; i++) {
       const p = this.p[i];
@@ -540,7 +892,7 @@ export class Effets {
     }
     if (this.explosionVie > 0) {
       this.explosionVie -= dt;
-      this.lumiereExplosion.intensity = Math.max(0, (this.explosionVie / 0.35) * 60);
+      this.lumiereExplosion.intensity = Math.max(0, (this.explosionVie / (this.explosionMax || 0.35)) * (this.explosionForce || 60));
     }
     // Fumigènes
     this.emetteurs = this.emetteurs.filter((e) => {

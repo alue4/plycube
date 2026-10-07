@@ -252,7 +252,8 @@ export class ChoixEquipement {
   resumer(a) {
     if (a.categorie === 'gadget') return [el('span', {}, icone('chrono'), ` ${Math.round((a.rechargeGadgetMs || 0) / 1000)} s`)];
     if (a.categorie === 'melee') return [el('span', {}, icone('degats'), ` ${a.degats}`)];
-    return [el('span', {}, icone('degats'), ` ${a.degats}${a.plombs > 1 ? ` ×${a.plombs}` : ''}`), el('span', {}, icone('recharger'), ` ${a.chargeur}`)];
+    // (laser, fusil Tesla : pas de chargeur, des munitions sans fin)
+    return [el('span', {}, icone('degats'), ` ${a.degats}${a.plombs > 1 ? ` ×${a.plombs}` : ''}`), el('span', {}, icone('recharger'), a.chargeur ? ` ${a.chargeur}` : ' ∞')];
   }
 
   details(a) {

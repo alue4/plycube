@@ -30,6 +30,16 @@ const SECOURS = {
   precision_tir: 'sniper_tir', canon_scie_tir: 'pompe_tir', lance_fusee_tir: 'roquette_tir', revolver_recharge: 'chargeur_insere',
   carreau_impact: 'impact_mur', batte_touche: 'degats', couteau_touche: 'touche', poele_touche: 'impact_mur', dos_special: 'elimination',
   grenade_rebond: 'douille', grenade_goupille: 'vide', grappin_accroche: 'impact_mur', soin_fini: 'apparition', lobby_depart: 'victoire',
+  // nouvelles armes (le son d'une arme proche, un peu plus aigu ou plus grave : voir TONS)
+  pompe_auto_tir: 'pompe_tir', double_canon_tir: 'canon_scie_tir', vector_tir: 'smg_tir', bullpup_tir: 'rafale_tir',
+  lance_grenades_tir: 'roquette_tir', anti_materiel_tir: 'sniper_tir', cloueuse_tir: 'arbalete_tir',
+  pistolet_lourd_tir: 'revolver_tir', pistolet_auto_tir: 'pistolet_tir', mini_arbalete_tir: 'arbalete_tir',
+  minigun_tir: 'smg_tir', feu_artifice_tir: 'lance_fusee_tir',
+};
+// Hauteur de base (vitesse de lecture) des sons empruntés à une autre arme
+const TONS = {
+  pompe_auto_tir: 1.12, double_canon_tir: 0.88, vector_tir: 1.22, bullpup_tir: 0.94, lance_grenades_tir: 0.78, anti_materiel_tir: 0.7,
+  cloueuse_tir: 1.45, pistolet_lourd_tir: 0.86, pistolet_auto_tir: 1.15, mini_arbalete_tir: 1.25, minigun_tir: 1.3, feu_artifice_tir: 1.25,
 };
 
 export function initSons(v, vm) {
@@ -95,6 +105,7 @@ const VOLUMES = {
   rafale_tir: 0.55,
   fumigene: 0.6,
   eblouissement: 0.5,
+  vector_tir: 0.8, bullpup_tir: 0.55, minigun_tir: 0.45, pistolet_auto_tir: 0.8, cloueuse_tir: 0.8, anti_materiel_tir: 1.1,
 };
 
 // Son placé en 3D (on entend d'où il vient)
@@ -120,7 +131,7 @@ export function jouer(nom, { vol = 1, variation = 0.06, position = null, delai =
   }
   const s = ctx.createBufferSource();
   s.buffer = t;
-  s.playbackRate.value = 1 + (Math.random() * 2 - 1) * variation;
+  s.playbackRate.value = (TONS[nom] || 1) * (1 + (Math.random() * 2 - 1) * variation);
   const g = ctx.createGain();
   g.gain.value = vol * (VOLUMES[nom] ?? 1);
   const fin = position ? spatialiser(g, position, portee) : g;
@@ -192,7 +203,7 @@ export function jouerEnBoucle(nom, { vol = 1, position = null, portee = 1, depui
 }
 
 // ---------- Sons de remplacement (si un fichier manque) ----------
-function note({ type = 'square', de = 440, a = 440, duree = 0.1, vol = 0.2, delai = 0 }) {
+function note({ type = 'square', de = 440, a = 440, duree = 0.1, vol = 0.2, delai = 0, dest = null }) {
   if (!ctx) return;
   const t = ctx.currentTime + delai;
   const o = ctx.createOscillator();
@@ -203,12 +214,12 @@ function note({ type = 'square', de = 440, a = 440, duree = 0.1, vol = 0.2, dela
   g.gain.setValueAtTime(0.0001, t);
   g.gain.exponentialRampToValueAtTime(vol, t + 0.008);
   g.gain.exponentialRampToValueAtTime(0.0001, t + duree);
-  o.connect(g).connect(sortie);
+  o.connect(g).connect(dest || sortie);
   o.start(t);
   o.stop(t + duree + 0.02);
 }
 let bruitBlanc = null;
-function bruit({ duree = 0.15, vol = 0.2, freq = 1200, q = 1, delai = 0 }) {
+function bruit({ duree = 0.15, vol = 0.2, freq = 1200, q = 1, delai = 0, dest = null }) {
   if (!ctx) return;
   if (!bruitBlanc) {
     bruitBlanc = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
@@ -225,9 +236,16 @@ function bruit({ duree = 0.15, vol = 0.2, freq = 1200, q = 1, delai = 0 }) {
   const g = ctx.createGain();
   g.gain.setValueAtTime(vol, t);
   g.gain.exponentialRampToValueAtTime(0.0001, t + duree);
-  s.connect(f).connect(g).connect(sortie);
+  s.connect(f).connect(g).connect(dest || sortie);
   s.start(t, Math.random() * 0.5);
   s.stop(t + duree + 0.02);
+}
+// Sortie d'un son fabriqué : en 3D s'il a une position (options de son())
+function destination({ position = null, portee = 1, vol = 1 } = {}) {
+  const g = ctx.createGain();
+  g.gain.value = vol;
+  if (position) spatialiser(g, position, portee).connect(sortie); else g.connect(sortie);
+  return g;
 }
 const REMPLACEMENT = {
   smg_tir: () => { bruit({ duree: 0.08, vol: 0.35, freq: 1800, q: 0.6 }); note({ type: 'square', de: 300, a: 80, duree: 0.06, vol: 0.1 }); },
@@ -258,6 +276,32 @@ const REMPLACEMENT = {
   apparition: () => note({ type: 'sine', de: 300, a: 1200, duree: 0.3, vol: 0.1 }),
   clic: () => note({ type: 'triangle', de: 900, a: 900, duree: 0.03, vol: 0.08 }),
   victoire: () => [523, 659, 784, 1046].forEach((f, i) => note({ type: 'square', de: f, a: f, duree: 0.18, vol: 0.1, delai: i * 0.12 })),
+  // ----- nouvelles armes et effets (sons fabriqués, en 3D quand ils viennent de quelqu'un d'autre) -----
+  plasma_tir: (o) => { const d = destination(o); note({ type: 'square', de: 1400, a: 260, duree: 0.18, vol: 0.09, dest: d }); note({ type: 'sine', de: 760, a: 140, duree: 0.25, vol: 0.16, dest: d }); bruit({ duree: 0.07, vol: 0.12, freq: 3200, q: 1, dest: d }); },
+  rayon_lev_tir: (o) => { const d = destination(o); note({ type: 'sine', de: 950, a: 280, duree: 0.38, vol: 0.16, dest: d }); note({ type: 'triangle', de: 1900, a: 560, duree: 0.32, vol: 0.06, dest: d }); note({ type: 'sine', de: 400, a: 1300, duree: 0.2, vol: 0.05, delai: 0.05, dest: d }); },
+  pistolet_eau_tir: (o) => { const d = destination(o); bruit({ duree: 0.12, vol: 0.16, freq: 2600, q: 0.7, dest: d }); note({ type: 'sine', de: 520, a: 380, duree: 0.06, vol: 0.03, dest: d }); },
+  trou_noir_tir: (o) => { const d = destination(o); note({ type: 'sine', de: 220, a: 38, duree: 0.7, vol: 0.32, dest: d }); note({ type: 'sawtooth', de: 130, a: 30, duree: 0.55, vol: 0.07, dest: d }); bruit({ duree: 0.45, vol: 0.2, freq: 280, q: 0.6, dest: d }); },
+  tesla_tir: (o) => REMPLACEMENT.tesla_zap(o),
+  tesla_zap: (o) => {
+    const d = destination(o);
+    for (let i = 0; i < 7; i++) bruit({ duree: 0.03, vol: 0.28, freq: 3500 + Math.random() * 3000, q: 3, delai: i * 0.03 + Math.random() * 0.02, dest: d });
+    note({ type: 'sawtooth', de: 120, a: 95, duree: 0.32, vol: 0.12, dest: d });
+    note({ type: 'square', de: 2400, a: 1800, duree: 0.12, vol: 0.04, dest: d });
+  },
+  flash: (o) => { const d = destination({ ...o, portee: 3 }); bruit({ duree: 0.55, vol: 0.65, freq: 1800, q: 0.3, dest: d }); bruit({ duree: 0.2, vol: 0.5, freq: 400, q: 0.5, dest: d }); note({ type: 'sine', de: 3100, a: 2900, duree: 1.4, vol: 0.05, dest: d }); },
+  propulseur: (o) => { const d = destination(o); bruit({ duree: 0.65, vol: 0.38, freq: 620, q: 0.5, dest: d }); note({ type: 'sawtooth', de: 80, a: 170, duree: 0.5, vol: 0.08, dest: d }); },
+  meteore: (o) => { const d = destination({ ...o, portee: 3 }); note({ type: 'sine', de: 1800, a: 260, duree: 0.6, vol: 0.12, dest: d }); bruit({ duree: 0.6, vol: 0.22, freq: 900, q: 0.6, dest: d }); },
+  artifice: (o) => {
+    const d = destination({ ...o, portee: 3 });
+    bruit({ duree: 0.3, vol: 0.4, freq: 900, q: 0.5, dest: d });
+    for (let i = 0; i < 12; i++) bruit({ duree: 0.02, vol: 0.22, freq: 2500 + Math.random() * 2500, q: 2, delai: 0.1 + Math.random() * 0.7, dest: d });
+  },
+  plasma_impact: (o) => { const d = destination(o); note({ type: 'sine', de: 620, a: 90, duree: 0.22, vol: 0.18, dest: d }); bruit({ duree: 0.14, vol: 0.18, freq: 2200, q: 0.8, dest: d }); },
+  tonnerre: (o) => { const d = destination({ ...o, portee: 4 }); bruit({ duree: 0.18, vol: 0.55, freq: 2400, q: 0.5, dest: d }); bruit({ duree: 1.7, vol: 0.6, freq: 140, q: 0.4, delai: 0.05, dest: d }); note({ type: 'sawtooth', de: 70, a: 30, duree: 1.2, vol: 0.14, dest: d }); },
+  trou_noir_boom: (o) => { const d = destination({ ...o, portee: 4 }); note({ type: 'sine', de: 50, a: 200, duree: 0.3, vol: 0.25, dest: d }); note({ type: 'sine', de: 90, a: 28, duree: 1.3, vol: 0.4, delai: 0.3, dest: d }); bruit({ duree: 1.1, vol: 0.45, freq: 220, q: 0.5, delai: 0.3, dest: d }); },
+  sabre_coup: (o) => { const d = destination(o); note({ type: 'sawtooth', de: 92, a: 150, duree: 0.32, vol: 0.09, dest: d }); note({ type: 'sawtooth', de: 95, a: 140, duree: 0.32, vol: 0.07, dest: d }); bruit({ duree: 0.25, vol: 0.08, freq: 1200, q: 1, dest: d }); },
+  minigun_rotor: (o) => { const d = destination(o); note({ type: 'sawtooth', de: 60, a: 420, duree: 0.6, vol: 0.08, dest: d }); bruit({ duree: 0.6, vol: 0.06, freq: 1500, q: 0.8, dest: d }); },
+  mine_armee: (o) => { const d = destination(o); note({ type: 'square', de: 1800, a: 1800, duree: 0.05, vol: 0.06, dest: d }); note({ type: 'square', de: 2400, a: 2400, duree: 0.05, vol: 0.06, delai: 0.09, dest: d }); },
 };
 
 // Joue un son : le vrai fichier s'il existe, sinon le remplacement.
@@ -265,7 +309,7 @@ export function son(nom, options = {}) {
   if (jouer(nom, options)) return;
   if (options.position && options.distance > 60) return;
   const r = REMPLACEMENT[nom] || REMPLACEMENT[nom.replace(/_\d$/, '')];
-  if (r && ctx) r();
+  if (r && ctx) r(options);
 }
 
 // Musique du menu (en boucle)
@@ -377,4 +421,67 @@ export function tirLaserSon(charge = 0.5, position = null) {
   s.connect(f).connect(g).connect(dest);
   s.start(t, Math.random() * 0.3);
   s.stop(t + 1.3);
+}
+
+// ---------- Nouvelles armes : sons qui durent ----------
+// Grondement d'un trou noir (en 3D) : il grossit puis se coupe. Renvoie { arreter() }.
+export function bourdonTrouNoir(position) {
+  if (!ctx) return { arreter() {} };
+  const t = ctx.currentTime;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.5, t + 0.6);
+  spatialiser(g, position, 3).connect(sortie);
+  const o1 = ctx.createOscillator(); o1.type = 'sawtooth'; o1.frequency.value = 42;
+  const o2 = ctx.createOscillator(); o2.type = 'sine'; o2.frequency.value = 63;
+  const filtre = ctx.createBiquadFilter(); filtre.type = 'lowpass'; filtre.frequency.value = 260; filtre.Q.value = 4;
+  const lfo = ctx.createOscillator(); lfo.frequency.value = 3.2;
+  const lfoGain = ctx.createGain(); lfoGain.gain.value = 120;
+  lfo.connect(lfoGain).connect(filtre.frequency);
+  o1.connect(filtre); o2.connect(filtre); filtre.connect(g);
+  [o1, o2, lfo].forEach((o) => o.start(t));
+  o1.frequency.linearRampToValueAtTime(30, t + 3.5);
+  let fini = false;
+  return {
+    arreter() {
+      if (fini) return;
+      fini = true;
+      const n = ctx.currentTime;
+      g.gain.cancelScheduledValues(n);
+      g.gain.setTargetAtTime(0.0001, n, 0.08);
+      [o1, o2, lfo].forEach((o) => { try { o.stop(n + 0.5); } catch { /* déjà arrêté */ } });
+    },
+  };
+}
+
+// Moteur du minigun : les canons tournent plus ou moins vite (k : 0 → 1). Renvoie { maj(k), arreter() }.
+export function moteurMinigun() {
+  if (!ctx) return { maj() {}, arreter() {} };
+  const t = ctx.currentTime;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  const filtre = ctx.createBiquadFilter(); filtre.type = 'bandpass'; filtre.frequency.value = 400; filtre.Q.value = 1.2;
+  const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = 40;
+  const o2 = ctx.createOscillator(); o2.type = 'square'; o2.frequency.value = 80;
+  const g2 = ctx.createGain(); g2.gain.value = 0.3;
+  o.connect(filtre); o2.connect(g2).connect(filtre); filtre.connect(g).connect(sortie);
+  o.start(t); o2.start(t);
+  let fini = false;
+  return {
+    maj(k) {
+      if (fini) return;
+      const n = ctx.currentTime;
+      o.frequency.setTargetAtTime(40 + k * 260, n, 0.05);
+      o2.frequency.setTargetAtTime(80 + k * 520, n, 0.05);
+      filtre.frequency.setTargetAtTime(300 + k * 1600, n, 0.05);
+      g.gain.setTargetAtTime(0.0001 + k * 0.07, n, 0.05);
+    },
+    arreter() {
+      if (fini) return;
+      fini = true;
+      const n = ctx.currentTime;
+      g.gain.setTargetAtTime(0.0001, n, 0.1);
+      try { o.stop(n + 0.6); o2.stop(n + 0.6); } catch { /* déjà arrêté */ }
+    },
+  };
 }

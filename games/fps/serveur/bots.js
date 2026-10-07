@@ -29,11 +29,14 @@ const JOUEURS_CLASSE = 6;  // les bots complètent jusqu'à ce nombre de joueurs
 const NIVEAU_MAX = 20;
 // Armes principales des bots selon leur niveau (à partir du niveau indiqué)
 const ARMES_PAR_NIVEAU = [
-  [1, ['smg', 'pompe', 'rafale']],
-  [5, ['fusil', 'smg', 'rafale', 'pompe']],
-  [10, ['fusil', 'rafale', 'precision', 'mitrailleuse']],
-  [16, ['fusil', 'precision', 'mitrailleuse', 'sniper']],
+  [1, ['smg', 'pompe', 'rafale', 'pompe_auto']],
+  [5, ['fusil', 'smg', 'rafale', 'pompe', 'vector', 'bullpup']],
+  [10, ['fusil', 'rafale', 'precision', 'mitrailleuse', 'bullpup', 'vector']],
+  [16, ['fusil', 'precision', 'mitrailleuse', 'sniper', 'bullpup', 'anti_materiel']],
 ];
+// (jamais d'armes d'admin pour les bots ; les pompes tirent de près, les fusils à lunette de loin)
+const POMPES = ['pompe', 'pompe_auto', 'double_canon'];
+const LUNETTES = ['precision', 'anti_materiel'];
 
 // Force des bots au niveau n (1 = facile, 20 = très fort)
 function forceDuNiveau(n) {
@@ -447,8 +450,9 @@ class Bots {
     const oeil = [j.x, j.y + G.HAUTEUR_YEUX, j.z];
 
     // 1) Qui voit-il ? (les joueurs en train de jouer et les autres bots, pas ses coéquipiers)
+    // Ébloui par une grenade flash : il ne voit personne pendant un moment.
     const visibles = [];
-    for (const e of p.joueurs.values()) {
+    for (const e of (now < (b.aveugleJusqua || 0) ? [] : p.joueurs.values())) {
       if (e === j || !e.vivant) continue;
       if (!e.bot && !this.actif(e, now)) continue;
       if (p.mode === 'equipes' && e.equipe === j.equipe) continue;
@@ -532,7 +536,7 @@ class Bots {
     const b = j.bot;
     const couteau = j.equipement[2];
     // Tout près : coup de couteau ; plus loin : son arme principale
-    if (dist < 2.2 && j.arme !== couteau && p.armes[j.arme].id !== 'pompe') p.changerArme(j, { a: couteau });
+    if (dist < 2.2 && j.arme !== couteau && !POMPES.includes(p.armes[j.arme].id)) p.changerArme(j, { a: couteau });
     else if (dist > 4 && j.arme === couteau) p.changerArme(j, { a: j.equipement[0] });
     const arme = p.armes[j.arme];
     j.visee = arme.type !== 'melee' && dist > 15;
@@ -571,7 +575,7 @@ class Bots {
       // Au combat : il garde une bonne distance et se décale sur les côtés
       const e = cible.e;
       const arme = p.armes[j.arme];
-      const ideal = arme.type === 'melee' ? 0 : arme.id === 'pompe' ? 6 : arme.id === 'precision' ? 22 : 12;
+      const ideal = arme.type === 'melee' ? 0 : POMPES.includes(arme.id) ? 6 : LUNETTES.includes(arme.id) ? 22 : 12;
       if (now > b.prochainLateral) { b.lateral = [-1, 0, 1][Math.floor(Math.random() * 3)]; b.prochainLateral = now + hasard(500, 1400); }
       const dx = e.x - j.x; const dz = e.z - j.z;
       const L = Math.hypot(dx, dz) || 1;

@@ -10,6 +10,7 @@
 //   chargeur, pompe, culasse, munition : pièces animées (rechargement...)
 import * as THREE from '../vendor/three.min.js';
 import { habillerArme } from './armes-glb.js';
+import { fabriquesNouvelles } from './armes-modeles-plus.js';
 
 const phong = (color, shininess = 30, specular = 0x2a2a2a) => new THREE.MeshPhongMaterial({ color, shininess, specular });
 const M = {
@@ -743,10 +744,13 @@ export function textureLueur() {
   return _lueur;
 }
 
+// Les nouvelles armes (et leurs projectiles) sont dans armes-modeles-plus.js
+const PLUS = fabriquesNouvelles({ THREE, M, phong, boite, cylindre, lunette, holo, mires, textureLueur });
 const FABRIQUES = {
   fusil, smg, pompe, sniper, roquette, rafale, mitrailleuse, precision, laser, arbalete,
   revolver, pistolet, uzi, canon_scie: canonScie, lance_fusee: lanceFusee,
   couteau, batte, poele, grenade: () => grenade(false), fumigene: () => grenade(true), grappin, kit_soin: kitSoin,
+  ...PLUS.fabriques,
 };
 
 export function modeleArme(id, ombres = false) {
@@ -809,3 +813,13 @@ export function modeleGrenadeVol(type) {
   g.traverse((o) => { if (o.isMesh) o.castShadow = true; });
   return g;
 }
+
+// Projectile en vol d'une nouvelle arme (obus, plasma, clou, trou_noir, artifice, flash, balise, mine), ou null.
+export function modeleProjectileVol(type) {
+  const g = PLUS.projectile(type);
+  if (g) g.traverse((o) => { if (o.isMesh && o.material && !o.material.transparent) o.castShadow = true; });
+  return g;
+}
+
+// Un météore qui tombe (pluie de météores de l'admin).
+export function modeleMeteore() { return PLUS.meteore(); }

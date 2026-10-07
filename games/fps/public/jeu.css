@@ -320,7 +320,7 @@ body.tactile .aide-clavier { display: none !important; }
 .outils-edition .rangee { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
 body.edition-boutons #hall, body.edition-boutons #pause { visibility: hidden; }
 
-/* HUD sur tablette : vie et munitions en haut à gauche (sous ☰ et 🏆), la barre d'armes tactile remplace celle du bas */
+/* HUD sur tablette : vie et munitions en haut à gauche (sous les boutons Menu et Scores), la barre d'armes tactile remplace celle du bas */
 body.tactile #barre-armes { display: none; }
 body.tactile #bas-gauche { left: 12px; bottom: auto; top: calc(9% + 36px); transform: scale(.8); transform-origin: top left; }
 body.tactile #bas-droite { right: auto; left: 12px; bottom: auto; top: calc(9% + 100px); transform: scale(.8); transform-origin: top left; text-align: left; }

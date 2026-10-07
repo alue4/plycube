@@ -368,6 +368,396 @@ const INSPECTIONS = {
       sons: [[0.5, 'apparition'], [1.6, 'couteau_coup']],
     };
   },
+  // ----- Nouvelles armes -----
+  // Pompe automatique : on regarde le côté, on vérifie le gros chargeur, puis deux tapes sur le protège-main
+  pompe_auto(g) {
+    const ch = (d = O) => g.G(g.sur('chargeur', d, [0, -0.08, 0]));
+    const garde = [0, 0.05, -0.36];
+    return {
+      duree: 3.1,
+      pistes: {
+        arme: [K(0), K(0.45, [-0.07, 0.05, 0.03], [0.1, 0.7, 0.35]), K(1.0, [-0.072, 0.055, 0.03], [0.12, 0.78, 0.3]), K(1.35, [-0.05, 0.04, 0.02], [0.2, 0.25, -0.6]),
+          K(1.9, [-0.05, 0.04, 0.02], [0.22, 0.22, -0.62], { arret: 1 }), K(2.3, [-0.04, 0.06, -0.04], [0.35, 0.1, -0.1]), K(2.7, [-0.04, 0.06, -0.04], [0.36, 0.1, -0.1], { arret: 1 }), K(3.1)],
+        chargeur: [K(0), K(1.45), K(1.6, [0, -0.035, 0.004]), K(1.85, [0, -0.035, 0.004], O, { arret: 1 }), K(1.92, [0, 0.003, 0]), K(2.0)],
+        mainG: [K(0), K(1.2, [0, -0.02, 0.05]), K(1.42, ch()), K(1.6, ch([0, -0.035, 0.004])), K(1.85, ch([0, -0.035, 0.004]), O, { arret: 1 }), K(1.92, ch()),
+          K(2.3, g.G(plus(garde, [0, 0.03, 0]))), K(2.4, g.G(garde)), K(2.5, g.G(plus(garde, [0, 0.03, 0.01]))), K(2.6, g.G(garde)), K(2.85), K(3.1)],
+      },
+      sons: [[1.6, 'chargeur_retire'], [1.92, 'chargeur_insere'], [2.4, 'clic'], [2.6, 'clic']],
+    };
+  },
+  // Double canon : on casse l'arme, on sort une cartouche pour la regarder et on la remet, on referme d'un coup
+  double_canon(g) {
+    return {
+      duree: 3.2,
+      pistes: {
+        arme: [K(0), K(0.35, [-0.03, 0.02, -0.02], [0.1, 0.2, 0.3]), K(0.45, [-0.03, 0, -0.02], [-0.1, 0.2, 0.3]), K(0.95, [-0.05, 0.05, -0.05], [0.42, 0.25, 0.2]),
+          K(2.0, [-0.05, 0.055, -0.05], [0.44, 0.25, 0.18], { arret: 1 }), K(2.3, [-0.02, 0, 0.0], [-0.2, 0.1, 0]), K(2.4, [-0.02, 0.01, 0.0], [0.35, 0.1, 0]),
+          K(2.6, [-0.01, 0, 0.01], [0.05, 0.05, 0]), K(3.2)],
+        canons: [K(0), K(0.38), K(0.48, O, [-0.7, 0, 0]), K(2.35, O, [-0.7, 0, 0], { arret: 1 }), K(2.42), K(3.2)],
+        munitionCanon: [K(0), K(1.1), K(1.3, [0, 0.03, 0.05]), K(1.6, [0, 0.03, 0.05], O, { arret: 1 }), K(1.75), K(3.2)],
+        mainG: [K(0), K(0.35, [0, -0.08, 0.05], O, { libre: 1 }), K(1.0, [0, -0.08, 0.05], O, { libre: 1 }), K(1.2, g.G([-0.02, 0.04, -0.09])), K(1.3, g.G([-0.02, 0.07, -0.06])),
+          K(1.6, g.G([-0.02, 0.07, -0.06]), O, { arret: 1 }), K(1.75, g.G([-0.02, 0.04, -0.09])), K(1.95, [0, -0.08, 0.05], O, { libre: 1 }), K(2.3, [0, -0.08, 0.05], O, { libre: 1 }), K(2.6), K(3.2)],
+      },
+      sons: [[0.48, 'chargeur_retire'], [1.3, 'douille'], [1.75, 'cartouche_insere'], [2.42, 'chargeur_insere']],
+    };
+  },
+  // Mitraillette rapide : deux tapes sur le bloc incliné, l'arme bascule à plat d'un coup de poignet, tape sur le chargeur
+  vector(g) {
+    const ch = (d = O) => g.G(g.sur('chargeur', d, [0, -0.08, 0]));
+    const bloc = [-0.03, -0.04, -0.11];
+    return {
+      duree: 2.9,
+      pistes: {
+        arme: [K(0), K(0.4, [-0.06, 0.05, 0.03], [0.15, 0.6, 0.4]), K(0.9, [-0.06, 0.055, 0.03], [0.18, 0.65, 0.35]), K(1.15, [-0.03, 0.04, 0], [0.1, 0.3, -0.2]),
+          K(1.45, [-0.03, 0.04, 0], [0.1, 0.3, -2.0]), K(1.75, [-0.03, 0.04, 0], [0.1, 0.3, -2.05], { arret: 1 }), K(2.05, [-0.03, 0.04, 0], [0.12, 0.25, -0.3]),
+          K(2.45, [-0.02, 0.02, 0], [0.05, 0.1, -0.4]), K(2.9)],
+        chargeur: [K(0), K(2.1), K(2.18, [0, 0.004, 0]), K(2.26)],
+        mainG: [K(0), K(0.55, g.G(plus(bloc, [-0.02, 0, 0]))), K(0.65, g.G(bloc)), K(0.75, g.G(plus(bloc, [-0.02, 0, 0]))), K(0.85, g.G(bloc)), K(1.05),
+          K(1.2, [0, -0.08, 0.04], O, { libre: 1 }), K(1.95, [0, -0.08, 0.04], O, { libre: 1 }), K(2.12, ch([0, -0.03, 0])), K(2.18, ch()), K(2.4), K(2.9)],
+      },
+      sons: [[0.65, 'clic'], [0.85, 'clic'], [1.4, 'couteau_coup'], [2.18, 'chargeur_insere']],
+    };
+  },
+  // Fusil bullpup : on sort le chargeur transparent et on regarde les cartouches à travers, puis un œil dans la lunette
+  bullpup(g) {
+    const ch = (d = O) => g.G(g.sur('chargeur', d, [0, -0.07, 0]));
+    const vu = [-0.12, 0.06, -0.15];
+    const P = poseRecharge([-0.1, 0.1, -0.1], [0.3, 0.55, -0.5]);
+    return {
+      duree: 3.2,
+      pistes: {
+        arme: [K(0), K(0.4, ...P()), K(1.9, ...P([0, 0, 0], [0.02, 0.04, 0.04]), { arret: 1 }), K(2.15, ...P()), K(2.2, ...P([0, 0.012, 0.004], [0.07, 0, 0.02])),
+          K(2.6, [-0.05, 0.07, -0.02], [0.04, 0.7, 0]), K(2.9, [-0.05, 0.07, -0.02], [0.05, 0.72, 0], { arret: 1 }), K(3.2)],
+        chargeur: [K(0), K(0.55), K(0.75, [0, -0.2, 0.02]), K(1.05, vu, [0.3, 0.2, -1.2]), K(1.75, plus(vu, [0, 0.01, 0]), [0.35, 0.3, -1.3], { arret: 1 }),
+          K(2.0, [0, -0.2, 0.02]), K(2.17, [0, -0.01, 0]), K(2.2), K(3.2)],
+        mainG: [K(0), K(0.45, ch()), K(0.55, ch(), O, { arret: 1 }), K(0.75, ch([0, -0.2, 0.02])), K(1.05, ch(vu)), K(1.75, ch(plus(vu, [0, 0.01, 0]))),
+          K(2.0, ch([0, -0.2, 0.02])), K(2.17, ch([0, -0.03, 0])), K(2.2, ch([0, -0.005, 0])), K(2.45), K(3.2)],
+      },
+      sons: [[0.75, 'chargeur_retire'], [2.2, 'chargeur_insere']],
+    };
+  },
+  // Lance-grenades : on fait tourner le tambour à la main (clic clic clic), puis une tape sur le canon
+  lance_grenades(g) {
+    const tambour = plus(g.repos('barillet'), [-0.07, 0.0, 0.0]);
+    const canon = [0, 0.065, -0.36];
+    const t = (dy) => g.G(plus(tambour, [0, dy, 0]));
+    return {
+      duree: 3.2,
+      pistes: {
+        arme: [K(0), K(0.45, [-0.06, 0.06, 0.0], [0.15, 0.5, 0.45]), K(2.0, [-0.065, 0.065, 0.0], [0.17, 0.55, 0.5], { arret: 1 }), K(2.4, [-0.04, 0.05, -0.05], [0.3, 0.2, -0.2]),
+          K(2.8, [-0.04, 0.05, -0.05], [0.32, 0.2, -0.22], { arret: 1 }), K(3.2)],
+        barillet: [K(0), K(0.7), K(0.85, O, [0, 0, 1.05]), K(1.0, O, [0, 0, 2.09]), K(1.15, O, [0, 0, 3.14]), K(1.3, O, [0, 0, 4.19]), K(1.45, O, [0, 0, 5.24]),
+          K(1.6, O, [0, 0, TOUR]), K(3.2, O, [0, 0, TOUR])],
+        mainG: [K(0), K(0.55, t(0.03)), K(0.7, t(0)), K(0.85, t(-0.03)), K(0.9, t(0.03)), K(1.0, t(-0.03)), K(1.05, t(0.03)), K(1.15, t(-0.03)), K(1.2, t(0.03)),
+          K(1.3, t(-0.03)), K(1.6, t(0)), K(1.9), K(2.45, g.G(plus(canon, [0, 0.025, 0]))), K(2.55, g.G(canon)), K(2.65, g.G(plus(canon, [0, 0.025, 0]))), K(2.95), K(3.2)],
+      },
+      sons: [[0.85, 'clic'], [1.0, 'clic'], [1.15, 'clic'], [1.3, 'clic'], [1.45, 'clic'], [1.6, 'clic'], [2.55, 'clic']],
+    };
+  },
+  // Fusil à plasma : on le tourne pour admirer les bobines qui brillent, puis on vérifie la cellule d'énergie
+  plasma(g) {
+    const ch = (d = O) => g.G(g.sur('chargeur', d, [0, -0.06, 0]));
+    return {
+      duree: 3,
+      pistes: {
+        arme: [K(0), K(0.5, [-0.06, 0.05, 0.05], [0.1, 0.85, 0.25]), K(1.3, [-0.065, 0.06, 0.05], [0.15, 0.9, -0.25]), K(1.6, [-0.04, 0.04, 0.02], [0.2, 0.25, -0.5]),
+          K(2.3, [-0.04, 0.04, 0.02], [0.22, 0.22, -0.52], { arret: 1 }), K(3)],
+        chargeur: [K(0), K(1.7), K(1.85, [0, -0.05, 0]), K(2.1, [0, -0.05, 0], O, { arret: 1 }), K(2.18, [0, 0.004, 0]), K(2.25)],
+        mainG: [K(0), K(0.4), K(0.7, [0, -0.1, 0.05], O, { libre: 1 }), K(1.3, [0, -0.1, 0.05], O, { libre: 1 }), K(1.65, ch()), K(1.85, ch([0, -0.05, 0])),
+          K(2.1, ch([0, -0.05, 0]), O, { arret: 1 }), K(2.18, ch()), K(2.5), K(3)],
+      },
+      sons: [[0.5, 'apparition'], [1.85, 'chargeur_retire'], [2.18, 'chargeur_insere']],
+    };
+  },
+  // Fusil anti-matériel : on essuie la grande lentille, on vérifie le chargeur, puis un regard dans la lunette
+  anti_materiel(g) {
+    const ch = (d = O) => g.G(g.sur('chargeur', d, [0, -0.06, 0]));
+    const L = (x, y) => g.G([x, y, -0.31]);
+    return {
+      duree: 3.6,
+      pistes: {
+        arme: [K(0), K(0.55, [-0.05, 0.05, 0.0], [0.06, 0.5, 0.15]), K(1.6, [-0.055, 0.055, 0.0], [0.08, 0.55, 0.12]), K(2.0, [-0.04, 0.03, 0.04], [0.2, 0.15, -0.5]),
+          K(2.5, [-0.04, 0.03, 0.04], [0.22, 0.12, -0.52], { arret: 1 }), K(2.9, [-0.03, 0.06, 0], [0.02, 0.6, 0]), K(3.2, [-0.03, 0.06, 0], [0.03, 0.62, 0], { arret: 1 }), K(3.6)],
+        chargeur: [K(0), K(2.05), K(2.15, [0, -0.03, 0.004]), K(2.4, [0, -0.03, 0.004], O, { arret: 1 }), K(2.48), K(3.6)],
+        mainG: [K(0), K(0.6, L(-0.03, 0.155)), K(0.8, L(0.03, 0.155)), K(1.0, L(-0.03, 0.148)), K(1.2, L(0.03, 0.15)), K(1.4, L(0, 0.152)), K(1.65),
+          K(2.0, ch()), K(2.15, ch([0, -0.03, 0.004])), K(2.4, ch([0, -0.03, 0.004]), O, { arret: 1 }), K(2.48, ch()), K(2.75), K(3.6)],
+      },
+      sons: [[2.15, 'chargeur_retire'], [2.48, 'chargeur_insere']],
+    };
+  },
+  // Cloueuse : deux « tchak » à vide en appuyant le nez devant soi, on la retourne pour regarder dessous, tape sur la bande de clous
+  cloueuse(g) {
+    const bande = (d = O) => g.G(g.sur('chargeur', d, [0, -0.02, 0.12]));
+    return {
+      duree: 2.8,
+      pistes: {
+        arme: [K(0), K(0.35, [-0.03, 0.03, -0.04], [-0.25, 0.1, 0]), K(0.5, [-0.03, 0.03, -0.07], [-0.25, 0.1, 0]), K(0.6, [-0.03, 0.03, -0.04], [-0.25, 0.1, 0]),
+          K(0.75, [-0.03, 0.03, -0.07], [-0.25, 0.1, 0]), K(0.9, [-0.03, 0.03, -0.04], [-0.2, 0.1, 0]), K(1.4, [-0.05, 0.04, -0.05], [0.2, 0.4, 2.6]),
+          K(1.9, [-0.05, 0.04, -0.05], [0.2, 0.42, 2.65], { arret: 1 }), K(2.3, [-0.03, 0.03, 0.0], [0.1, 0.2, 0.2]), K(2.8)],
+        chargeur: [K(0), K(1.95), K(2.05, [0, 0, 0.03]), K(2.15), K(2.8)],
+        mainG: [K(0), K(1.0), K(1.2, [0, -0.13, 0.04], O, { libre: 1 }), K(1.85, [0, -0.13, 0.04], O, { libre: 1 }), K(2.0, bande()), K(2.05, bande([0, 0, 0.03])), K(2.15, bande()),
+          K(2.45), K(2.8)],
+      },
+      sons: [[0.5, 'clic'], [0.75, 'clic'], [2.05, 'chargeur_retire'], [2.15, 'chargeur_insere']],
+    };
+  },
+  // Pistolet lourd : on le montre de profil des deux côtés (il brille), puis la main tire la glissière par-dessus
+  pistolet_lourd(g) {
+    const dessus = [-0.008, 0.066, -0.12];
+    return {
+      duree: 2.8,
+      pistes: {
+        arme: [K(0), K(0.4, [-0.05, 0.05, -0.04], [0.1, 0.25, 1.2]), K(0.9, [-0.055, 0.055, -0.04], [0.12, -0.3, 1.25]), K(1.2, [-0.03, 0.03, -0.03], [0.08, 0.1, 0.2]),
+          K(1.35, [-0.04, 0.05, -0.08], [0.15, 0.25, 0.5]), K(1.9, [-0.04, 0.05, -0.08], [0.15, 0.25, 0.55], { arret: 1 }), K(2.3, [-0.02, 0.02, -0.02], [0.05, 0.1, 0.1]), K(2.8)],
+        culasse: [K(0), K(1.5), K(1.6, [0, 0, 0.03]), K(1.75, [0, 0, 0.03], O, { arret: 1 }), K(1.8), K(2.8)],
+        mainG: [K(0), K(0.3, [0, -0.08, 0.03], O, { libre: 1 }), K(1.15, [0, -0.08, 0.03], O, { libre: 1 }), K(1.4, g.G(dessus)), K(1.5, g.G(dessus), O, { arret: 1 }),
+          K(1.6, g.G(plus(dessus, [0, 0, 0.03]))), K(1.75, g.G(plus(dessus, [0, 0, 0.03]))), K(1.8, g.G(plus(dessus, [0, 0.02, 0.05]))), K(2.1), K(2.8)],
+      },
+      sons: [[1.6, 'clic'], [1.8, 'clic']],
+    };
+  },
+  // Pistolet automatique : clic clic sur le sélecteur de tir, on le penche à plat, puis une tape sous le long chargeur
+  pistolet_auto(g) {
+    const ch = (d = O) => g.G(g.sur('chargeur', d, [0, -0.1, 0.02]));
+    const selecteur = [-0.02, 0.034, -0.02];
+    return {
+      duree: 2.6,
+      pistes: {
+        arme: [K(0), K(0.35, [-0.05, 0.05, -0.09], [0.12, 0.3, 0.6]), K(1.0, [-0.055, 0.055, -0.09], [0.13, 0.32, 0.62], { arret: 1 }), K(1.3, [-0.04, 0.05, -0.03], [0.05, 0.2, -0.6]),
+          K(1.6, [-0.04, 0.05, -0.03], [0.05, 0.2, -0.62], { arret: 1 }), K(1.85, [-0.03, 0.04, -0.03], [0.15, 0.15, 0.1]), K(2.0, [-0.03, 0.05, -0.03], [0.2, 0.15, 0.1]), K(2.6)],
+        chargeur: [K(0), K(1.85), K(1.95, [0, 0.004, 0]), K(2.05)],
+        mainG: [K(0), K(0.4, g.G(plus(selecteur, [-0.01, 0.01, 0]))), K(0.55, g.G(selecteur)), K(0.65, g.G(plus(selecteur, [0, 0.006, 0]))), K(0.75, g.G(selecteur)),
+          K(0.85, g.G(plus(selecteur, [0, -0.006, 0]))), K(1.05), K(1.25, [0, -0.08, 0.03], O, { libre: 1 }), K(1.65, [0, -0.08, 0.03], O, { libre: 1 }),
+          K(1.88, ch([0, -0.03, 0])), K(1.95, ch()), K(2.25), K(2.6)],
+      },
+      sons: [[0.65, 'clic'], [0.85, 'clic'], [1.95, 'chargeur_insere']],
+    };
+  },
+  // Mini-arbalète : un tour autour du doigt façon cow-boy, puis on pince la corde (elle vibre)
+  mini_arbalete(g) {
+    const corde = [0.07, 0.03, -0.17];
+    return {
+      duree: 2.8,
+      pistes: {
+        arme: [K(0), K(0.25, [-0.02, 0.02, -0.06], [0.1, 0, 0]), K(0.55, [-0.02, 0.03, -0.08], [0.1, 0, Math.PI]), K(0.85, [-0.02, 0.02, -0.06], [0.1, 0, TOUR]), K(1.0, [0, -0.01, 0], [0.05, 0, TOUR]),
+          K(1.4, [-0.05, 0.05, -0.05], [0.3, 0.35, TOUR + 0.3]), K(2.2, [-0.05, 0.055, -0.05], [0.32, 0.37, TOUR + 0.28], { arret: 1 }), K(2.8, O, [0, 0, TOUR])],
+        corde: [K(0, [1, 0, 0]), K(1.55, [1, 0, 0]), K(1.62, [0.85, 0, 0]), K(1.67, [1.04, 0, 0]), K(1.72, [0.95, 0, 0]), K(1.77, [1.02, 0, 0]), K(1.82, [0.98, 0, 0]),
+          K(1.9, [1, 0, 0]), K(2.8, [1, 0, 0])],
+        mainG: [K(0), K(0.2, [0, -0.08, 0.03], O, { libre: 1 }), K(1.1, [0, -0.08, 0.03], O, { libre: 1 }), K(1.45, g.G(plus(corde, [0, 0.01, 0]))), K(1.55, g.G(corde)),
+          K(1.65, g.G(plus(corde, [0.01, 0.03, 0.02]))), K(2.1), K(2.8)],
+      },
+      sons: [[0.4, 'couteau_coup'], [1.62, 'grappin_corde']],
+    };
+  },
+  // Pistolet à eau : on le secoue (l'eau fait « floc floc »), on regarde le réservoir, puis deux coups de pompe
+  pistolet_eau(g) {
+    const pompe = plus(g.repos('pompe'), [0, -0.05, -0.22]);
+    const s = [0.15, 0.2, 0.3];
+    return {
+      duree: 2.8,
+      pistes: {
+        arme: [K(0), K(0.3, [-0.04, 0.04, 0.02], s), K(0.4, [-0.04, 0.07, 0.02], s), K(0.5, [-0.04, 0.02, 0.02], s), K(0.6, [-0.04, 0.07, 0.02], s), K(0.7, [-0.04, 0.02, 0.02], s),
+          K(0.8, [-0.04, 0.06, 0.02], s), K(1.1, [-0.05, 0.05, 0.04], [0.1, 0.7, 0.2]), K(1.5, [-0.05, 0.05, 0.04], [0.12, 0.72, 0.2], { arret: 1 }),
+          K(1.8, [-0.03, 0.03, 0], [0.1, 0.2, -0.1]), K(2.4, [-0.03, 0.03, 0], [0.1, 0.2, -0.1], { arret: 1 }), K(2.8)],
+        pompe: [K(0), K(1.85), K(1.95, [0, 0, 0.05]), K(2.05), K(2.15, [0, 0, 0.05]), K(2.25), K(2.8)],
+        mainG: [K(0), K(1.85, g.G(pompe)), K(1.95, g.G(plus(pompe, [0, 0, 0.05]))), K(2.05, g.G(pompe)), K(2.15, g.G(plus(pompe, [0, 0, 0.05]))), K(2.25, g.G(pompe)), K(2.8)],
+      },
+      sons: [[0.4, 'eau'], [0.6, 'eau'], [1.95, 'pompe_armement'], [2.15, 'pompe_armement']],
+    };
+  },
+  // Katana : on regarde le fil de la lame, un moulinet du poignet, puis le petit coup sec pour « essuyer » la lame
+  katana() {
+    return {
+      duree: 3,
+      pistes: {
+        arme: [K(0), K(0.4, [-0.05, 0.05, 0.04], [-0.4, 0.8, 0.5]), K(1.2, [-0.06, 0.055, 0.04], [-0.45, 0.85, 0.45], { arret: 1 }), K(1.5), K(1.75, [0, 0.02, 0], [0, 0, Math.PI]),
+          K(2.0, [0, 0.02, 0], [0, 0, TOUR]), K(2.3, [0.05, -0.02, 0], [-0.3, -0.6, TOUR + 0.2]), K(2.45, [0.02, -0.03, 0], [-0.5, -0.1, TOUR]), K(3, O, [0, 0, TOUR])],
+        mainG: [K(0), K(0.3, [0, -0.05, 0.04], O, { libre: 1 }), K(2.5, [0, -0.05, 0.04], O, { libre: 1 }), K(3)],
+      },
+      sons: [[1.75, 'couteau_coup'], [2.3, 'couteau_coup']],
+    };
+  },
+  // Hache : on la soupèse deux fois, on la tourne et on passe le doigt sur le tranchant (toc)
+  hache(g) {
+    const tranchant = [-0.03, -0.12, -0.5];
+    return {
+      duree: 3,
+      pistes: {
+        arme: [K(0), K(0.3, [0, 0.04, 0], [0.2, 0, 0]), K(0.45, [0, -0.01, 0], [-0.05, 0, 0]), K(0.6, [0, 0.04, 0], [0.2, 0, 0]), K(0.75),
+          K(1.3, [-0.08, 0.08, 0.06], [-0.5, 0.7, 0.6]), K(2.2, [-0.08, 0.085, 0.06], [-0.52, 0.72, 0.58], { arret: 1 }), K(2.6, [-0.02, 0.02, 0], [-0.1, 0.1, 0.1]), K(3)],
+        mainG: [K(0), K(1.2), K(1.55, g.G(plus(tranchant, [0, 0.03, 0.04]))), K(1.75, g.G(tranchant)), K(1.95, g.G(plus(tranchant, [0, 0, -0.06]))),
+          K(2.15, g.G(plus(tranchant, [0, 0.03, 0]))), K(2.5), K(3)],
+      },
+      sons: [[0.45, 'clic'], [0.75, 'clic'], [1.75, 'poele_touche']],
+    };
+  },
+  // Masse : on la lève devant soi pour regarder la tête (elle est lourde, ça tremble), puis elle retombe avec son poids
+  masse() {
+    const h = [-0.07, 0.03, -0.08]; const r = [0.6, 0.35, 0.25];
+    const tremble = (k, d) => K(k, plus(h, [0, d, 0]), r);
+    return {
+      duree: 3.2,
+      pistes: {
+        arme: [K(0), K(0.6, h, r), tremble(0.9, 0.006), tremble(1.1, -0.004), tremble(1.3, 0.006), tremble(1.5, -0.004), K(1.9, plus(h, [0, 0, 0.01]), [0.62, -0.3, 0.2]),
+          K(2.2, plus(h, [0, 0.005, 0.01]), [0.64, -0.32, 0.2], { arret: 1 }), K(2.5, [0, -0.05, -0.02], [-0.4, 0, 0]), K(2.6, [0, -0.06, -0.02], [-0.45, 0, 0]), K(3.2)],
+      },
+      sons: [[2.55, 'batte_coup']],
+    };
+  },
+  // Pelle : on creuse un coup devant soi, on jette la terre par-dessus l'épaule, puis on toque sur la lame
+  pelle(g) {
+    const lame = [0.02, 0.01, -0.66];
+    return {
+      duree: 3,
+      pistes: {
+        arme: [K(0), K(0.4, [0, -0.06, -0.06], [-0.6, 0, 0]), K(0.55, [0, -0.08, -0.12], [-0.7, 0, 0]), K(0.9, [0, -0.02, -0.06], [0.1, 0, 0]), K(1.05, [0.02, 0.02, -0.04], [0.3, -0.2, 0.2]),
+          K(1.5, [-0.06, 0.06, 0.04], [-0.3, 0.8, 0.5]), K(2.2, [-0.06, 0.065, 0.04], [-0.32, 0.82, 0.48], { arret: 1 }), K(2.5, [-0.06, 0.06, 0.04], [-0.3, 0.8, 0.5]), K(3)],
+        mainG: [K(0), K(1.5), K(1.75, g.G(plus(lame, [0.03, 0.03, 0]))), K(1.85, g.G(lame)), K(1.95, g.G(plus(lame, [0.03, 0.03, 0]))), K(2.05, g.G(lame)), K(2.4), K(3)],
+      },
+      sons: [[0.55, 'impact_mur'], [1.05, 'pouf'], [1.85, 'poele_touche'], [2.05, 'poele_touche']],
+    };
+  },
+  // Grenade flash : on lit l'étiquette des deux côtés, puis petit lancer en vrille au-dessus de la main
+  grenade_flash() {
+    return {
+      duree: 2.4,
+      pistes: {
+        arme: [K(0), K(0.4, [-0.05, 0.05, 0.05], [0.1, 1.2, 0.1]), K(1.0, [-0.05, 0.05, 0.05], [0.1, -0.5, 0.1]), K(1.2, [-0.05, 0.05, 0.05], [0.1, -0.52, 0.1], { arret: 1 }),
+          K(1.5, [0, -0.02, 0], [-0.1, 0, 0]), K(1.6, [0, 0.01, 0], [0.1, 0, 0]), K(2.4)],
+        objet: [K(0), K(1.55), K(1.8, [0, 0.15, 0], [0, TOUR, 0]), K(2.05, O, [0, TOUR * 2, 0]), K(2.4, O, [0, TOUR * 2, 0])],
+      },
+      sons: [[1.6, 'couteau_coup'], [2.05, 'clic']],
+    };
+  },
+  // Mine : deux tapes sur le détonateur, puis on la retourne pour voir dessous
+  mine() {
+    return {
+      duree: 2.6,
+      pistes: {
+        arme: [K(0), K(0.4, [-0.03, 0.05, 0.04], [0.5, 0.2, 0.1]), K(1.1, [-0.03, 0.05, 0.04], [0.5, 0.2, 0.1], { arret: 1 }), K(1.4, [-0.03, 0.05, 0.04], [0.5, 0.2, 0.1]),
+          K(2.0, [-0.02, 0.03, 0.02], [0.3, 0.1, 0.1]), K(2.6)],
+        objet: [K(0), K(1.1), K(1.6, O, [Math.PI, 0, 0]), K(1.9, O, [Math.PI, 0, 0], { arret: 1 }), K(2.3, O, [TOUR, 0, 0]), K(2.6, O, [TOUR, 0, 0])],
+        mainG: [K(0), K(0.5, [-0.03, 0.05, -0.03]), K(0.6, [-0.03, 0.035, -0.03]), K(0.7, [-0.03, 0.05, -0.03]), K(0.8, [-0.03, 0.035, -0.03]), K(1.0), K(2.6)],
+      },
+      sons: [[0.6, 'clic'], [0.8, 'clic']],
+    };
+  },
+  // Propulseur : on regarde le manomètre (toc toc), puis un petit « pschht » d'essai qui fait sauter la main
+  propulseur() {
+    return {
+      duree: 2.6,
+      pistes: {
+        arme: [K(0), K(0.4, [-0.04, 0.06, 0.04], [0.4, 0.6, 0]), K(1.2, [-0.04, 0.065, 0.04], [0.42, 0.62, 0], { arret: 1 }), K(1.5, O, [-0.2, 0, 0]), K(1.6, [0, 0.05, 0], [-0.2, 0, 0]),
+          K(1.75, O, [-0.2, 0, 0]), K(2.6)],
+        mainG: [K(0), K(0.5, [-0.02, 0.06, -0.02]), K(0.7, [-0.02, 0.05, -0.02]), K(0.8, [-0.02, 0.06, -0.02]), K(0.9, [-0.02, 0.05, -0.02]), K(1.2), K(2.6)],
+      },
+      sons: [[0.7, 'clic'], [0.9, 'clic'], [1.6, 'pouf']],
+    };
+  },
+  // Balise des météores : levée vers le ciel (bip !), puis un petit lancer en tournant
+  meteores() {
+    return {
+      duree: 2.8,
+      pistes: {
+        arme: [K(0), K(0.5, [-0.05, 0.25, -0.1], [0.6, 0, 0]), K(1.5, [-0.05, 0.27, -0.1], [0.62, 0, 0], { arret: 1 }), K(1.9), K(2.0, [0, -0.02, 0]), K(2.8)],
+        objet: [K(0), K(1.6), K(1.85, [0, 0.15, 0], [0, Math.PI, 0]), K(2.1, O, [0, TOUR, 0]), K(2.8, O, [0, TOUR, 0])],
+      },
+      sons: [[0.6, 'lobby_pret'], [2.1, 'clic']],
+    };
+  },
+  // Canon à trou noir : on le tourne vers soi pour regarder l'orbe qui pulse, la main s'approche... et recule vite
+  trou_noir(g) {
+    const orbe = [0, 0.06, -0.33];
+    return {
+      duree: 3.2,
+      pistes: {
+        arme: [K(0), K(0.5, [-0.06, 0.06, 0.06], [0.15, 0.9, 0.3]), K(1.5, [-0.065, 0.065, 0.06], [0.18, 0.95, 0.25], { arret: 1 }), K(1.9, [-0.04, 0.05, 0.03], [0.3, 0.3, -0.2]),
+          K(2.7, [-0.04, 0.05, 0.03], [0.32, 0.3, -0.22], { arret: 1 }), K(3.2)],
+        mainG: [K(0), K(1.6), K(2.0, g.G(plus(orbe, [0, 0.04, 0.03]))), K(2.2, g.G(plus(orbe, [0, 0.02, 0.02]))), K(2.3, g.G(plus(orbe, [0, 0.07, 0.06]))), K(2.7), K(3.2)],
+      },
+      sons: [[0.5, 'apparition'], [2.3, 'couteau_coup']],
+    };
+  },
+  // Fusil Tesla : on touche la bobine de cuivre... zap ! (la main saute), les éclairs crépitent
+  tesla(g) {
+    const bobine = [0, 0.045, -0.3];
+    return {
+      duree: 3,
+      pistes: {
+        arme: [K(0), K(0.45, [-0.06, 0.05, 0.05], [0.15, 0.8, 0.3]), K(1.2, [-0.06, 0.055, 0.05], [0.18, 0.85, 0.25], { arret: 1 }), K(1.5, [-0.04, 0.04, 0.02], [0.2, 0.3, -0.3]),
+          K(1.85, [-0.04, 0.04, 0.02], [0.2, 0.3, -0.3]), K(1.9, [-0.03, 0.05, 0.03], [0.28, 0.32, -0.25]), K(1.98, [-0.04, 0.04, 0.02], [0.2, 0.3, -0.3]),
+          K(2.4, [-0.04, 0.04, 0.02], [0.22, 0.3, -0.32], { arret: 1 }), K(3)],
+        mainG: [K(0), K(1.5), K(1.8, g.G(plus(bobine, [0, 0.03, 0]))), K(1.88, g.G(bobine)), K(1.95, g.G(plus(bobine, [-0.03, 0.07, 0.04]))), K(2.3), K(3)],
+      },
+      sons: [[0.5, 'apparition'], [1.88, 'tesla_zap']],
+    };
+  },
+  // Minigun : deux tapes sur la boîte de munitions, puis la main lance les canons qui tournent
+  minigun(g) {
+    const boite = g.sur('chargeur', O, [-0.03, 0.03, 0]);
+    const canons = [0, 0.05, -0.45];
+    return {
+      duree: 3.2,
+      pistes: {
+        arme: [K(0), K(0.6, [-0.05, 0.08, -0.03], [0.25, 0.4, -0.4]), K(1.6, [-0.05, 0.085, -0.03], [0.27, 0.42, -0.42], { arret: 1 }), K(2.0, [-0.03, 0.05, 0.02], [0.1, 0.2, 0.3]),
+          K(2.7, [-0.03, 0.05, 0.02], [0.12, 0.2, 0.32], { arret: 1 }), K(3.2)],
+        mainG: [K(0), K(0.65, g.G(plus(boite, [0, 0.04, 0]))), K(0.8, g.G(boite)), K(0.95, g.G(plus(boite, [0, 0.04, 0]))), K(1.1, g.G(boite)), K(1.4),
+          K(2.05, g.G(plus(canons, [0, 0.02, 0]))), K(2.15, g.G(plus(canons, [0.04, 0.0, 0]))), K(2.25, g.G(plus(canons, [0, -0.02, 0]))), K(2.5), K(3.2)],
+      },
+      sons: [[0.8, 'clic'], [1.1, 'clic'], [2.15, 'minigun_rotor']],
+    };
+  },
+  // Marteau de Thor : levé vers le ciel (le tonnerre gronde), puis deux tours en le faisant tourner par le manche
+  marteau_thor() {
+    return {
+      duree: 3.2,
+      pistes: {
+        arme: [K(0), K(0.5, [-0.08, 0.3, -0.1], [1.6, 0, 0]), K(1.4, [-0.08, 0.31, -0.1], [1.62, 0, 0], { arret: 1 }), K(1.7, [0, 0.02, 0]), K(1.9, [0, 0.02, 0], [-Math.PI, 0, 0]),
+          K(2.1, [0, 0.02, 0], [-TOUR, 0, 0]), K(2.3, [0, 0.02, 0], [-TOUR * 1.5, 0, 0]), K(2.5, O, [-TOUR * 2, 0, 0]), K(3.2, O, [-TOUR * 2, 0, 0])],
+      },
+      sons: [[0.6, 'tonnerre'], [1.9, 'couteau_coup'], [2.3, 'couteau_coup']],
+    };
+  },
+  // Lance-feux d'artifice : une tape sur chaque tube (on dirait des notes de musique), puis on vérifie la fusée
+  feu_artifice(g) {
+    const tube = (i) => [((i % 2) - 0.5) * 0.07, (Math.floor(i / 2) - 0.5) * 0.07 + 0.065, -0.3];
+    return {
+      duree: 3,
+      pistes: {
+        arme: [K(0), K(0.5, [-0.07, 0.05, 0.04], [0.2, 0.5, 0.4]), K(2.0, [-0.072, 0.055, 0.04], [0.22, 0.52, 0.38], { arret: 1 }), K(2.4, [-0.04, 0.03, 0.02], [0.1, 0.2, -0.2]), K(3)],
+        munition: [K(0), K(1.95), K(2.05, [0, 0, -0.01]), K(2.15), K(3)],
+        mainG: [K(0), K(0.6, g.G(tube(2))), K(0.75, g.G(plus(tube(2), [0, 0.02, 0]))), K(0.9, g.G(tube(3))), K(1.05, g.G(plus(tube(3), [0, 0.02, 0]))),
+          K(1.2, g.G(plus(tube(2), [0, 0, 0.12]))), K(1.35, g.G(plus(tube(2), [0, 0.02, 0.12]))), K(1.5, g.G(plus(tube(3), [0, 0, 0.12]))), K(1.65, g.G(plus(tube(3), [0, 0.02, 0.12]))),
+          K(1.9, g.G(plus(g.repos('munition'), [0, 0.03, 0.02]))), K(2.05, g.G(plus(g.repos('munition'), [0, 0.02, 0.01]))), K(2.3), K(3)],
+      },
+      sons: [[0.6, 'clic'], [0.9, 'clic'], [1.2, 'clic'], [1.5, 'clic'], [2.05, 'clic']],
+    };
+  },
+  // Rayon anti-gravité : pointé vers le ciel, « piou » d'essai, puis on le regarde de près
+  rayon_lev() {
+    return {
+      duree: 2.8,
+      pistes: {
+        arme: [K(0), K(0.4, [-0.03, 0.1, -0.05], [1.0, 0.1, 0.2]), K(1.0, [-0.03, 0.11, -0.05], [1.05, 0.1, 0.2], { arret: 1 }), K(1.08, [-0.03, 0.12, -0.03], [1.15, 0.1, 0.2]),
+          K(1.2, [-0.03, 0.11, -0.05], [1.05, 0.1, 0.2]), K(1.6, [-0.06, 0.05, -0.04], [0.6, 0.4, 0]), K(2.3, [-0.06, 0.055, -0.04], [0.62, 0.42, 0], { arret: 1 }), K(2.8)],
+        mainG: [K(0), K(0.3, [0, -0.08, 0.03], O, { libre: 1 }), K(2.4, [0, -0.08, 0.03], O, { libre: 1 }), K(2.8)],
+      },
+      sons: [[1.08, 'rayon_lev_tir']],
+    };
+  },
+  // Sabre laser : deux moulinets (vvvoum), puis la lame tenue près du visage pour l'admirer
+  sabre_laser() {
+    return {
+      duree: 3,
+      pistes: {
+        arme: [K(0), K(0.3, [0, 0.02, 0], [-0.3, 0, 0]), K(0.6, [0, 0.03, 0], [-0.3, 0, Math.PI]), K(0.9, [0, 0.03, 0], [-0.3, 0, TOUR]), K(1.2, [0.03, 0.02, 0], [-0.2, 0.6, TOUR]),
+          K(1.5, [-0.02, 0.02, 0], [-0.2, -0.6, TOUR]), K(1.9, [-0.08, 0.06, 0.06], [-0.5, 0.9, TOUR + 0.5]), K(2.4, [-0.08, 0.065, 0.06], [-0.52, 0.92, TOUR + 0.48], { arret: 1 }),
+          K(3, O, [0, 0, TOUR])],
+        mainG: [K(0), K(0.25, [0, -0.05, 0.04], O, { libre: 1 }), K(2.6, [0, -0.05, 0.04], O, { libre: 1 }), K(3)],
+      },
+      sons: [[0.6, 'sabre_coup'], [1.2, 'sabre_coup'], [1.5, 'sabre_coup']],
+    };
+  },
 };
 
 // Grenade : lancée en l'air (l'objet monte en tournant, la main reste en bas), rattrapée, regardée,
@@ -624,6 +1014,267 @@ const RECHARGES = {
           K(0.68, g.G([0, 0.04, -0.01])), K(0.8), K(1)],
       },
       sons: [[0.16, 'chargeur_retire'], [0.24, 'douille'], [0.58, 'cartouche_insere'], [0.88, 'chargeur_insere']],
+    };
+  },
+  // ----- Nouvelles armes -----
+  // Pompe automatique : gros chargeur changé, puis la main tire le levier d'armement sur le dessus
+  pompe_auto(g) {
+    const P = poseRecharge([-0.08, 0.1, -0.06], [0.3, 0.45, -0.5]);
+    const e = echangeChargeur(g, { prise: [0, -0.08, 0], bas: [0, -0.28, 0.03], loin: [-0.05, -0.32, 0.07], arrivee: [0, -0.26, 0.04] });
+    const levier = [-0.035, 0.05, -0.2];
+    return {
+      pistes: {
+        arme: [K(0), K(0.12, ...P()), K(0.4, ...P([0, -0.005, 0], [0.02, 0.02, -0.03]), { arret: 1 }), K(0.6, ...P()), K(0.64, ...P([0, 0.016, 0.005], [0.08, 0, 0.02])),
+          K(0.7, ...P()), K(0.8, [-0.05, 0.06, -0.05], [0.12, 0.3, -0.25]), K(0.86, [-0.05, 0.055, -0.03], [0.08, 0.3, -0.27]), K(1)],
+        chargeur: [...e.chargeur, K(1)],
+        mainG: [K(0), ...e.mainG, K(0.76, g.G(levier)), K(0.82, g.G(plus(levier, [0, 0, 0.06]))), K(0.88, g.G(plus(levier, [0, -0.02, 0.02]))), K(1)],
+      },
+      sons: [[0.2, 'chargeur_retire'], [0.64, 'chargeur_insere'], [0.82, 'pompe_armement']],
+    };
+  },
+  // Double canon : on casse l'arme d'un coup sec, les douilles sautent, deux cartouches neuves, on referme vers le haut
+  double_canon(g) {
+    const P = poseRecharge([-0.05, 0.05, -0.12], [0.35, 0.15, 0.3]);
+    return {
+      pistes: {
+        arme: [K(0), K(0.06, [-0.03, 0.04, -0.02], [0.15, 0.15, 0.2]), K(0.12, ...P()), K(0.2, ...P([0, 0.02, 0], [0.3, 0, 0])), K(0.3, ...P()),
+          K(0.75, ...P([0, -0.004, 0], [-0.02, 0, 0.02]), { arret: 1 }), K(0.82, ...P([0, 0, 0], [-0.2, 0, -0.1])), K(0.88, [-0.03, 0.04, -0.02], [0.35, 0.1, 0]), K(1)],
+        canons: [K(0), K(0.08), K(0.14, O, [-0.7, 0, 0]), K(0.86, O, [-0.7, 0, 0], { arret: 1 }), K(0.9), K(1)],
+        munitionCanon: [K(0), K(0.18), K(0.26, [0, 0.04, 0.11], [0.9, 0, 0]), K(0.27, [0, 0.04, 0.11], O, { cache: 1 }), K(0.4, [0, 0, 0.09]), K(0.6), K(1)],
+        mainG: [K(0), K(0.1, [0, -0.06, 0.05], O, { libre: 1 }), K(0.3, [0, -0.14, 0.05], O, { libre: 1 }), K(0.4, g.G([0, 0.08, 0.03])), K(0.5, g.G([0, 0.025, -0.05])),
+          K(0.53, g.G([0, 0.06, -0.02])), K(0.6, g.G([0, 0.025, -0.05])), K(0.7, g.G([0, 0.035, -0.04])), K(0.8), K(1)],
+      },
+      sons: [[0.14, 'chargeur_retire'], [0.24, 'douille'], [0.28, 'douille'], [0.5, 'cartouche_insere'], [0.6, 'cartouche_insere'], [0.9, 'chargeur_insere']],
+    };
+  },
+  // Mitraillette rapide : coup de poignet, chargeur neuf, puis le levier d'armement sur le côté gauche
+  vector(g) {
+    const P = poseRecharge([-0.07, 0.09, -0.05], [0.3, 0.4, -0.45]);
+    const e = echangeChargeur(g, { prise: [0, -0.09, 0], debut: 0.12, sortie: 0.3, cache: 0.31, neuf: 0.42, dedans: 0.58, tape: 0.62, bas: [0, -0.24, 0.02], loin: [-0.05, -0.28, 0.05], arrivee: [0, -0.22, 0.03] });
+    const levier = [-0.03, 0.04, -0.06];
+    return {
+      pistes: {
+        arme: [K(0), K(0.1, ...P()), K(0.2, ...P([0.02, 0.01, 0], [0, -0.1, 0.4])), K(0.3, ...P()), K(0.55, ...P([0, -0.004, 0], [0.02, 0, -0.02]), { arret: 1 }),
+          K(0.62, ...P([0, 0.014, 0.004], [0.08, 0, 0.02])), K(0.7, ...P()), K(0.8, [-0.05, 0.06, -0.04], [0.1, 0.3, -0.2]), K(0.86, [-0.045, 0.055, -0.04], [0.08, 0.3, -0.25]), K(1)],
+        chargeur: [...e.chargeur, K(1)],
+        mainG: [K(0), ...e.mainG, K(0.76, g.G(levier)), K(0.82, g.G(plus(levier, [0, 0, 0.05]))), K(0.88, g.G(plus(levier, [-0.02, 0, 0.05]))), K(1)],
+      },
+      sons: [[0.18, 'chargeur_retire'], [0.62, 'chargeur_insere'], [0.82, 'clic']],
+    };
+  },
+  // Fusil bullpup : l'arme loin devant, chargeur derrière la poignée, puis la main claque le levier vers l'arrière
+  bullpup(g) {
+    const P = poseRecharge([-0.11, 0.12, -0.14], [0.35, 0.65, -0.6]);
+    const e = echangeChargeur(g, { prise: [0, -0.07, 0], debut: 0.13, sortie: 0.32, cache: 0.33, neuf: 0.44, dedans: 0.6, tape: 0.64, bas: [0, -0.22, 0.02], loin: [-0.05, -0.28, 0.02], arrivee: [0, -0.2, 0.03] });
+    const levier = [-0.035, 0.04, -0.18];
+    return {
+      pistes: {
+        arme: [K(0), K(0.12, ...P()), K(0.42, ...P([0, -0.005, 0], [0.02, 0, -0.02]), { arret: 1 }), K(0.6, ...P()), K(0.64, ...P([0, 0.014, 0.005], [0.07, 0, 0.02])),
+          K(0.72, ...P()), K(0.8, [-0.05, 0.05, -0.06], [0.08, 0.25, -0.25]), K(0.86, [-0.05, 0.04, -0.06], [0.03, 0.25, -0.27]), K(1)],
+        chargeur: [...e.chargeur, K(1)],
+        mainG: [K(0), ...e.mainG, K(0.76, g.G(levier)), K(0.82, g.G(plus(levier, [0, 0, 0.07]))), K(0.86, g.G(plus(levier, [0, -0.02, 0.07]))), K(1)],
+      },
+      sons: [[0.2, 'chargeur_retire'], [0.64, 'chargeur_insere'], [0.82, 'clic']],
+    };
+  },
+  // Lance-grenades : on penche l'arme, quatre grenades glissées une par une dans le tambour qui tourne d'un cran à chaque fois
+  lance_grenades(g) {
+    const P = poseRecharge([-0.06, 0.08, -0.06], [0.2, 0.4, 0.6]);
+    const t = plus(g.repos('barillet'), [-0.06, 0.04, 0.05]);
+    const mainG = [K(0)];
+    const tambour = [K(0), K(0.15)];
+    const sons = [[0.12, 'chargeur_retire']];
+    for (let i = 0; i < 4; i++) {
+      const d = 0.2 + i * 0.15;
+      mainG.push(K(d, [0, -0.15, 0.06], O, { libre: 1 }), K(d + 0.07, g.G(plus(t, [0, 0, 0.04]))), K(d + 0.1, g.G(t)));
+      tambour.push(K(d + 0.1, O, [0, 0, (i * Math.PI) / 3]), K(d + 0.14, O, [0, 0, ((i + 1) * Math.PI) / 3]));
+      sons.push([d + 0.1, 'cartouche_insere'], [d + 0.14, 'clic']);
+    }
+    mainG.push(K(0.86), K(1));
+    tambour.push(K(1, O, [0, 0, (4 * Math.PI) / 3]));
+    return {
+      pistes: {
+        arme: [K(0), K(0.12, ...P()), K(0.8, ...P([0, -0.004, 0], [0.02, 0, 0.02]), { arret: 1 }), K(0.88, [-0.03, 0.04, -0.03], [0.1, 0.15, 0.1]), K(1)],
+        barillet: tambour, mainG,
+      },
+      sons: [...sons, [0.88, 'chargeur_insere']],
+    };
+  },
+  // Fusil à plasma : la cellule vide tombe, une neuve, puis une tape sur le dessus (ça se rallume)
+  plasma(g) {
+    const P = poseRecharge([-0.08, 0.09, -0.06], [0.3, 0.45, -0.5]);
+    const e = echangeChargeur(g, { prise: [0, -0.06, 0], bas: [0, -0.24, 0.03], loin: [-0.05, -0.3, 0.06], arrivee: [0, -0.22, 0.04] });
+    const dessus = [-0.02, 0.07, -0.08];
+    return {
+      pistes: {
+        arme: [K(0), K(0.12, ...P()), K(0.4, ...P([0, -0.005, 0], [0.02, 0.02, -0.03]), { arret: 1 }), K(0.6, ...P()), K(0.64, ...P([0, 0.014, 0.004], [0.07, 0, 0.02])),
+          K(0.72, ...P()), K(0.82, [-0.05, 0.05, -0.04], [0.12, 0.25, -0.2]), K(1)],
+        chargeur: [...e.chargeur, K(1)],
+        mainG: [K(0), ...e.mainG, K(0.76, g.G(plus(dessus, [0, 0.03, 0]))), K(0.82, g.G(dessus)), K(0.9), K(1)],
+      },
+      sons: [[0.2, 'chargeur_retire'], [0.64, 'chargeur_insere'], [0.82, 'apparition']],
+    };
+  },
+  // Fusil anti-matériel : énorme chargeur changé, puis la main droite tire le gros levier d'armement
+  anti_materiel(g) {
+    const P = poseRecharge([-0.09, 0.1, -0.12], [0.3, 0.35, -0.55]);
+    const e = echangeChargeur(g, { prise: [0, -0.06, 0], debut: 0.12, sortie: 0.3, cache: 0.31, neuf: 0.44, dedans: 0.6, tape: 0.64, bas: [0, -0.26, 0.03], loin: [-0.05, -0.32, 0.06], arrivee: [0, -0.24, 0.04] });
+    const levier = [0.045, 0.05, -0.18]; const tire = [0.045, 0.05, -0.08];
+    const C = poseRecharge([-0.04, 0.05, -0.1], [0.15, 0.3, 0.35]);
+    return {
+      pistes: {
+        arme: [K(0), K(0.1, ...P()), K(0.42, ...P([0, -0.005, 0], [0.02, 0, -0.02]), { arret: 1 }), K(0.6, ...P()), K(0.64, ...P([0, 0.014, 0.005], [0.07, 0, 0.02])),
+          K(0.72, ...C()), K(0.92, ...C([0, 0, 0], [0.02, 0, 0.02])), K(1)],
+        chargeur: [...e.chargeur, K(1)],
+        mainG: [K(0), ...e.mainG, K(1)],
+        mainD: [K(0), K(0.72), K(0.78, g.D(levier)), K(0.84, g.D(tire)), K(0.88, g.D(levier)), K(0.94), K(1)],
+      },
+      sons: [[0.2, 'chargeur_retire'], [0.64, 'chargeur_insere'], [0.84, 'sniper_culasse'], [0.88, 'clic']],
+    };
+  },
+  // Cloueuse : la bande vide glisse vers l'arrière, une bande pleine rentre et se verrouille
+  cloueuse(g) {
+    const P = poseRecharge([-0.06, 0.08, -0.06], [0.25, 0.4, -0.5]);
+    const b = (d = O) => g.G(g.sur('chargeur', d, [0, -0.03, 0.25]));
+    const dir = [0, -0.1, 0.28];
+    return {
+      pistes: {
+        arme: [K(0), K(0.12, ...P()), K(0.75, ...P([0, -0.004, 0], [0.02, 0, -0.02]), { arret: 1 }), K(0.8, ...P([0, 0.01, 0.004], [0.06, 0, 0.02])),
+          K(0.9, [-0.03, 0.03, -0.02], [0.1, 0.15, -0.1]), K(1)],
+        chargeur: [K(0), K(0.16), K(0.32, dir), K(0.33, dir, O, { cache: 1 }), K(0.45, dir), K(0.7, [0, -0.005, 0.01]), K(0.76), K(1)],
+        mainG: [K(0), K(0.13, b()), K(0.16, b(), O, { arret: 1 }), K(0.32, b(dir)), K(0.38, b(plus(dir, [-0.05, -0.04, 0.05]))), K(0.45, b(dir)), K(0.7, b([0, -0.005, 0.01])),
+          K(0.76, b([0, 0.01, 0])), K(0.86), K(1)],
+      },
+      sons: [[0.2, 'chargeur_retire'], [0.74, 'chargeur_insere']],
+    };
+  },
+  // Pistolet lourd : glissière bloquée en arrière, chargeur neuf, puis le pouce relâche la glissière (clac)
+  pistolet_lourd(g) {
+    const P = poseRecharge([-0.06, 0.09, -0.06], [0.3, 0.45, -0.4]);
+    const ch = (d = O) => g.G(g.sur('chargeur', d, [0, -0.05, 0]));
+    const arret = [-0.018, 0.02, -0.02];
+    return {
+      pistes: {
+        arme: [K(0), K(0.1, ...P()), K(0.4, ...P([0, -0.004, 0], [0.02, 0, -0.02]), { arret: 1 }), K(0.56, ...P()), K(0.6, ...P([0, 0.012, 0.004], [0.08, 0, 0.02])),
+          K(0.72, [-0.04, 0.05, -0.05], [0.1, 0.25, 0.4]), K(0.84, [-0.04, 0.05, -0.05], [0.1, 0.25, 0.42]), K(0.88, [-0.04, 0.055, -0.045], [0.16, 0.25, 0.4]), K(1)],
+        chargeur: [K(0), K(0.1), K(0.25, [0, -0.22, 0.04]), K(0.26, [0, -0.22, 0.04], O, { cache: 1 }), K(0.36, [0, -0.16, 0.05]), K(0.56, [0, -0.01, 0]), K(0.6), K(1)],
+        culasse: [K(0), K(0.05, [0, 0, 0.04]), K(0.84, [0, 0, 0.04]), K(0.87), K(1)],
+        mainG: [K(0), K(0.12, [0, -0.06, 0.02]), K(0.3, ch([0, -0.18, 0.05])), K(0.36, ch([0, -0.16, 0.05])), K(0.56, ch([0, -0.01, 0])), K(0.58, ch([0, -0.03, 0])),
+          K(0.6, ch([0, -0.003, 0])), K(0.76, g.G(plus(arret, [-0.01, 0.01, 0]))), K(0.84, g.G(arret)), K(0.87, g.G(plus(arret, [0, -0.01, 0]))), K(1)],
+      },
+      sons: [[0.15, 'chargeur_retire'], [0.6, 'chargeur_insere'], [0.87, 'clic']],
+    };
+  },
+  // Pistolet automatique : le long chargeur tombe, un neuf, puis la main arme la glissière par-dessus
+  pistolet_auto(g) {
+    const P = poseRecharge([-0.06, 0.1, -0.06], [0.3, 0.4, -0.45]);
+    const ch = (d = O) => g.G(g.sur('chargeur', d, [0, -0.11, 0.02]));
+    const dessus = [-0.01, 0.05, -0.1];
+    return {
+      pistes: {
+        arme: [K(0), K(0.1, ...P()), K(0.42, ...P([0, -0.004, 0], [0.02, 0, -0.02]), { arret: 1 }), K(0.58, ...P()), K(0.62, ...P([0, 0.012, 0.004], [0.08, 0, 0.02])),
+          K(0.72, [-0.05, 0.06, -0.06], [0.15, 0.3, 0.3]), K(0.86, [-0.05, 0.06, -0.06], [0.15, 0.3, 0.32]), K(0.9, [-0.05, 0.065, -0.055], [0.2, 0.3, 0.3]), K(1)],
+        chargeur: [K(0), K(0.1), K(0.26, [0, -0.26, 0.05]), K(0.27, [0, -0.26, 0.05], O, { cache: 1 }), K(0.38, [0, -0.2, 0.06]), K(0.58, [0, -0.01, 0]), K(0.62), K(1)],
+        culasse: [K(0), K(0.74), K(0.82, [0, 0, 0.03]), K(0.86, [0, 0, 0.03]), K(0.88), K(1)],
+        mainG: [K(0), K(0.12, [0, -0.07, 0.02]), K(0.32, ch([0, -0.22, 0.06])), K(0.38, ch([0, -0.2, 0.06])), K(0.58, ch([0, -0.01, 0])), K(0.6, ch([0, -0.03, 0])),
+          K(0.62, ch([0, -0.003, 0])), K(0.74, g.G(dessus)), K(0.82, g.G(plus(dessus, [0, 0, 0.03]))), K(0.86, g.G(plus(dessus, [0, 0.02, 0.05]))), K(1)],
+      },
+      sons: [[0.15, 'chargeur_retire'], [0.62, 'chargeur_insere'], [0.88, 'clic']],
+    };
+  },
+  // Mini-arbalète : pointée vers le ciel, la main tend la corde jusqu'au loquet, puis pose un carreau
+  mini_arbalete(g) {
+    const encoche = (k) => [0, 0.045, -0.19 + 0.15 * k];
+    const milieu = plus(g.repos('munition'), [0, 0, -0.1]);
+    const depart = [0, 0.04, 0.1];
+    const B = [[-0.05, 0.03, -0.08], [0.5, 0.3, 0.2]];
+    return {
+      pistes: {
+        arme: [K(0), K(0.12, ...B), K(0.55, B[0], plus(B[1], [-0.03, 0, 0])), K(0.62, [-0.05, 0.05, -0.06], [0.1, 0.3, 0.2]),
+          K(0.88, [-0.05, 0.05, -0.06], [0.12, 0.3, 0.2], { arret: 1 }), K(1)],
+        corde: [K(0, [0, 0, 0]), K(0.12, [0, 0, 0]), K(0.5, [1, 0, 0]), K(1, [1, 0, 0])],
+        mainG: [K(0), K(0.1, g.G(encoche(0))), K(0.12, g.G(encoche(0)), O, { arret: 1 }), K(0.5, g.G(encoche(1))), K(0.55, g.G(encoche(1)), O, { arret: 1 }),
+          K(0.62, g.G(plus(milieu, depart))), K(0.85, g.G(milieu)), K(0.88, g.G(milieu), O, { arret: 1 }), K(1)],
+        munition: [K(0, O, O, { cache: 1 }), K(0.6, depart), K(0.85), K(1)],
+      },
+      sons: [[0.12, 'chargeur_retire'], [0.5, 'clic'], [0.85, 'chargeur_insere']],
+    };
+  },
+  // Pistolet à eau : on enlève le réservoir, on le remplit (il gigote), on le remet, deux coups de pompe
+  pistolet_eau(g) {
+    const P = poseRecharge([-0.05, 0.06, -0.06], [0.15, 0.4, 0.4]);
+    const t = (d = O) => g.G(g.sur('chargeur', d, [0, 0.04, 0]));
+    const haut = [-0.04, 0.085, 0.0];
+    const pompe = plus(g.repos('pompe'), [0, -0.05, -0.22]);
+    return {
+      pistes: {
+        arme: [K(0), K(0.12, ...P()), K(0.62, ...P([0, -0.003, 0], [0.02, 0, 0.02]), { arret: 1 }), K(0.7, [-0.03, 0.03, -0.02], [0.1, 0.2, 0]), K(1)],
+        chargeur: [K(0), K(0.15), K(0.3, haut, [0, 0, 0.3]), K(0.38, plus(haut, [0, 0.01, 0]), [0, 0, -0.3]), K(0.46, haut, [0, 0, 0.3]), K(0.54, plus(haut, [0, 0.01, 0]), [0, 0, -0.2]),
+          K(0.66), K(1)],
+        pompe: [K(0), K(0.72), K(0.78, [0, 0, 0.05]), K(0.84), K(0.9, [0, 0, 0.05]), K(0.96), K(1)],
+        mainG: [K(0), K(0.12, t()), K(0.15, t(), O, { arret: 1 }), K(0.3, t(haut)), K(0.38, t(plus(haut, [0, 0.01, 0]))), K(0.46, t(haut)), K(0.54, t(plus(haut, [0, 0.01, 0]))),
+          K(0.66, t()), K(0.7, g.G(pompe)), K(0.78, g.G(plus(pompe, [0, 0, 0.05]))), K(0.84, g.G(pompe)), K(0.9, g.G(plus(pompe, [0, 0, 0.05]))), K(0.96, g.G(pompe)), K(1)],
+      },
+      sons: [[0.3, 'clic'], [0.42, 'eau'], [0.66, 'chargeur_insere'], [0.78, 'pompe_armement'], [0.9, 'pompe_armement']],
+    };
+  },
+  // Canon à trou noir : la cellule d'énergie violette sort par le bas, une neuve, l'orbe se rallume
+  trou_noir(g) {
+    const P = poseRecharge([-0.08, 0.09, -0.08], [0.3, 0.5, -0.5]);
+    const e = echangeChargeur(g, { prise: [0, -0.05, 0], bas: [0, -0.26, 0.03], loin: [-0.05, -0.32, 0.06], arrivee: [0, -0.24, 0.04] });
+    return {
+      pistes: {
+        arme: [K(0), K(0.12, ...P()), K(0.4, ...P([0, -0.005, 0], [0.02, 0.02, -0.03]), { arret: 1 }), K(0.6, ...P()), K(0.64, ...P([0, 0.016, 0.005], [0.08, 0, 0.02])),
+          K(0.72, ...P()), K(0.85, [-0.04, 0.05, -0.04], [0.2, 0.3, -0.2]), K(1)],
+        chargeur: [...e.chargeur, K(1)],
+        mainG: [K(0), ...e.mainG, K(0.8), K(1)],
+      },
+      sons: [[0.2, 'chargeur_retire'], [0.64, 'chargeur_insere'], [0.7, 'apparition']],
+    };
+  },
+  // Minigun : on change la grosse boîte de munitions, on pose la bande, puis on relance les canons à la main
+  minigun(g) {
+    const P = poseRecharge([-0.06, 0.08, -0.06], [0.2, 0.3, -0.35]);
+    const b = (d = O) => g.G(g.sur('chargeur', d, [-0.03, 0.0, 0]));
+    return {
+      pistes: {
+        arme: [K(0), K(0.1, ...P()), K(0.6, ...P([0, -0.004, 0], [0, 0, -0.02]), { arret: 1 }), K(0.66, ...P([0, 0.012, 0], [0.04, 0, 0.02])), K(0.75, ...P()),
+          K(0.85, [-0.04, 0.05, -0.05], [0.1, 0.15, 0.1]), K(1)],
+        chargeur: [K(0), K(0.15), K(0.3, [-0.06, -0.3, 0.02], [0, 0, 0.3]), K(0.31, [-0.06, -0.3, 0.02], [0, 0, 0.3], { cache: 1 }), K(0.4, [-0.06, -0.28, 0.02], [0, 0, 0.2]),
+          K(0.6, [0, -0.008, 0]), K(0.64), K(1)],
+        mainG: [K(0), K(0.12, b()), K(0.15, b(), O, { arret: 1 }), K(0.3, b([-0.06, -0.3, 0.02])), K(0.35, b([-0.1, -0.34, 0])), K(0.4, b([-0.06, -0.28, 0.02])),
+          K(0.6, b([0, -0.008, 0])), K(0.64, b([0, 0.01, 0])), K(0.72, g.G([0, 0.03, -0.2])), K(0.8, g.G([0.03, 0.03, -0.22])), K(0.88), K(1)],
+      },
+      sons: [[0.18, 'chargeur_retire'], [0.64, 'chargeur_insere'], [0.78, 'minigun_rotor']],
+    };
+  },
+  // Lance-feux d'artifice : la main amène une nouvelle fusée par l'avant et la glisse dans le tube
+  feu_artifice(g) {
+    const R = (d) => g.G(plus(plus(g.repos('munition'), [0, 0.03, -0.08]), d));
+    const pose = [[-0.05, -0.03, -0.04], [0.6, 0.35, 0.2]];
+    return {
+      pistes: {
+        arme: [K(0), K(0.14, ...pose), K(0.75, pose[0], plus(pose[1], [-0.02, 0, 0]), { arret: 1 }), K(0.82, plus(pose[0], [0, 0.01, 0]), plus(pose[1], [0.04, 0, -0.1])),
+          K(0.9, ...pose), K(1)],
+        munition: [K(0, [0, 0.3, -0.05], O, { cache: 1 }), K(0.3, [0, 0.3, -0.05]), K(0.55, [0, 0, -0.12]), K(0.75), K(1)],
+        mainG: [K(0), K(0.15, [0, -0.1, 0.1], O, { libre: 1 }), K(0.3, R([0, 0.3, -0.05])), K(0.55, R([0, 0, -0.12])), K(0.75, R(O)), K(0.85), K(1)],
+      },
+      sons: [[0.6, 'chargeur_retire'], [0.75, 'chargeur_insere'], [0.82, 'clic']],
+    };
+  },
+  // Rayon anti-gravité : la cellule glisse hors de la poignée, une neuve, l'arme vibre en se rechargeant
+  rayon_lev(g) {
+    const P = poseRecharge([-0.06, 0.09, -0.06], [0.3, 0.4, -0.45]);
+    const ch = (d = O) => g.G(g.sur('chargeur', d, [0, -0.04, 0]));
+    return {
+      pistes: {
+        arme: [K(0), K(0.1, ...P()), K(0.42, ...P([0, -0.004, 0], [0.02, 0, -0.02]), { arret: 1 }), K(0.58, ...P()), K(0.62, ...P([0, 0.012, 0.004], [0.08, 0, 0.02])),
+          K(0.7, ...P()), K(0.75, ...P([0.004, 0, 0], [0, 0, 0.05])), K(0.8, ...P([-0.004, 0, 0], [0, 0, -0.05])), K(0.85, ...P()), K(1)],
+        chargeur: [K(0), K(0.1), K(0.25, [0, -0.2, 0.04]), K(0.26, [0, -0.2, 0.04], O, { cache: 1 }), K(0.36, [0, -0.15, 0.05]), K(0.58, [0, -0.01, 0]), K(0.62), K(1)],
+        mainG: [K(0), K(0.12, [0, -0.06, 0.02]), K(0.3, ch([0, -0.17, 0.05])), K(0.36, ch([0, -0.15, 0.05])), K(0.58, ch([0, -0.01, 0])), K(0.6, ch([0, -0.03, 0])),
+          K(0.62, ch([0, -0.003, 0])), K(0.8), K(1)],
+      },
+      sons: [[0.15, 'chargeur_retire'], [0.62, 'chargeur_insere'], [0.75, 'apparition']],
     };
   },
 };

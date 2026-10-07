@@ -179,7 +179,7 @@ Les amis sont communs à tout le site : un ami ajouté une fois l'est dans tous 
 
 ## Le jeu Arena FPS
 
-Jeu de tir en blocs (style Minecraft, sans sang) : **Chacun pour soi** ou **Équipes Bleus contre Rouges**, **4 cartes**, **21 armes et gadgets**, des trampolines, et des ragdolls quand on est éliminé.
+Jeu de tir en blocs (style Minecraft, sans sang) : **Chacun pour soi** ou **Équipes Bleus contre Rouges**, **4 cartes**, **40 armes et gadgets** (et 9 armes d'admin), des trampolines, et des ragdolls quand on est éliminé.
 
 - **Tester avant d'ouvrir aux élèves** : tant que `games/fps/manifest.json` contient `"statut": "bientot"`, seul l'admin le voit. Sur l'accueil, son bouton s'appelle *Tester (admin)*.
 - **L'ouvrir aux élèves** : remplace `"bientot"` par `"beta"` dans `games/fps/manifest.json`. Le changement apparaît dans les 10 secondes, sans redémarrage.
@@ -199,10 +199,10 @@ Chaque joueur choisit **4 armes**, une par catégorie, en arrivant dans la parti
 
 | Catégorie (touche) | Armes |
 |---|---|
-| **Principale** (1) | Fusil d'assaut, Fusil à rafale (3 balles par clic), Mitraillette, Mitrailleuse lourde (100 balles, on marche moins vite), Fusil à pompe, Fusil de précision (semi-auto, lunette ×2,6), Sniper (lunette ×4,5), Arbalète (carreaux qui tombent en arc, silencieuse), Lance-roquettes |
-| **Secondaire** (2) | Revolver, Pistolet, Mini-mitraillette, Fusil à canon scié (2 coups), Lance-fusée (brûle et éblouit) |
-| **Mêlée** (3) | **Couteau** (on court plus vite ; *dans le dos d'un adversaire en visant* : élimination en un coup, avec une animation spéciale), Batte de baseball (projette l'adversaire), Poêle à frire (BOING ! et dans ton dos, elle arrête les balles qui arrivent par derrière) |
-| **Gadget** (4) | Grenade (rebondit, explose après 3 s), Fumigène (gros nuage pour se cacher), Grappin (tire vers un mur ou un toit), Kit de soin (+50 points de vie). Chaque gadget a un **temps de recharge**. |
+| **Principale** (1) | Fusil d'assaut, Fusil à rafale (3 balles par clic), Mitraillette, Mitrailleuse lourde (100 balles, on marche moins vite), Fusil à pompe, Fusil de précision (semi-auto, lunette ×2,6), Sniper (lunette ×4,5), Arbalète (carreaux qui tombent en arc, silencieuse), Lance-roquettes, **Pompe automatique** (7 plombs, tire tout seul), **Fusil à double canon** (2 énormes coups de près), **Mitraillette rapide** (la plus rapide de toutes), **Fusil bullpup** (lunette ×2,2, plus puissant que le fusil d'assaut), **Lance-grenades** (les grenades retombent en arc et explosent au contact), **Fusil à plasma** (boules d'énergie qui éclatent en petite gerbe), **Fusil anti-matériel** (lunette ×6, une balle élimine presque à coup sûr), **Cloueuse** (des clous qui restent plantés dans les murs) |
+| **Secondaire** (2) | Revolver, Pistolet, Mini-mitraillette, Fusil à canon scié (2 coups), Lance-fusée (brûle et éblouit), **Pistolet lourd** (7 balles puissantes), **Pistolet automatique**, **Mini-arbalète** (silencieuse, à une main), **Pistolet à eau** (presque pas de dégâts, mais tellement drôle) |
+| **Mêlée** (3) | **Couteau** (on court plus vite ; *dans le dos d'un adversaire en visant* : élimination en un coup, avec une animation spéciale), Batte de baseball (projette l'adversaire), Poêle à frire (BOING ! et dans ton dos, elle arrête les balles qui arrivent par derrière), **Katana** (grande portée), **Hache** (lente, très puissante), **Masse** (envoie l'adversaire voler très loin), **Pelle** (comme la poêle : rangée dans ton dos, elle arrête les balles) |
+| **Gadget** (4) | Grenade (rebondit, explose après 3 s), Fumigène (gros nuage pour se cacher), Grappin (tire vers un mur ou un toit), Kit de soin (+50 points de vie), **Grenade flash** (aveugle ceux qui la voient pendant 3,5 s, sans dégâts ; moitié moins pour le lanceur, rien derrière un mur), **Mine** (posée au sol, elle s'arme en 1 s et explose quand un adversaire passe tout près ; 2 au maximum), **Propulseur** (un coup de réacteur qui t'envoie sur les toits). Chaque gadget a un **temps de recharge**. |
 
 **Chaque élimination remet ta vie à 100 %** (pour tout le monde, bots compris ; se tuer soi-même ne compte pas). Pour l'enlever : `"vieAuMaxApresElimination": false` dans la partie `joueur` de `games/fps/public/reglages.json`, puis `sudo docker compose restart`.
 
@@ -223,6 +223,21 @@ Dans *Réglages*, l'admin du site a un bouton **>_ ADMIN PANEL** (les autres jou
 Les touches <kbd>T</kbd> (téléportation) et <kbd>G</kbd> (frappe orbitale) se changent dans *Réglages → Changer les touches* (groupe Admin). Le serveur vérifie que c'est bien le compte admin pour tout ce qui compte (vol, vitesse, téléportation, dégâts, invincibilité, géant, invisible, bots…) : un élève ne peut rien activer. Les pouvoirs de vision (radar, nocturne, Matrix, disco, grosses têtes, wallhack) ne changent que l'écran de l'admin.
 
 **Le laser (arme d'admin).** Dans le choix des armes, l'admin a en plus un **Laser** (catégorie principale). On **maintient le tir pour le charger** : quatre anneaux d'énergie tourbillonnent de plus en plus vite autour du canon, une boule de lumière grossit au bout, des éclairs sautent entre les anneaux, des particules sont aspirées dans le canon ; autour du viseur, un « réacteur » tourne et se remplit, les bords de l'écran s'illuminent, le son monte, **l'écran tremble de plus en plus** et la vue se resserre ; à 100 %, tout passe au rose et « MAX » clignote. On **relâche pour envoyer le rayon** (rayon en spirale, onde de choc, flash et lumière, la vue « s'ouvre » d'un coup) : plus c'est chargé, plus ça fait de dégâts (quasi un seul tir à pleine charge) et plus ça **casse la carte** autour du point d'impact — **jamais le sol** (ni le terrain de l'île, le pont ou les douves) : seulement les murs, tours, bâtiments, caisses… (réglage `casseSol` du laser dans `reglages.json`). Les blocs cassés disparaissent (plus de collision) puis **réapparaissent** tout seuls après quelques secondes ; une nouvelle manche repart avec une carte intacte. Le serveur vérifie que seul l'admin peut l'équiper et refait tous les dégâts et les cassures lui-même.
+
+**Les autres armes d'admin** (elles aussi seulement dans le choix des armes de l'admin, vérifié par le serveur) :
+
+| Arme | Ce qu'elle fait |
+|---|---|
+| **Canon à trou noir** (principale) | Une boule noire qui ouvre un trou noir en touchant quelque chose : pendant 3,5 s, il aspire les adversaires autour (et blesse ceux qui sont tout près du centre), puis tout explose. L'aspiration vise une vitesse vers le centre : elle ne s'emballe pas. |
+| **Fusil Tesla** (principale) | Un éclair instantané qui saute d'adversaire en adversaire (5 touchés au maximum, à moins de 9 m les uns des autres et sans mur entre eux), de moins en moins fort. Pas de munitions. |
+| **Minigun** (principale) | 6 canons qui tournent, 300 balles ; les canons mettent un instant à démarrer. |
+| **Lance-feux d'artifice** (principale) | Une fusée qui éclate en bouquet de couleur, puis en 6 petites explosions colorées tout autour. |
+| **Rayon anti-gravité** (principale) | Un rayon violet : l'adversaire touché s'envole et flotte dans les airs (avec une aura violette). |
+| **Marteau de Thor** (mêlée) | À chaque coup, même dans le vide, la foudre tombe et une onde de choc envoie en l'air les adversaires autour (rien pour celui qui frappe). |
+| **Sabre laser** (mêlée) | Une lame d'énergie qui touche jusqu'à 3 m, très puissante. |
+| **Pluie de météores** (gadget) | Une balise qu'on lance : elle s'allume, puis 10 météores tombent du ciel autour d'elle et explosent. |
+
+Toutes ces armes se règlent dans `games/fps/public/reglages.json` (à la fin de la liste `armes`). Les bots du mode classé n'utilisent jamais d'armes d'admin ; à partir de certains niveaux, ils prennent aussi la pompe automatique, la mitraillette rapide, le fusil bullpup ou le fusil anti-matériel. Les explosions, aspirations et envols des nouvelles armes poussent aussi les bots, et la grenade flash les aveugle.
 
 ### Inspections et recharges propres à chaque arme
 

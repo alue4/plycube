@@ -280,6 +280,223 @@ function testerPouvoirsAdmin() {
 
 // Mode classé du FPS : niveau de départ, démarrage avec un seul joueur, bots pendant la vraie manche,
 // bots plus forts quand le niveau monte, niveau ajusté à la fin de la manche. (Le chacun pour soi garde ses bots d'entraînement.)
+// Nouvelles armes du FPS (19 normales + 8 d'admin) : données complètes, armes d'admin réservées à l'admin,
+// et chaque mécanique nouvelle (explosions au contact, mine, flash, propulseur, Tesla, trou noir, Thor,
+// feu d'artifice, rayon anti-gravité, météores, pelle dans le dos).
+function testerNouvellesArmes() {
+  const { Partie } = require(path.join(ROOT, 'games/fps/serveur/partie.js'));
+  const G = require(path.join(ROOT, 'games/fps/serveur/geometrie.js'));
+  const reglages = JSON.parse(fs.readFileSync(path.join(ROOT, 'games/fps/public/reglages.json'), 'utf8'));
+  const NORMALES = ['pompe_auto', 'double_canon', 'vector', 'bullpup', 'lance_grenades', 'plasma', 'anti_materiel', 'cloueuse',
+    'pistolet_lourd', 'pistolet_auto', 'mini_arbalete', 'pistolet_eau', 'katana', 'hache', 'masse', 'pelle', 'grenade_flash', 'mine', 'propulseur'];
+  const ADMIN = ['trou_noir', 'tesla', 'minigun', 'marteau_thor', 'feu_artifice', 'rayon_lev', 'meteores', 'sabre_laser'];
+  const arme = (id) => reglages.armes.find((a) => a.id === id);
+
+  // 1) Les données
+  const manquantes = [...NORMALES, ...ADMIN].filter((id) => !arme(id));
+  check('nouvelles armes : les 27 armes sont dans les réglages', manquantes.length === 0, manquantes);
+  const defauts = [];
+  for (const id of [...NORMALES, ...ADMIN]) {
+    const a = arme(id); if (!a) continue;
+    const pb = [];
+    if (!['principale', 'secondaire', 'melee', 'gadget'].includes(a.categorie)) pb.push('categorie');
+    if (typeof a.nom !== 'string' || !a.nom || typeof a.description !== 'string' || a.description.length < 15) pb.push('textes');
+    if (!a.fiche || ['degats', 'cadence', 'portee', 'precision'].some((k) => !(a.fiche[k] >= 1 && a.fiche[k] <= 5))) pb.push('fiche');
+    if (!a.dispersion || ['hanche', 'visee', 'mouvement', 'saut', 'parTir', 'max'].some((k) => typeof a.dispersion[k] !== 'number')) pb.push('dispersion');
+    if (!(a.cadenceMs > 0) || !(a.sortieMs > 0) || typeof a.zoom !== 'number' || typeof a.viseur !== 'string') pb.push('base');
+    if (['balle', 'obus', 'plasma', 'clou', 'carreau', 'trou_noir', 'artifice'].includes(a.type) && !(a.chargeur > 0 && a.rechargementMs > 0)) pb.push('chargeur');
+    if (['obus', 'plasma', 'clou', 'carreau', 'trou_noir', 'artifice'].includes(a.type) && !(a.vitesse > 0)) pb.push('vitesse');
+    if (a.explose && !(a.rayon > 0 && a.degats > 0 && a.degatsMin >= 0 && a.poussee >= 0)) pb.push('explosion');
+    if (a.type === 'melee' && !(a.degats > 0 && a.portee > 0 && a.angle > 0)) pb.push('melee');
+    if (a.categorie === 'gadget' && !(a.rechargeGadgetMs > 0)) pb.push('gadget');
+    if (ADMIN.includes(id) !== !!a.admin) pb.push('admin');
+    if (/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(a.nom + a.description)) pb.push('emoji');
+    if (pb.length) defauts.push(`${id}: ${pb.join(',')}`);
+  }
+  check('nouvelles armes : chaque arme a tous ses réglages (et 8 armes d\'admin)', defauts.length === 0, defauts);
+
+  // Partie de test : grand sol plat et un mur (x de 4 à 5, z de -7 à 0) pour cacher quelqu'un
+  const carte = { id: 'test', nom: 'Test', taille: 60, boites: [[-60, -1, -60, 60, 0, 60, 'herbe'], [4, 0, -7, 5, 5, 0, 'pierre'], [-3, 0, -20, 3, 5, -19, 'pierre']],
+    apparitions: [{ x: -20, z: 20, angle: 0 }, { x: 20, z: 20, angle: 0 }, { x: -20, z: 30, angle: 0 }, { x: 20, z: 30, angle: 0 }, { x: 0, z: 40, angle: 0 }, { x: 10, z: 40, angle: 0 }] };
+  const fauxWs = () => ({ readyState: 1, recus: [], send(x) { this.recus.push(JSON.parse(x)); } });
+  const idx = (id) => reglages.armes.findIndex((a) => a.id === id);
+  // Une partie en cours avec des joueurs placés où l'on veut. joueurs = [{ x, z, admin, eq: {...}, yaw }]
+  const scene = (joueurs) => {
+    const p = new Partie({ code: 'ARME', mode: 'solo', reglages, carte, surVide: () => {} });
+    clearInterval(p.timer);
+    const liste = joueurs.map((o, i) => {
+      const ws = fauxWs();
+      const j = p.ajouter(ws, { id: i + 1, username: `J${i + 1}`, isAdmin: !!o.admin });
+      p.message(j, { t: 'equipement', e: { principale: 'fusil', secondaire: 'pistolet', melee: 'couteau', gadget: 'grenade', ...(o.eq || {}) } });
+      return { j, ws, o };
+    });
+    p.nouvelleManche();
+    for (const { j, ws, o } of liste) {
+      j.x = o.x; j.y = o.y || 0; j.z = o.z; j.yaw = o.yaw || 0;
+      j.historique = []; j.protegeJusqua = 0; j.pretA = 0; j.gadgetPretA = 0;
+      ws.recus.length = 0;
+    }
+    return { p, J: liste.map((x) => x.j), W: liste.map((x) => x.ws) };
+  };
+  const oeil = (j) => [j.x, j.y + G.HAUTEUR_YEUX, j.z];
+  const vers = (j, q) => G.normaliser([q[0] - j.x, q[1] - (j.y + G.HAUTEUR_YEUX), q[2] - j.z]);
+  const tirer = (p, j, id, d) => { j.arme = idx(id); j.pretA = 0; j.dernierTir[j.arme] = 0; p.message(j, { t: 'tir', a: j.arme, d, o: oeil(j), e: 0, s: 1 }); };
+  const avancer = (p, ms) => { for (let t = 0; t < ms; t += 50) p.majProjectiles(0.05); };
+  const recu = (ws, t) => ws.recus.filter((m) => m.t === t);
+
+  // 2) Armes d'admin réservées à l'admin
+  const s0 = scene([{ x: 0, z: 0 }, { x: 0, z: -6, admin: true }]);
+  const refus = ADMIN.filter((id) => s0.p.validerEquipement({ principale: 'fusil', secondaire: 'pistolet', melee: 'couteau', gadget: 'grenade', [arme(id).categorie]: id }, false));
+  const admisAdmin = ADMIN.filter((id) => s0.p.validerEquipement({ principale: 'fusil', secondaire: 'pistolet', melee: 'couteau', gadget: 'grenade', [arme(id).categorie]: id }, true));
+  check('nouvelles armes : armes d\'admin refusées aux joueurs, acceptées pour l\'admin', refus.length === 0 && admisAdmin.length === ADMIN.length, { refus, admisAdmin });
+  // même en trichant (équipement forcé), un joueur normal ne tire pas avec le Tesla
+  s0.J[0].equipement = [idx('tesla'), idx('pistolet'), idx('couteau'), idx('grenade')];
+  tirer(s0.p, s0.J[0], 'tesla', [0, 0, -1]);
+  check('nouvelles armes : un joueur normal ne peut pas tirer au Tesla', recu(s0.W[1], 'tesla').length === 0 && s0.J[1].pv === 100);
+
+  // 3) Lance-grenades : l'obus retombe et explose au contact
+  let s = scene([{ x: 0, z: 0, eq: { principale: 'lance_grenades' } }, { x: 0, z: -8 }]);
+  tirer(s.p, s.J[0], 'lance_grenades', vers(s.J[0], [0, 1.6, -8]));
+  const obus = recu(s.W[1], 'projectile')[0];
+  avancer(s.p, 1500);
+  const explObus = recu(s.W[1], 'explosion')[0];
+  check('lance-grenades : obus qui explose au contact', obus && obus.type === 'obus' && explObus && explObus.type === 'obus' && s.J[1].pv < 100, [obus && obus.type, explObus, s.J[1].pv]);
+
+  // 4) Plasma : boule qui éclate en petite gerbe
+  s = scene([{ x: 0, z: 0, eq: { principale: 'plasma' } }, { x: 0, z: -10 }]);
+  tirer(s.p, s.J[0], 'plasma', vers(s.J[0], [0, 1.0, -10]));
+  avancer(s.p, 800);
+  const explPl = recu(s.W[1], 'explosion')[0];
+  check('plasma : la boule éclate (petits dégâts)', explPl && explPl.type === 'plasma' && s.J[1].pv < 100 && s.J[1].pv >= 100 - arme('plasma').degats, [explPl, s.J[1].pv]);
+
+  // 5) Cloueuse : le clou reste planté dans le mur
+  s = scene([{ x: 0, z: -12, eq: { principale: 'cloueuse' } }, { x: 30, z: 30 }]);
+  tirer(s.p, s.J[0], 'cloueuse', [0, 0, -1]);
+  avancer(s.p, 600);
+  const finClou = recu(s.W[1], 'projectileFin')[0];
+  check('cloueuse : le clou se plante dans le mur', finClou && finClou.type === 'clou' && finClou.mur === 1, finClou);
+
+  // 6) Mine : posée au sol, s'arme, explose quand un adversaire approche ; 2 au maximum
+  s = scene([{ x: 0, z: 0, eq: { gadget: 'mine' } }, { x: 0, z: -12 }]);
+  tirer(s.p, s.J[0], 'mine', [0, 0, -1]);
+  const mine = [...s.p.projectiles.values()].find((pr) => pr.type === 'mine');
+  check('mine : posée au sol devant le joueur', mine && Math.abs(mine.p[1]) < 0.1 && mine.p[2] < -0.5 && mine.p[2] >= -1.6 && mine.v.every((x) => x === 0), mine && mine.p);
+  avancer(s.p, 200);
+  s.J[1].z = mine.p[2] - 1; // trop tôt : la mine n'est pas encore armée
+  avancer(s.p, 100);
+  check('mine : pas encore armée tout de suite', s.p.projectiles.has(mine.id) && s.J[1].pv === 100);
+  mine.nee -= 2000; // une seconde plus tard…
+  avancer(s.p, 50);
+  const explMine = recu(s.W[1], 'explosion')[0];
+  check('mine : explose quand un adversaire passe tout près', explMine && explMine.type === 'mine' && s.J[1].pv < 100, [explMine, s.J[1].pv]);
+  s.J[1].z = -40;
+  for (let i = 0; i < 3; i++) { s.J[0].gadgetPretA = 0; tirer(s.p, s.J[0], 'mine', [0, 0, -1]); }
+  check('mine : 2 mines au maximum par joueur (la plus vieille disparaît)', [...s.p.projectiles.values()].filter((pr) => pr.type === 'mine').length === 2);
+
+  // 7) Grenade flash : éblouit ceux qui la voient (moitié pour le lanceur), pas ceux qui sont cachés
+  s = scene([{ x: 0, z: 0, eq: { gadget: 'grenade_flash' } }, { x: 0, z: -6 }, { x: 8, z: -3 }, { x: 0, z: -40 }]);
+  tirer(s.p, s.J[0], 'grenade_flash', [0, 0, -1]);
+  const fl = [...s.p.projectiles.values()].find((pr) => pr.type === 'flash');
+  fl.p = [0, 1, -3]; fl.v = [0, 0, 0]; fl.nee -= 5000;
+  s.p.majProjectiles(0.05);
+  const e = (k) => recu(s.W[k], 'eblouir')[0];
+  check('grenade flash : explosion sans dégâts', recu(s.W[1], 'explosion').some((m) => m.type === 'flash') && s.J.every((j) => j.pv === 100));
+  check('grenade flash : éblouit l\'adversaire qui la voit, moitié pour le lanceur', e(1) && e(1).ms === arme('grenade_flash').eblouissementMs && e(0) && e(0).ms === Math.round(arme('grenade_flash').eblouissementMs / 2), [e(0), e(1)]);
+  check('grenade flash : rien derrière un mur ni trop loin', !e(2) && !e(3), [e(2), e(3)]);
+
+  // 8) Propulseur : on s'envole
+  s = scene([{ x: 0, z: 0, eq: { gadget: 'propulseur' } }, { x: 20, z: 20 }]);
+  tirer(s.p, s.J[0], 'propulseur', [0, 0, -1]);
+  const pp = recu(s.W[0], 'pousse')[0];
+  check('propulseur : envol vers le haut (et vu par les autres)', pp && pp.v[1] === arme('propulseur').pousseeHaut && s.J[0].libreJusqua > Date.now() && recu(s.W[1], 'propulse').length === 1, pp);
+
+  // 9) Tesla : l'éclair saute d'adversaire en adversaire (pas trop loin, et de moins en moins fort)
+  s = scene([{ x: 0, z: 0, admin: true, eq: { principale: 'tesla' } }, { x: 0, z: -6 }, { x: 3, z: -6 }, { x: 3, z: -10 }, { x: 25, z: -10 }]);
+  tirer(s.p, s.J[0], 'tesla', vers(s.J[0], [0, 1.0, -6]));
+  const tes = recu(s.W[4], 'tesla')[0];
+  const pertes = s.J.slice(1).map((j) => 100 - j.pv);
+  check('Tesla : 3 adversaires touchés à la chaîne, pas celui qui est loin', tes && tes.points.length === 3 && pertes[3] === 0, [tes && tes.points.length, pertes]);
+  check('Tesla : dégâts qui baissent à chaque saut', pertes[0] === 60 && pertes[1] === 45 && pertes[2] === 34, pertes);
+
+  // 10) Trou noir : aspire vers le centre sans s'emballer, blesse tout près, puis explose (sans toucher le tireur)
+  s = scene([{ x: 0, z: -12, admin: true, eq: { principale: 'trou_noir' } }, { x: 25, z: 25 }]);
+  tirer(s.p, s.J[0], 'trou_noir', [0, 0, -1]);
+  check('trou noir : tire une boule', recu(s.W[1], 'projectile').some((m) => m.type === 'trou_noir'));
+  avancer(s.p, 1500);
+  const zone = recu(s.W[1], 'zone')[0];
+  check('trou noir : la boule ouvre une zone en touchant le mur', zone && zone.type === 'trou_noir' && zone.rayon === arme('trou_noir').zone.rayon && zone.ms === arme('trou_noir').zone.dureeMs, zone);
+  const z = s.p.zones.get(zone.id);
+  z.p = [0, 0.9, -12]; // (centre bien placé pour la suite)
+  const cible = s.J[1];
+  cible.x = 5; cible.y = 0; cible.z = -12; cible.historique = []; s.W[1].recus.length = 0;
+  z.prochain = 0; s.p.majZones(Date.now());
+  const asp = recu(s.W[1], 'pousse')[0];
+  check('trou noir : aspire vers le centre', asp && asp.v[0] < -3 && cible.libreJusqua > Date.now(), asp);
+  // déjà en route vers le centre à la bonne vitesse : presque plus de poussée (l'aspiration ne s'emballe pas)
+  const zz = arme('trou_noir').zone;
+  const vVoulue = (zz.forceMin + (zz.forceMax - zz.forceMin) * (1 - 5 / zz.rayon)) * Math.min(1, 5 / 1.5);
+  cible.historique = [{ t: Date.now() - 200, x: 5 + vVoulue * 0.2, y: 0, z: -12 }, { t: Date.now(), x: 5, y: 0, z: -12 }];
+  s.W[1].recus.length = 0; z.prochain = 0; s.p.majZones(Date.now());
+  const asp2 = recu(s.W[1], 'pousse')[0];
+  check('trou noir : l\'aspiration ne s\'emballe pas', asp2 && Math.hypot(...asp2.v) < 0.5, asp2);
+  cible.x = 1; cible.historique = []; const pvAvant = cible.pv;
+  z.prochain = 0; s.p.majZones(Date.now());
+  check('trou noir : blesse ceux qui sont tout près du centre', cible.pv === pvAvant - zz.degats, [pvAvant, cible.pv]);
+  s.W[0].recus.length = 0; s.W[1].recus.length = 0; const pvTireur = s.J[0].pv;
+  z.fin = 0; s.p.majZones(Date.now());
+  check('trou noir : explose à la fin, sans toucher le tireur', recu(s.W[1], 'zoneFin').length === 1 && recu(s.W[1], 'explosion').some((m) => m.type === 'trou_noir')
+    && !s.p.zones.size && s.J[0].pv === pvTireur && recu(s.W[0], 'pousse').length === 0, [s.J[0].pv, recu(s.W[0], 'pousse')]);
+
+  // 11) Marteau de Thor : onde de choc à chaque coup (même raté), envoie en l'air, rien pour celui qui frappe
+  s = scene([{ x: 0, z: 0, admin: true, eq: { melee: 'marteau_thor' } }, { x: 0, z: -1.5 }, { x: 2.5, z: -2.5 }]);
+  tirer(s.p, s.J[0], 'marteau_thor', [0, 0, -1]);
+  const pousseE2 = recu(s.W[2], 'pousse')[0];
+  check('Marteau de Thor : coup + onde de choc (la foudre tombe)', recu(s.W[2], 'explosion').some((m) => m.type === 'thor') && s.J[1].pv < 100 - arme('marteau_thor').degats + 1 && s.J[2].pv < 100, [s.J[1].pv, s.J[2].pv]);
+  check('Marteau de Thor : l\'onde envoie en l\'air', pousseE2 && pousseE2.v[1] > Math.hypot(pousseE2.v[0], pousseE2.v[2]), pousseE2);
+  check('Marteau de Thor : rien pour celui qui frappe', s.J[0].pv === 100 && recu(s.W[0], 'pousse').length === 0);
+  s = scene([{ x: 0, z: 0, admin: true, eq: { melee: 'marteau_thor' } }, { x: 30, z: 30 }]);
+  tirer(s.p, s.J[0], 'marteau_thor', [0, 0, -1]);
+  check('Marteau de Thor : onde de choc même dans le vide', recu(s.W[1], 'explosion').some((m) => m.type === 'thor'));
+
+  // 12) Feu d'artifice : explosion colorée, puis 6 petites explosions colorées autour
+  s = scene([{ x: 0, z: -12, admin: true, eq: { principale: 'feu_artifice' } }, { x: 25, z: 25 }]);
+  tirer(s.p, s.J[0], 'feu_artifice', [0, 0, -1]);
+  avancer(s.p, 1500);
+  const explA = recu(s.W[1], 'explosion').filter((m) => m.type === 'artifice');
+  check('feu d\'artifice : explosion principale colorée, 6 petites prévues', explA.length === 1 && explA[0].c >= 0 && explA[0].c <= 5 && s.p.retards.length === arme('feu_artifice').bouquet.nombre, [explA, s.p.retards.length]);
+  for (const r of s.p.retards.splice(0)) r.f();
+  const petites = recu(s.W[1], 'explosion').filter((m) => m.type === 'artifice').slice(1);
+  check('feu d\'artifice : 6 petites explosions de couleur', petites.length === 6 && petites.every((m) => m.c >= 0 && m.c <= 5 && m.rayon === arme('feu_artifice').bouquet.rayon), petites.length);
+
+  // 13) Rayon anti-gravité : la cible s'envole et flotte
+  s = scene([{ x: 0, z: 0, admin: true, eq: { principale: 'rayon_lev' } }, { x: 0, z: -8 }]);
+  tirer(s.p, s.J[0], 'rayon_lev', vers(s.J[0], [0, 1.0, -8]));
+  const pl = recu(s.W[1], 'pousse')[0]; const lev = recu(s.W[1], 'lev')[0];
+  check('rayon anti-gravité : la cible s\'envole (aura vue par tous)', pl && pl.v[1] === arme('rayon_lev').levHaut && lev && lev.id === s.J[1].id && lev.ms === arme('rayon_lev').levMs && s.J[1].pv === 100 - arme('rayon_lev').degats, [pl, lev, s.J[1].pv]);
+
+  // 14) Pluie de météores : la balise s'allume, 10 météores tombent puis explosent
+  s = scene([{ x: 0, z: 0, admin: true, eq: { gadget: 'meteores' } }, { x: 25, z: 25 }]);
+  tirer(s.p, s.J[0], 'meteores', [0, 0, -1]);
+  const bal = [...s.p.projectiles.values()].find((pr) => pr.type === 'balise');
+  bal.nee -= 5000; s.p.majProjectiles(0.05);
+  const zm = recu(s.W[1], 'zone')[0];
+  const plu = arme('meteores').pluie;
+  check('météores : la balise ouvre une zone et prévoit 10 météores', zm && zm.type === 'meteores' && zm.rayon === plu.rayonZone && s.p.retards.length === plu.nombre, [zm, s.p.retards.length]);
+  for (const r of s.p.retards.splice(0)) r.f();
+  const mets = recu(s.W[1], 'meteore');
+  check('météores : chaque météore part du ciel vers le sol', mets.length === plu.nombre && mets.every((m) => Math.abs(m.p[1] - m.cible[1] - plu.hauteur) < 0.05 && m.ms === plu.chuteMs), mets.length);
+  for (const r of s.p.retards.splice(0)) r.f();
+  check('météores : puis ils explosent', recu(s.W[1], 'explosion').filter((m) => m.type === 'meteore').length === plu.nombre);
+
+  // 15) Mêlée : dégâts du katana ; la pelle rangée dans le dos arrête les balles
+  s = scene([{ x: 0, z: 0, eq: { melee: 'katana' } }, { x: 0, z: -2 }]);
+  tirer(s.p, s.J[0], 'katana', [0, 0, -1]);
+  check('katana : grande portée et gros dégâts', s.J[1].pv === 100 - arme('katana').degats, s.J[1].pv);
+  s = scene([{ x: 0, z: 0 }, { x: 0, z: -8, eq: { melee: 'pelle' } }]); // il regarde vers -z : on lui tire dans le dos
+  tirer(s.p, s.J[0], 'fusil', vers(s.J[0], [0, 0.9, -8]));
+  check('pelle : rangée dans le dos, elle arrête les balles', s.J[1].pv === 100 && recu(s.W[1], 'ding').length === 1, s.J[1].pv);
+}
+
 function testerClasse() {
   const { Partie } = require(path.join(ROOT, 'games/fps/serveur/partie.js'));
   const reglages = JSON.parse(fs.readFileSync(path.join(ROOT, 'games/fps/public/reglages.json'), 'utf8'));
@@ -1209,6 +1426,8 @@ async function main() {
     testerPouvoirsAdmin();
     console.log('\n— Jeu FPS : mode classé —');
     testerClasse();
+    console.log('\n— Jeu FPS : nouvelles armes —');
+    testerNouvellesArmes();
     testerCameleon();
 
     console.log('\n— Journal —');

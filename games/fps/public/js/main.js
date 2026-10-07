@@ -7,10 +7,10 @@ import { Personnage, styleParDefaut, COULEURS_EQUIPES, NOMS_EQUIPES } from './pe
 import { Ragdoll } from './ragdoll.js';
 import { Effets } from './effets.js';
 import { JoueurLocal, YEUX } from './joueur.js';
-import { ArmeVue } from './arme.js';
+import { ArmeVue, SON_FRAPPE } from './arme.js';
 import * as Modeles from './armes-modeles.js';
 import { directionsTir, dispersionActuelle, normaliser } from './balistique.js';
-import { son, initSons, reglerVolume, reglerMusique, majAuditeur, musiqueMenu, jouerEnBoucle, prechargerSons, bourdonLaser, tirLaserSon } from './sons.js';
+import { son, initSons, reglerVolume, reglerMusique, majAuditeur, musiqueMenu, jouerEnBoucle, prechargerSons, bourdonLaser, tirLaserSon, bourdonTrouNoir, moteurMinigun } from './sons.js';
 import { LaserHud } from './laser-hud.js';
 import { hud, el } from './hud.js';
 import { definirCatalogue, normaliserStyle } from './apparence.js';
@@ -86,6 +86,15 @@ const TRAINEES = {
   pistolet: { couleur: 0xffe9a8, epaisseur: 0.01, duree: 0.05, opacite: 0.6 },
   uzi: { couleur: 0xffe9a8, epaisseur: 0.009, duree: 0.05, opacite: 0.55 },
   canon_scie: { couleur: 0xffd88a, epaisseur: 0.007, duree: 0.05, opacite: 0.45 },
+  pompe_auto: { couleur: 0xffd88a, epaisseur: 0.007, duree: 0.05, opacite: 0.45 },
+  double_canon: { couleur: 0xffd88a, epaisseur: 0.007, duree: 0.05, opacite: 0.45 },
+  vector: { couleur: 0xffe9a8, epaisseur: 0.009, duree: 0.045, opacite: 0.55 },
+  bullpup: { couleur: 0xffe9a8, epaisseur: 0.012, duree: 0.06, opacite: 0.7 },
+  anti_materiel: { couleur: 0xffffff, epaisseur: 0.04, duree: 0.8, opacite: 0.55 },
+  pistolet_lourd: { couleur: 0xffe9a8, epaisseur: 0.016, duree: 0.08, opacite: 0.7 },
+  pistolet_auto: { couleur: 0xffe9a8, epaisseur: 0.009, duree: 0.045, opacite: 0.55 },
+  minigun: { couleur: 0xffd27a, epaisseur: 0.01, duree: 0.04, opacite: 0.6 },
+  rayon_lev: { couleur: 0xc77dff, epaisseur: 0.05, duree: 0.25, opacite: 0.85 },
 };
 const AXE_MOINS_Z = new THREE.Vector3(0, 0, -1);
 // Son quand un coup de mêlée touche
@@ -144,6 +153,7 @@ async function demarrer() {
   const camera = new THREE.PerspectiveCamera(prefs.fov, 1, 0.05, 900);
   scene.add(camera);
   const effets = new Effets(scene);
+  effets.fabriqueMeteore = Modeles.modeleMeteore; // (pluie de météores de l'admin)
   const joueur = new JoueurLocal({ boites: [], reglages });
   // Clavier, souris et manette : les touches se changent dans les réglages (écran « Touches »)
   const commandes = new Commandes(prefs.touches, (t) => { prefs.touches = t; sauverPrefs(); });
@@ -222,6 +232,9 @@ async function demarrer() {
   const E = {
     enPartie: false, code: null, mode: null, moiId: null, moiNom: '', objectif: 0, niveauBots: 0,
     joueurs: new Map(), // id -> { id, nom, equipe, style, kills, morts, vivant, perso, tampon, protegeJusqua, ... }
+    levitations: new Map(), // rayon anti-gravité : id du joueur -> fin de l'effet
+    bourdons: new Map(),    // trous noirs : id de la zone -> son qui gronde
+    prechauffe: 0,          // minigun : canons qui tournent (0 → 1)
     scores: [0, 0], finA: 0, etat: 'jeu', redemarrageA: 0,
     vie: 0, pv: 100,
     arme: 0, munitions: ARMES.map((a) => a.chargeur), rechargeFin: 0, rechargeDebut: 0,
@@ -251,7 +264,7 @@ async function demarrer() {
     j.perso.prendreArme(w.id, w.categorie);
     if (j.perso.afficherPoeleDos) {
       const poele = j.eq && ARMES[j.eq[2]];
-      j.perso.afficherPoeleDos(!!(poele && poele.protegeDos) && a !== j.eq[2]);
+      j.perso.afficherPoeleDos(!!(poele && poele.protegeDos) && a !== j.eq[2], poele && poele.id);
     }
   }
 
@@ -819,6 +832,12 @@ async function demarrer() {
     E.projectiles.clear();
     for (const c of E.carreauxPlantes) c.mesh.removeFromParent();
     E.carreauxPlantes = [];
+    E.levitations.clear();
+    for (const b of E.bourdons.values()) b.arreter();
+    E.bourdons.clear();
+    E.prechauffe = 0;
+    majMoteurMinigun(0);
+    effets.viderNouveaux();
     for (const id of E.cordesDistantes.keys()) effets.enleverCorde(id);
     E.cordesDistantes.clear();
     finGrappin();
@@ -1397,10 +1416,15 @@ async function demarrer() {
     const { o, d } = viseeCamera();
     reseau.envoyer({ t: 'tir', a: E.arme, o, d });
     E.gadgetPretA = now + (pouvoir('munitions') ? 300 : w.rechargeGadgetMs); // le serveur confirme
-    if (w.id === 'grenade' || w.id === 'fumigene') {
+    if (w.id === 'grenade' || w.id === 'fumigene' || w.id === 'grenade_flash' || w.id === 'meteores') {
       if (arme.lancer) arme.lancer();
-      son('grenade_goupille', { vol: 0.6 });
+      son(w.id === 'meteores' ? 'lobby_pret' : 'grenade_goupille', { vol: 0.6 });
       son('grenade_lancer', { vol: 0.7, delai: 0.2 });
+    } else if (w.id === 'mine') {
+      if (arme.lancer) arme.lancer();
+      son('clic', { vol: 0.7, delai: 0.25 });
+    } else if (w.id === 'propulseur') {
+      if (arme.tirer) arme.tirer(1);
     } else if (w.id === 'grappin') {
       if (arme.grappiner) arme.grappiner();
       son('grappin_tir', { vol: 0.8 });
@@ -1440,6 +1464,29 @@ async function demarrer() {
     if (laserHud) laserHud.maj(c, dt, now);
   }
 
+  // Minigun : le bruit du moteur suit la vitesse des canons (0 → 1)
+  let moteur = null;
+  function majMoteurMinigun(k) {
+    if (k > 0.02 && !moteur) moteur = moteurMinigun();
+    if (!moteur) return;
+    if (k > 0.02) moteur.maj(k);
+    else { moteur.arreter(); moteur = null; }
+  }
+
+  // Fusil Tesla (admin) : le serveur cherche les cibles et renvoie l'éclair à tout le monde (message « tesla »).
+  function tirerTesla(now, w) {
+    E.dernierTir = now;
+    const { o, d } = viseeCamera();
+    reseau.envoyer({ t: 'tir', a: E.arme, o, d });
+    arme.tirer(0);
+    son('tesla_zap', { vol: 0.9 });
+    const kick = pouvoir('sansRecul') ? 0 : w.recul;
+    joueur.pitch = Math.min(1.55, joueur.pitch + kick);
+    E.reculARattraper += kick * 0.6;
+    E.secousse = Math.max(E.secousse, 0.25);
+    vibrer(0.6, 0.4, 120);
+  }
+
   // Laser de l'admin : on envoie la charge (0 → 1) ; le serveur fait les dégâts et casse la carte.
   function tirerLaser(now, charge) {
     const w = ARMES[E.arme];
@@ -1469,6 +1516,7 @@ async function demarrer() {
   function tirer(now) {
     const w = ARMES[E.arme];
     if (w.type === 'laser') { tirerLaser(now, E.chargeLaser || 0); return; }
+    if (w.type === 'tesla') { tirerTesla(now, w); return; }
     if (w.type === 'melee') { frapper(now, w); return; }
     if (w.type === 'gadget') { utiliserGadget(now, w); return; }
     // Le fusil à pompe peut interrompre son rechargement pour tirer.
@@ -1522,7 +1570,9 @@ async function demarrer() {
           if (tj < t) { t = tj; joueurTouche = true; }
         }
         _fin.set(o[0] + d[0] * t, o[1] + d[1] * t, o[2] + d[2] * t);
+        if (w.traceur === 'eau') { effets.jetEau(_bout, _fin, joueurTouche); continue; } // pistolet à eau : pas de trou dans le mur
         if (w.plombs > 1 || Math.random() < 0.85) effets.trait(_bout, _fin, style);
+        if (w.traceur === 'violet') effets.boule(_fin, 0xc77dff, 0.6, 0.25, 1.5);
         if (!joueurTouche && coup.boite && t < w.portee) {
           effets.impact(_fin, coup.normale, coup.boite[6]);
           if (Math.random() < 0.35) son('impact_mur', { position: _fin, vol: 0.5 });
@@ -1537,7 +1587,7 @@ async function demarrer() {
         const vit = droite.multiplyScalar(2 + Math.random()).add(new THREE.Vector3(0, 2 + Math.random(), 0));
         if (w.id !== 'pompe') effets.douille(_ej, vit);
         else setTimeout(() => { if (arme && arme.pointMonde('ejection', camera, _ej)) effets.douille(_ej, vit, true); }, 250);
-        if (w.id !== 'smg' || Math.random() < 0.3) son('douille', { vol: 0.25, delai: 0.45 + Math.random() * 0.2 });
+        if ((w.id !== 'smg' && !(w.cadenceMs < 50)) || Math.random() < 0.3) son('douille', { vol: 0.25, delai: 0.45 + Math.random() * 0.2 });
       }
     }
     if (E.munitions[E.arme] <= 0) setTimeout(recharger, w.id === 'sniper' ? 300 : 150);
@@ -1717,7 +1767,9 @@ async function demarrer() {
     const origine = new THREE.Vector3(msg.o[0], msg.o[1], msg.o[2]);
     msg.f.forEach((f, i) => {
       const fin = new THREE.Vector3(f[0], f[1], f[2]);
+      if (w.traceur === 'eau') { effets.jetEau(depart, fin, !!msg.c[i]); return; }
       effets.trait(depart, fin, style);
+      if (w.traceur === 'violet') effets.boule(fin, 0xc77dff, 0.6, 0.25, 1.5);
       if (!msg.c[i]) {
         const d = normaliser([f[0] - msg.o[0], f[1] - msg.o[1], f[2] - msg.o[2]]);
         if (!d) return;
@@ -1731,6 +1783,8 @@ async function demarrer() {
   // Projectiles (roquettes, carreaux, fusées, grenades, fumigènes) : le serveur les fait
   // voler et décide des impacts ; ici on les affiche.
   function meshProjectile(type) {
+    const nouveau = Modeles.modeleProjectileVol && Modeles.modeleProjectileVol(type); // obus, plasma, clou, trou noir, artifice, flash, balise, mine
+    if (nouveau) return nouveau;
     if (type === 'roquette') return Modeles.modeleRoquetteVol();
     if (type === 'carreau' && Modeles.modeleCarreauVol) return Modeles.modeleCarreauVol();
     if (type === 'fusee' && Modeles.modeleFuseeVol) return Modeles.modeleFuseeVol();
@@ -1740,18 +1794,24 @@ async function demarrer() {
     const m = type === 'fusee' ? new THREE.MeshBasicMaterial({ color: couleurs.fusee }) : new THREE.MeshLambertMaterial({ color: couleurs[type] || 0x888888 });
     return new THREE.Mesh(new THREE.BoxGeometry(...(tailles[type] || [0.1, 0.1, 0.1])), m);
   }
-  const SON_PROJECTILE = { roquette: 'roquette_tir', carreau: 'arbalete_tir', fusee: 'lance_fusee_tir', grenade: 'grenade_lancer', fumigene: 'grenade_lancer' };
+  const SON_PROJECTILE = {
+    roquette: 'roquette_tir', carreau: 'arbalete_tir', fusee: 'lance_fusee_tir', grenade: 'grenade_lancer', fumigene: 'grenade_lancer',
+    obus: 'lance_grenades_tir', plasma: 'plasma_tir', clou: 'cloueuse_tir', trou_noir: 'trou_noir_tir', artifice: 'feu_artifice_tir',
+    flash: 'grenade_lancer', balise: 'grenade_lancer', mine: 'clic',
+  };
+  // Projectiles qui rebondissent (le serveur envoie leur position pour qu'on se recale)
+  const REBONDISSENT = new Set(['grenade', 'fumigene', 'flash', 'balise']);
   reseau.on('projectile', (msg) => {
     const mesh = meshProjectile(msg.type);
     mesh.position.set(msg.p[0], msg.p[1], msg.p[2]);
     const v = new THREE.Vector3(msg.v[0], msg.v[1], msg.v[2]);
     if (v.lengthSq() > 0) mesh.quaternion.setFromUnitVectors(AXE_MOINS_Z, v.clone().normalize());
     scene.add(mesh);
-    const rebondit = msg.type === 'grenade' || msg.type === 'fumigene';
+    const rebondit = REBONDISSENT.has(msg.type);
     E.projectiles.set(msg.id, { mesh, type: msg.type, a: msg.a, v, nee: performance.now(), rebondit, cible: null });
     if (msg.tireur !== E.moiId) {
       const j = E.joueurs.get(msg.tireur);
-      if (j) { j.protegeJusqua = 0; if (rebondit && j.perso.lancer) j.perso.lancer(); }
+      if (j) { j.protegeJusqua = 0; if ((rebondit || msg.type === 'mine') && j.perso.lancer) j.perso.lancer(); }
       son(SON_PROJECTILE[msg.type], { position: mesh.position, portee: 2, vol: 0.9 });
     }
   });
@@ -1760,7 +1820,7 @@ async function demarrer() {
     const p = new THREE.Vector3(msg.p[0], msg.p[1], msg.p[2]);
     if (pr) {
       E.projectiles.delete(msg.id);
-      if (msg.type === 'carreau' && msg.mur) {
+      if ((msg.type === 'carreau' || msg.type === 'clou') && msg.mur) { // le carreau ou le clou reste planté dans le mur
         pr.mesh.position.copy(p); // le carreau reste planté dans le mur
         E.carreauxPlantes.push({ mesh: pr.mesh, fin: performance.now() + 8000 });
         son('carreau_impact', { position: p, vol: 0.8 });
@@ -1776,6 +1836,21 @@ async function demarrer() {
     if (pr) { pr.mesh.removeFromParent(); E.projectiles.delete(msg.id); }
     const p = new THREE.Vector3(msg.p[0], msg.p[1], msg.p[2]);
     const mini = msg.type === 'mini'; // balles explosives de l'admin
+    // Nouvelles armes : des explosions qui ne ressemblent pas à celle de la roquette (obus, mine, météore : comme elle)
+    const speciales = {
+      plasma: () => { effets.explosionPlasma(p, msg.rayon); son('plasma_impact', { position: p, portee: 2 }); return 0.3; },
+      artifice: () => { effets.explosionArtifice(p, msg.rayon, msg.c || 0); son('artifice', { position: p }); return msg.rayon >= 3.5 ? 0.5 : 0.25; },
+      thor: () => { effets.eclairThor(p, msg.rayon); son('tonnerre', { position: p }); return 1.1; },
+      trou_noir: () => { effets.implosion(p, msg.rayon); son('trou_noir_boom', { position: p }); return 1.3; },
+      flash: () => { effets.flashBlanc(p); son('flash', { position: p }); return 0.35; },
+    };
+    if (speciales[msg.type]) {
+      const force = speciales[msg.type]();
+      const d = p.distanceTo(camera.position);
+      E.secousse = Math.max(E.secousse, Math.max(0, 1 - d / 28) * force);
+      if (d < 20 && force > 0.6) vibrer(1 - d / 22, 0.6 * (1 - d / 22), 300);
+      return;
+    }
     if (msg.type === 'frappe') effets.rayonLaser(new THREE.Vector3(p.x, p.y + 140, p.z), p, 1); // le rayon tombe du ciel
     effets.explosionRoquette(p, msg.rayon || 4);
     son('explosion', { position: p, portee: mini ? 2 : 4, vol: mini ? 0.45 : 1 });
@@ -1785,6 +1860,55 @@ async function demarrer() {
     if (dist < 25) vibrer(1 - dist / 28, 0.7 * (1 - dist / 28), 300);
   });
   reseau.on('rebond', (msg) => son('grenade_rebond', { position: new THREE.Vector3(msg.p[0], msg.p[1], msg.p[2]), vol: 0.6 }));
+  // Zones des armes d'admin : trou noir (il aspire tout le monde), pluie de météores (cercle rouge au sol)
+  reseau.on('zone', (msg) => {
+    const p = new THREE.Vector3(msg.p[0], msg.p[1], msg.p[2]);
+    effets.zone(msg.id, msg.type, p, msg.ms, msg.rayon);
+    if (msg.type === 'trou_noir') {
+      if (E.bourdons.has(msg.id)) E.bourdons.get(msg.id).arreter();
+      E.bourdons.set(msg.id, bourdonTrouNoir(p));
+    } else if (msg.type === 'meteores') son('lobby_pret', { position: p, portee: 4, vol: 0.9 });
+  });
+  reseau.on('zoneFin', (msg) => {
+    effets.finZone(msg.id);
+    const b = E.bourdons.get(msg.id);
+    if (b) { b.arreter(); E.bourdons.delete(msg.id); }
+  });
+  // Fusil Tesla : l'éclair part du canon et saute d'adversaire en adversaire (points = les impacts)
+  reseau.on('tesla', (msg) => {
+    if (!Array.isArray(msg.points) || !msg.points.length) return;
+    let depart;
+    if (msg.id === E.moiId && arme) depart = arme.pointMonde('bout', camera, new THREE.Vector3());
+    else {
+      const j = E.joueurs.get(msg.id);
+      depart = j && j.perso ? j.perso.boutDuCanon(new THREE.Vector3()) : new THREE.Vector3(msg.o[0], msg.o[1], msg.o[2]);
+      if (j) j.protegeJusqua = 0;
+      son('tesla_zap', { position: depart, portee: 2, vol: 0.9 });
+    }
+    const points = [depart, ...msg.points.map((q) => new THREE.Vector3(q[0], q[1], q[2]))];
+    effets.arcsTesla(points);
+    const d = points[points.length - 1].distanceTo(camera.position);
+    if (d < 20) E.secousse = Math.max(E.secousse, (1 - d / 20) * 0.4);
+  });
+  // Pluie de météores : un rocher en feu tombe, l'explosion arrive ensuite (message « explosion »)
+  reseau.on('meteore', (msg) => {
+    const cible = new THREE.Vector3(msg.cible[0], msg.cible[1], msg.cible[2]);
+    effets.meteore(new THREE.Vector3(msg.p[0], msg.p[1], msg.p[2]), cible, msg.ms || 600);
+    son('meteore', { position: cible });
+  });
+  // Propulseur : des flammes sous les pieds de celui qui s'envole
+  reseau.on('propulse', (msg) => {
+    const j = E.joueurs.get(msg.id);
+    const base = msg.id === E.moiId ? joueur.pos : (j && j.perso ? j.perso.groupe.position : null);
+    const p = base ? base.clone() : new THREE.Vector3(msg.p[0], msg.p[1], msg.p[2]);
+    effets.flammes(p);
+    son('propulseur', { position: p, portee: 2 });
+  });
+  // Rayon anti-gravité : le joueur touché s'envole, entouré d'étincelles violettes
+  reseau.on('lev', (msg) => {
+    E.levitations.set(msg.id, performance.now() + (msg.ms || 2000));
+    if (msg.id === E.moiId) hud.toast('Tu t\'envoles !');
+  });
   // Laser d'un autre joueur (admin) : on dessine le rayon et on casse la carte quand le serveur le dit.
   reseau.on('laser', (msg) => {
     if (msg.id === E.moiId) return; // le mien est déjà dessiné localement
@@ -1869,6 +1993,7 @@ async function demarrer() {
   });
   reseau.on('gadget', (msg) => {
     E.gadgetPretA = performance.now() + (msg.pretDans || 0);
+    if (msg.rate) hud.toast('Pose la mine sur le sol, juste devant toi.');
     if (msg.plein) { hud.toast('Tu as déjà toute ta vie !'); if (arme && arme.soigner) arme.soigner(0); E.soinFin = 0; }
   });
   reseau.on('eblouir', (msg) => {
@@ -1892,7 +2017,7 @@ async function demarrer() {
     if (j.perso.frapper) j.perso.frapper(!!msg.dos);
     const w = ARMES[msg.a] || {};
     const pos = j.perso.groupe.position;
-    son(w.id === 'couteau' ? 'couteau_coup' : 'batte_coup', { position: pos, vol: 0.6 });
+    son(SON_FRAPPE[w.id] || 'batte_coup', { position: pos, vol: 0.6 });
     if (msg.cible !== undefined) {
       son(SON_COUP[w.id] || 'touche', { position: pos, vol: 0.9 });
       if (msg.dos) son('dos_special', { position: pos, vol: 1 });
@@ -2412,6 +2537,14 @@ async function demarrer() {
     for (const [id, pr] of E.projectiles) {
       const w = ARMES[pr.a] || {};
       const m = pr.mesh;
+      if (pr.type === 'mine') {
+        // posée au sol : la petite lumière clignote une fois armée (au bout d'une seconde) ; elle reste jusqu'à son explosion
+        const armee = now - pr.nee > 1000;
+        if (armee && !pr.armee) { pr.armee = true; son('mine_armee', { position: m.position, vol: 0.6 }); }
+        if (m.userData.lumiere) m.userData.lumiere.visible = armee && Math.floor(now / 300) % 2 === 0;
+        continue;
+      }
+      if (m.userData.lumiere) m.userData.lumiere.visible = Math.floor(now / 150) % 2 === 0; // balise des météores
       if (pr.rebondit && pr.cible) {
         m.position.lerp(pr.cible, Math.min(1, dt * 14));
         m.rotation.x += dt * 8;
@@ -2431,10 +2564,33 @@ async function demarrer() {
         effets.particule(m.position, new THREE.Vector3((Math.random() - 0.5), Math.random(), (Math.random() - 0.5)), Math.random() < 0.5 ? '#ff5533' : '#ffd27a', { taille: 0.06, vie: 0.3, gravite: 0.3 });
       } else if (pr.type === 'fumigene' && Math.random() < 0.3) {
         effets.particule(m.position, new THREE.Vector3(0, 0.6, 0), '#c8c8c8', { taille: 0.08, vie: 0.6, gravite: -0.05, grandit: 0.2 });
+      } else if (pr.type === 'plasma') {
+        effets.particule(m.position, _v.set((Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3), Math.random() < 0.5 ? '#39e0ff' : '#b066ff', { taille: 0.05, vie: 0.25, gravite: 0 });
+      } else if (pr.type === 'artifice') {
+        effets.particule(m.position, _v.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5), ['#ffd23f', '#ff3b5c', '#3fa9ff', '#ffffff'][(Math.random() * 4) | 0], { taille: 0.05, vie: 0.5, gravite: 0.4 });
+      } else if (pr.type === 'trou_noir') {
+        if (m.userData.anneau) m.userData.anneau.rotation.z += dt * 6;
+        effets.particule(m.position, _v.set((Math.random() - 0.5) * 0.6, (Math.random() - 0.5) * 0.6, (Math.random() - 0.5) * 0.6), Math.random() < 0.5 ? '#9a4dff' : '#2a1040', { taille: 0.08, vie: 0.4, gravite: 0 });
+      } else if (pr.type === 'obus' && Math.random() < 0.6) {
+        effets.particule(m.position, _v.set(0, 0.3, 0), '#c8c8c8', { taille: 0.07, vie: 0.5, gravite: -0.05, grandit: 0.2 });
       }
       if (now - pr.nee > 8000) { m.removeFromParent(); E.projectiles.delete(id); }
     }
     effets.eclairerFusee(fuseeVisible);
+    // Joueurs qui flottent (rayon anti-gravité) : étincelles violettes autour d'eux
+    for (const [id, fin] of E.levitations) {
+      if (now > fin) { E.levitations.delete(id); continue; }
+      const j = E.joueurs.get(id);
+      const base = id === E.moiId ? joueur.pos : (j && j.perso && j.vivant ? j.perso.groupe.position : null);
+      if (base) { effets.auraLev(base); effets.auraLev(base); }
+    }
+    // Près d'un trou noir, la caméra tremble
+    for (const z of effets.zonesActives()) {
+      if (z.type !== 'trou_noir') continue;
+      const portee = z.rayon * 1.6;
+      const d = z.pos.distanceTo(camera.position);
+      if (d < portee) E.secousse = Math.max(E.secousse, (1 - d / portee) * 0.45);
+    }
     // Carreaux plantés dans les murs : ils disparaissent au bout de quelques secondes
     E.carreauxPlantes = E.carreauxPlantes.filter((c) => {
       if (now < c.fin) return true;
@@ -2460,6 +2616,9 @@ async function demarrer() {
 
     // --- Mon joueur ---
     const w = ARMES[E.arme];
+    if (!w.prechauffeMs || !joueur.vivant) E.prechauffe = 0; // (minigun : canons qui tournent)
+    if (arme && arme.prechauffer) arme.prechauffer(E.prechauffe || 0);
+    majMoteurMinigun(E.prechauffe || 0);
     joueur.multVitesse = (1 - (1 - w.vitesseVisee) * E.visee) * (w.vitesseArme || 1) * (E.maDanse && E.maDanse.marcher ? E.maDanse.vitesse : 1)
       * (pouvoir('vitesse') ? 2.2 : 1); // admin : super vitesse
     // Grappin : on est tiré tout droit vers le point accroché
@@ -2554,8 +2713,10 @@ async function demarrer() {
           } else { E.rafaleReste = 0; E.dernierTir = now; son('vide', { vol: 0.5 }); recharger(); }
         }
       } else {
-        const veutTirer = w.automatique ? E.tirEnfonce : E.tirDemande;
-        const sansMunitions = w.type === 'melee' || w.type === 'gadget';
+        // Minigun : les canons doivent d'abord tourner assez vite (préchauffage)
+        if (w.prechauffeMs) E.prechauffe = Math.max(0, Math.min(1, (E.prechauffe || 0) + ((peutAgir && E.tirEnfonce && !E.rechargeFin) ? 1 : -0.6) * dt * 1000 / w.prechauffeMs));
+        const veutTirer = (w.automatique ? E.tirEnfonce : E.tirDemande) && (!w.prechauffeMs || E.prechauffe >= 1);
+        const sansMunitions = w.type === 'melee' || w.type === 'gadget' || w.type === 'tesla';
         if (veutTirer && peutAgir && now - E.dernierTir >= cadence
             && (sansMunitions || !E.rechargeFin || (w.parCartouche && E.munitions[E.arme] > 0))) {
           if (sansMunitions || E.munitions[E.arme] > 0) tirer(now);
@@ -2660,7 +2821,7 @@ async function demarrer() {
     if (E.soinFin > now) progression = 1 - (E.soinFin - now) / E.soinDuree;
     const gadgetPret = now >= E.gadgetPretA;
     const texteArme = (a, i) => {
-      if (a.type === 'laser') return '∞';
+      if (a.type === 'laser' || a.type === 'tesla') return '∞';
       if (a.chargeur) return pouvoir('munitions') ? '∞' : `${E.munitions[i]} / ${a.chargeur}`;
       if (a.type === 'gadget') return gadgetPret ? 'prêt' : `${Math.ceil((E.gadgetPretA - now) / 1000)} s`;
       return 'mêlée';
@@ -2668,7 +2829,7 @@ async function demarrer() {
     if (w.type === 'laser') hud.munitions(`${Math.round((E.chargeLaser || 0) * 100)} %`, null, E.chargeLaser || null, w.nom, 'Charge');
     else if (w.chargeur && pouvoir('munitions')) hud.munitions('∞', null, progression, w.nom);
     else if (w.chargeur) hud.munitions(E.munitions[E.arme], w.chargeur, progression, w.nom);
-    else hud.munitions(w.type === 'gadget' ? texteArme(w, E.arme) : '—', null, progression, w.nom);
+    else hud.munitions(w.type === 'gadget' || w.type === 'tesla' ? texteArme(w, E.arme) : '—', null, progression, w.nom);
     const eqArmes = E.equipement ? E.equipement.map((i) => ARMES[i]) : [];
     const textes = eqArmes.map((a, k) => texteArme(a, E.equipement[k]));
     const vides = eqArmes.map((a, k) => (a.chargeur ? E.munitions[E.equipement[k]] === 0 : a.type === 'gadget' && !gadgetPret));
@@ -2716,7 +2877,7 @@ async function demarrer() {
   requestAnimationFrame(boucle);
   reseau.connecter();
   // Pour les tests automatiques uniquement (adresse terminée par ?debug).
-  if (location.search.includes('debug')) window.__fps = { joueur, E, camera, atelier, commandes, aide, get arme() { return arme; } };
+  if (location.search.includes('debug')) window.__fps = { joueur, E, camera, atelier, commandes, aide, effets, reseau, ARMES, get arme() { return arme; } };
 }
 
 demarrer();

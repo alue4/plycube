@@ -28,7 +28,14 @@ const RECUL = {
   rafale: [0.026, 0.04], mitrailleuse: [0.03, 0.04], precision: [0.07, 0.14], arbalete: [0.05, 0.08],
   revolver: [0.06, 0.32], pistolet: [0.03, 0.12], uzi: [0.02, 0.06], canon_scie: [0.1, 0.38], lance_fusee: [0.06, 0.26],
   grappin: [0.06, 0.18],
+  // nouvelles armes
+  pompe_auto: [0.07, 0.12], double_canon: [0.11, 0.3], vector: [0.018, 0.03], bullpup: [0.03, 0.045], lance_grenades: [0.08, 0.16],
+  plasma: [0.02, 0.03], anti_materiel: [0.14, 0.3], cloueuse: [0.02, 0.04], pistolet_lourd: [0.05, 0.34], pistolet_auto: [0.02, 0.07],
+  mini_arbalete: [0.04, 0.1], pistolet_eau: [0.006, 0.01], trou_noir: [0.09, 0.2], tesla: [0.05, 0.1], minigun: [0.012, 0.012],
+  feu_artifice: [0.07, 0.16], rayon_lev: [0.03, 0.12],
 };
+// Son du coup de mêlée (sinon « batte_coup ») : aussi utilisé pour les coups des autres joueurs (main.js)
+export const SON_FRAPPE = { couteau: 'couteau_coup', katana: 'couteau_coup', sabre_laser: 'sabre_coup' };
 // Valeur d'une animation à étapes au moment q (0 → 1)
 function etape(etapes, q) {
   for (let i = 1; i < etapes.length; i++) {
@@ -260,6 +267,74 @@ export class ArmeVue {
     }
   }
 
+  // Minigun : les canons tournent de plus en plus vite pendant le préchauffage (k : 0 → 1), voir animerEffets().
+  prechauffer(k) { this.prechauffe = Math.max(0, Math.min(1, k || 0)); }
+
+  // Effets lumineux et pièces qui bougent toutes seules sur les nouvelles armes (armes-modeles-plus.js)
+  animerEffets(dt, u) {
+    const t = this.temps;
+    const insp = this.inspection ? 1 : 0;
+    if (u.rotor) {
+      const k = Math.max(this.prechauffe || 0, this.recul > 0.05 ? 1 : 0);
+      this.vitesseRotor = (this.vitesseRotor || 0) + ((k * 38 + insp * 6) - (this.vitesseRotor || 0)) * Math.min(1, dt * (k > 0 ? 4 : 1.5));
+      u.rotor.rotation.z += dt * this.vitesseRotor;
+    }
+    if (u.anneauNoir) {
+      u.anneauNoir.rotation.x = Math.sin(t * 1.3) * 0.5;
+      u.anneauNoir.rotation.y += dt * (2 + insp * 6);
+      u.anneauNoir.rotation.z += dt * 3;
+      const s = 1 + Math.sin(t * 5) * 0.06 + insp * 0.15;
+      u.orbeNoire.scale.setScalar(s);
+      u.haloNoir.scale.setScalar(0.2 + Math.sin(t * 3.1) * 0.03 + insp * 0.08);
+    }
+    if (u.arcsTesla) {
+      const fort = this.recul > 0.2 || insp;
+      u.lueurTesla.scale.setScalar(0.1 + Math.random() * 0.04 + (fort ? 0.12 : 0));
+      u.arcsTesla.forEach((l, i) => {
+        l.visible = Math.random() < (fort ? 0.9 : 0.25);
+        if (!l.visible) return;
+        const a = l.geometry.attributes.position;
+        const n = a.count;
+        // de la petite bobine du dessus (ou d'une électrode) jusqu'à la boule du bout
+        const dep = i === 0 ? [0, 0.15, -0.08] : [Math.random() < 0.5 ? -0.045 : 0.045, 0.035, -0.48];
+        const arr = [0, 0.01, -0.52];
+        for (let k = 0; k < n; k++) {
+          const q = k / (n - 1);
+          const bruit = k === 0 || k === n - 1 ? 0 : (Math.random() - 0.5) * 0.035;
+          a.setXYZ(k, dep[0] + (arr[0] - dep[0]) * q + bruit, dep[1] + (arr[1] - dep[1]) * q + Math.sin(q * Math.PI) * 0.03 + bruit, dep[2] + (arr[2] - dep[2]) * q + bruit * 0.5);
+        }
+        a.needsUpdate = true;
+      });
+    }
+    if (u.runes) {
+      const k = 0.55 + 0.45 * Math.abs(Math.sin(t * 2.2)) + insp * 0.3;
+      u.runes.opacity = Math.min(1, k);
+      u.lueurThor.scale.setScalar(0.26 + 0.08 * Math.sin(t * 6) + (this.coup ? 0.2 : 0) + insp * 0.1);
+      u.arcsThor.forEach((l) => {
+        l.visible = Math.random() < (this.coup || insp ? 0.85 : 0.18);
+        if (!l.visible) return;
+        const a = l.geometry.attributes.position;
+        const n = a.count;
+        const ang = Math.random() * Math.PI * 2;
+        const L = 0.12 + Math.random() * 0.12;
+        for (let k = 0; k < n; k++) {
+          const q = k / (n - 1);
+          const bruit = k === 0 ? 0 : (Math.random() - 0.5) * 0.03;
+          a.setXYZ(k, Math.cos(ang) * (0.06 + L * q) + bruit, Math.sin(ang) * (0.06 + L * q) + bruit, -0.24 + bruit);
+        }
+        a.needsUpdate = true;
+      });
+    }
+    if (u.lameLaser) {
+      const f = 1 + (Math.random() - 0.5) * 0.06 + (this.coup ? 0.12 : 0);
+      u.lameLaser[1].scale.set(f, 1, f);
+      u.lameLaser[2].scale.set(f * (1 + Math.sin(t * 40) * 0.05), 1, f);
+      u.lameLaser[2].material.opacity = 0.2 + Math.random() * 0.08;
+    }
+    if (u.lueurs) for (const [i, m] of u.lueurs.entries()) m.material.opacity = 0.6 + 0.35 * Math.abs(Math.sin(t * 3 + i * 0.9)) + insp * 0.1;
+    if (u.lumiere) u.lumiere.visible = Math.floor(t * (this.arme.id === 'mine' ? 2 : 4)) % 2 === 0;
+  }
+
   tirer(munitionsRestantes) {
     this.recul = 1;
     this.tirDebut = this.temps;
@@ -271,7 +346,7 @@ export class ArmeVue {
       this.eclair.visible = true;
       this.eclair.material.rotation = Math.random() * Math.PI;
     }
-    if (this.arme.id === 'pistolet') this.glissiere = 1;
+    if (u.glissiere || this.arme.id === 'pistolet') this.glissiere = 1;
     const t = this.temps;
     if (this.arme.id === 'pompe') this.armer(t + 0.12);
     if (this.arme.id === 'sniper' && munitionsRestantes > 0) this.armer(t + 0.3);
@@ -293,7 +368,7 @@ export class ArmeVue {
     this.coup = { debut: this.temps, duree: anim.duree, etapes: anim.etapes, special: dos, cle };
     this.inspection = null;
     this.nouveauxSons(cle);
-    if (!this.perso(cle)) this.surSon(id === 'couteau' ? 'couteau_coup' : 'batte_coup');
+    if (!this.perso(cle)) this.surSon(SON_FRAPPE[id] || 'batte_coup');
   }
 
   // Lancer d'une grenade ou d'un fumigène.
@@ -472,7 +547,7 @@ export class ArmeVue {
       z += r * rz0 * (1 - e * 0.5);
       rx += r * rr0 * (1 - e * 0.6);
       y += r * rz0 * 0.25;
-      if (u.culasse && arme.id === 'pistolet') {
+      if (u.culasse && (u.glissiere || arme.id === 'pistolet')) {
         // glissière du pistolet qui recule au tir
         this.glissiere = Math.max(0, this.glissiere - dt * 12);
         u.culasse.position.z = u.culasse.userData.repos.z + 0.028 * this.glissiere;
@@ -653,6 +728,7 @@ export class ArmeVue {
       if (this.eclairVie <= 0) this.eclair.visible = false;
     }
     if (u.anneaux) this.animerLaser(dt, u);
+    this.animerEffets(dt, u);
     // Dans la lunette du sniper, on cache l'arme (l'écran affiche la lunette)
     this.cache = !!u.lunette && e > (u.lunetteSeuil ?? 0.92); // (plus tôt pour les modèles réalistes, voir armes-glb.js)
     return e;
@@ -688,7 +764,7 @@ export class ArmeVue {
       case 'tir':
         this.tirDebut = debut;
         this.recul = Math.max(0, 1 - t * (RAPIDES.has(arme.id) ? 14 : 6));
-        if (arme.id === 'pistolet') this.glissiere = Math.max(0, 1 - t * 12);
+        if (arme.id === 'pistolet' || this.modele.userData.glissiere) this.glissiere = Math.max(0, 1 - t * 12);
         break;
       case 'armement':
         this.action = { debut, duree: d, type: arme.id === 'pompe' ? 'pompe' : 'culasse', son: arme.id === 'pompe' ? 'pompe_armement' : 'sniper_culasse', sonJoue: !ecoute };

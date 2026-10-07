@@ -92,6 +92,9 @@ class Partie {
     this.bots = new Bots(this);
     this.botsBonus = 0;  // l'admin peut ajouter (ou enlever) des bots d'entraînement
     this.frappes = [];   // frappes orbitales de l'admin en attente : { j, p, a, at }
+    this.zones = new Map(); // zones actives (trou noir, pluie de météores) : id -> zone
+    this.prochaineZone = 1;
+    this.retards = [];   // événements à déclencher plus tard (petites explosions du feu d'artifice, météores) : { at, f }
     this.timer = setInterval(() => this.tick(), TICK_MS);
   }
 
@@ -277,6 +280,7 @@ class Partie {
     if (!j || (ws && j.ws !== ws)) return;
     this.joueurs.delete(id);
     if (j.ws.partie === this) j.ws.partie = null;
+    for (const pr of [...this.projectiles.values()]) if (pr.type === 'mine' && pr.tireur === j) this.finProjectile(pr, pr.p); // ses mines disparaissent
     this.diffuser({ t: 'sortie', id });
     if (this.humains() === 0) {
       this.bots.toutRetirer();
@@ -505,6 +509,7 @@ class Partie {
     const a = data.a;
     if (a !== j.arme) return;
     const arme = this.armes[a];
+    if (arme.admin && !j.admin) return; // armes d'admin : seulement l'admin du site
     if (now < j.pretA || j.soinA) return; // on ne tire pas en sortant l'arme ou en se soignant
     const rapide = j.admin && j.pouvoirs.tirRapide ? 0.3 : 1; // admin : tir ultra rapide
     if (now - j.dernierTir[a] < arme.cadenceMs * 0.8 * rapide) return;
@@ -517,6 +522,7 @@ class Partie {
     if (arme.type === 'melee') { this.arreterDanse(j); j.dernierTir[a] = now; this.coupMelee(j, a, oeil, d, data, now); return; }
     if (arme.type === 'gadget') { this.arreterDanse(j); this.utiliserGadget(j, a, oeil, d, now); return; }
     if (arme.type === 'laser') { if (j.admin) { this.arreterDanse(j); this.tirLaser(j, a, oeil, d, data, now); } return; }
+    if (arme.type === 'tesla') { if (j.admin) { this.arreterDanse(j); this.tirTesla(j, a, oeil, d, now); } return; }
 
     if (j.rechargeA) {
       // Le fusil à pompe peut tirer pendant qu'on remet des cartouches.
@@ -531,7 +537,8 @@ class Partie {
     j.protegeJusqua = 0; // tirer met fin à la protection d'apparition
     if (arme.type === 'balle') this.tirBalles(j, a, o, d, data, now);
     else {
-      // Projectiles : roquette (tout droit), carreau d'arbalète et fusée (ils retombent)
+      // Projectiles : roquette (tout droit), carreau d'arbalète et fusée (ils retombent), obus du lance-grenades,
+      // boule de plasma, clou, trou noir, feu d'artifice (le type de l'arme = le type du projectile)
       const p = [o[0] + d[0] * 0.7, o[1] + d[1] * 0.7, o[2] + d[2] * 0.7];
       const disp = j.admin && j.pouvoirs.precision ? 0 : Math.max(arme.dispersion.visee, Math.min(25, Number(data.e) || 0));
       const dir = G.directionsTir(d, disp, 1, Number(data.s) >>> 0)[0];
@@ -586,7 +593,78 @@ class Partie {
     this.diffuser({ t: 'tir', id: j.id, a, o: arrondir(o), f: fins, c: touches }, j);
     for (const id of dings) this.diffuser({ t: 'ding', id });
     for (const [cible, c] of coups) this.infliger(j, cible, Math.max(1, Math.round(c.deg)), c.tete, d, a);
+    if (arme.lev) for (const cible of coups.keys()) this.leviter(cible, d, arme, now); // rayon anti-gravité (admin)
     if (premier && j.admin && j.pouvoirs.explosives) this.miniExplosion(j, premier, a, now);
+  }
+
+  // Pousse un joueur (souffle, aspiration, envol...) : son navigateur ajoute cette vitesse à la sienne
+  // (comme public/js/joueur.js pousser) ; un bot, lui, est poussé directement ici.
+  pousser(j, v) {
+    if (j.bot) {
+      const b = j.bot;
+      b.vit[0] += v[0]; b.vit[1] = Math.max(b.vit[1], 0) + v[1]; b.vit[2] += v[2];
+      b.auSol = false;
+      return;
+    }
+    this.envoyer(j, { t: 'pousse', v: arrondir(v) });
+  }
+
+  // Un joueur protégé (apparition) ou l'admin invincible ne se fait pas balader par les armes spéciales.
+  intouchable(j, now) { return j.protegeJusqua > now || (j.admin && j.pouvoirs.invincible); }
+
+  // Rayon anti-gravité : l'adversaire touché s'envole et flotte (les autres voient une aura violette).
+  leviter(cible, d, arme, now) {
+    if (!cible.vivant || this.intouchable(cible, now)) return;
+    this.pousser(cible, [d[0] * (arme.levAvant || 0), arme.levHaut || 20, d[2] * (arme.levAvant || 0)]);
+    cible.libreJusqua = now + 2500;
+    this.diffuser({ t: 'lev', id: cible.id, ms: arme.levMs || 2000 });
+  }
+
+  // ---------- Fusil Tesla de l'admin ----------
+  // Un éclair instantané : il touche le premier adversaire sur le trajet, puis saute vers le plus proche
+  // (à moins de distanceSaut, sans mur entre eux), jusqu'à « sauts » fois, avec des dégâts qui baissent.
+  tirTesla(j, a, oeil, d, now) {
+    const arme = this.armes[a];
+    if (now - j.dernierTir[a] < arme.cadenceMs * (j.pouvoirs.tirRapide ? 0.3 : 1)) return;
+    j.dernierTir[a] = now;
+    j.protegeJusqua = 0;
+    const retard = Math.min(250, j.rtt / 2 + 100);
+    const cibles = this.cibles(j, now - retard);
+    const tMur = G.rayonCarte(oeil, d, this.boites, arme.portee);
+    let premier = null; let tMin = tMur; let tete = false;
+    for (const c of cibles) {
+      const th = G.rayonBoite(oeil, d, c.b.tete);
+      const tc = G.rayonBoite(oeil, d, c.b.corps);
+      const t = Math.min(th, tc);
+      if (t < tMin) { tMin = t; premier = c; tete = th <= tc; }
+    }
+    if (!premier) {
+      this.diffuser({ t: 'tesla', id: j.id, o: arrondir(oeil), points: [arrondir([oeil[0] + d[0] * tMur, oeil[1] + d[1] * tMur, oeil[2] + d[2] * tMur])] });
+      return;
+    }
+    const centre = (c) => [c.pos[0], c.pos[1] + 1.0, c.pos[2]];
+    const chaine = [{ c: premier, dir: d, degats: arme.degats * (tete ? arme.multiplicateurTete || 1 : 1), tete }];
+    const touches = new Set([premier.autre]);
+    let degats = arme.degats;
+    for (let s = 0; s < (arme.sauts || 0); s++) {
+      degats *= arme.reductionSaut || 0.75;
+      const de = centre(chaine[chaine.length - 1].c);
+      let suivant = null; let dMin = arme.distanceSaut || 9;
+      for (const c of cibles) {
+        if (touches.has(c.autre)) continue;
+        const q = centre(c);
+        const v = [q[0] - de[0], q[1] - de[1], q[2] - de[2]];
+        const L = Math.hypot(v[0], v[1], v[2]);
+        if (L >= dMin || L < 0.01) continue;
+        if (G.rayonCarte(de, [v[0] / L, v[1] / L, v[2] / L], this.boites, L) < L - 0.3) continue; // un mur entre eux
+        suivant = { c, dir: [v[0] / L, v[1] / L, v[2] / L] }; dMin = L;
+      }
+      if (!suivant) break;
+      touches.add(suivant.c.autre);
+      chaine.push({ c: suivant.c, dir: suivant.dir, degats, tete: false });
+    }
+    this.diffuser({ t: 'tesla', id: j.id, o: arrondir(oeil), points: chaine.map((x) => arrondir(centre(x.c))) });
+    for (const x of chaine) this.infliger(j, x.c.autre, Math.max(1, Math.round(x.degats)), x.tete, x.dir, a);
   }
 
   // ---------- Laser de l'admin ----------
@@ -633,7 +711,11 @@ class Partie {
       if (G.rayonCarte(oeil, [vers[0] / L, vers[1] / L, vers[2] / L], this.boites, L) < L - 0.4) continue; // un mur entre nous
       if (!meilleur || dist < meilleur.dist) meilleur = { ...c, dist };
     }
-    if (!meilleur) { this.diffuser({ t: 'coup', id: j.id, a }, j); return; }
+    if (!meilleur) {
+      this.diffuser({ t: 'coup', id: j.id, a }, j);
+      if (arme.onde) this.ondeChoc(j, a, this.solDevant(j, 2.5), arme.onde); // Marteau de Thor : même dans le vide
+      return;
+    }
     const cible = meilleur.autre;
     // Coup dans le dos au couteau : en visant (clic droit), derrière l'adversaire → élimination
     let dos = false;
@@ -652,16 +734,43 @@ class Partie {
       this.envoyer(cible, { t: 'pousse', v: arrondir(v) });
     }
     this.infliger(j, cible, dos ? arme.dansLeDos : arme.degats, false, d, a, { melee: 1, dos: dos ? 1 : 0 });
+    if (arme.onde) this.ondeChoc(j, a, [cible.x, cible.y + 0.3, cible.z], arme.onde); // (un peu au-dessus du sol : sinon le sol « cache » l'onde)
   }
 
-  // ---------- Gadgets : grenade, fumigène, grappin, kit de soin ----------
+  // Le point du sol à « distance » mètres devant un joueur (moins s'il y a un mur ; ses pieds s'il n'y a pas de sol).
+  solDevant(j, distance) {
+    const f = devant(j);
+    const depart = [j.x, j.y + 1, j.z];
+    const t = Math.max(0, Math.min(distance, G.rayonCarte(depart, f, this.boites, distance) - 0.3));
+    const p = [j.x + f[0] * t, j.y + 1, j.z + f[2] * t];
+    const bas = G.rayonCarte(p, [0, -1, 0], this.boites, 6);
+    return bas < 6 ? [p[0], p[1] - bas + 0.3, p[2]] : [j.x, j.y + 0.3, j.z];
+  }
+
+  // Onde de choc du Marteau de Thor : la foudre tombe, les adversaires autour sont blessés et envoyés en l'air.
+  // Rien pour celui qui frappe.
+  ondeChoc(j, a, p, onde) {
+    this.exploser({ id: 0, type: 'thor', tireur: j, a }, p,
+      { rayon: onde.rayon, degats: onde.degats, degatsMin: onde.degatsMin, poussee: onde.poussee, autoDegats: 0 },
+      { sansTireur: true, bots: true, haut: true });
+  }
+
+  // ---------- Gadgets : grenade, fumigène, grenade flash, balise des météores, grappin, kit de soin, mine, propulseur ----------
   utiliserGadget(j, a, oeil, d, now) {
     const arme = this.armes[a];
     if (now < j.gadgetPretA) { this.envoyer(j, { t: 'gadget', pretDans: j.gadgetPretA - now }); return; }
-    if (arme.id === 'grenade' || arme.id === 'fumigene') {
+    if (arme.lancer) {
+      // Gadgets qu'on lance (ils rebondissent) : le type du projectile est « projectile », sinon l'identifiant de l'arme
       const p = [oeil[0] + d[0] * 0.5, oeil[1] + d[1] * 0.5 - 0.1, oeil[2] + d[2] * 0.5];
       const v = [d[0] * arme.lancer, d[1] * arme.lancer + 3, d[2] * arme.lancer];
-      this.creerProjectile(j, a, arme.id, p, v);
+      this.creerProjectile(j, a, arme.projectile || arme.id, p, v);
+    } else if (arme.id === 'mine') {
+      if (!this.poserMine(j, a, arme)) { this.envoyer(j, { t: 'gadget', pretDans: 0, rate: 1 }); return; }
+    } else if (arme.id === 'propulseur') {
+      // Un coup de réacteur : vers le haut, et un peu dans la direction où l'on regarde
+      this.pousser(j, [d[0] * (arme.pousseeAvant || 0), arme.pousseeHaut || 15, d[2] * (arme.pousseeAvant || 0)]);
+      j.libreJusqua = now + 1800;
+      this.diffuser({ t: 'propulse', id: j.id, p: arrondir([j.x, j.y, j.z]) });
     } else if (arme.id === 'grappin') {
       const coup = G.rayonCarteDetail(oeil, d, this.boites, arme.portee);
       if (!coup.boite) { this.envoyer(j, { t: 'grappin', id: j.id, rate: 1 }); j.gadgetPretA = now + 800; return; }
@@ -717,6 +826,7 @@ class Partie {
     const id = this.prochainProjectile++;
     this.projectiles.set(id, { id, type, tireur: j, a, p, v, nee: Date.now() });
     this.diffuser({ t: 'projectile', id, type, tireur: j.id, a, p: arrondir(p), v: arrondir(v) });
+    return id;
   }
 
   finProjectile(pr, p, extra = {}) {
@@ -728,19 +838,24 @@ class Partie {
     const now = Date.now();
     const pas = dt / 2;
     for (const pr of [...this.projectiles.values()]) {
+      if (!this.projectiles.has(pr.id)) continue; // (déjà parti : une mine qui a explosé à côté...)
       const arme = this.armes[pr.a];
       const age = now - pr.nee;
-      const rebondit = pr.type === 'grenade' || pr.type === 'fumigene';
+      if (pr.type === 'mine') { this.majMine(pr, arme, age, now); continue; }
+      const rebondit = !!arme.rebond; // grenade, fumigène, grenade flash, balise des météores
       if (rebondit && age >= arme.explosionMs) {
         if (pr.type === 'grenade') this.exploser(pr, pr.p, arme);
+        else if (pr.type === 'flash') this.flash(pr, arme);
+        else if (pr.type === 'balise') this.pluieMeteores(pr, arme, now);
         else {
           this.finProjectile(pr, pr.p);
           this.diffuser({ t: 'fumee', p: arrondir(pr.p), ms: arme.dureeFumeeMs, rayon: arme.rayon });
         }
         continue;
       }
-      if (age > 6000 || pr.p[1] < -20) {
-        if (pr.type === 'roquette') this.exploser(pr, pr.p, arme);
+      if (age > (arme.vieMs || 6000) || pr.p[1] < -20) {
+        if (pr.p[1] >= -20 && pr.type === 'trou_noir') this.ouvrirTrouNoir(pr, pr.p, arme, now);
+        else if (pr.type === 'roquette' || arme.explose) this.exploserProjectile(pr, pr.p, arme);
         else this.finProjectile(pr, pr.p);
         continue;
       }
@@ -754,6 +869,7 @@ class Partie {
     if (L < 1e-5) return;
     const n = G.normaliser(pr.v);
     const coup = G.rayonCarteDetail(pr.p, n, this.boites, L);
+    const gros = pr.type === 'roquette' || arme.explose || pr.type === 'trou_noir'; // ceux-là touchent un peu plus facilement
     // Joueurs touchés (pas pour les grenades : elles rebondissent seulement sur les murs)
     let cible = null;
     let tCible = coup.t;
@@ -762,7 +878,7 @@ class Partie {
       for (const autre of this.joueurs.values()) {
         if (autre === pr.tireur || !autre.vivant) continue;
         if (this.mode === 'equipes' && autre.equipe === pr.tireur.equipe) continue;
-        const b = G.boitesJoueur(autre.x, autre.y, autre.z, pr.type === 'roquette' ? 0.15 : 0.05);
+        const b = G.boitesJoueur(autre.x, autre.y, autre.z, gros ? 0.15 : 0.05);
         const th = G.rayonBoite(pr.p, n, b.tete);
         const tc = G.rayonBoite(pr.p, n, b.corps);
         const t = Math.min(th, tc);
@@ -770,9 +886,13 @@ class Partie {
       }
     }
     const point = (t) => [pr.p[0] + n[0] * t, pr.p[1] + n[1] * t, pr.p[2] + n[2] * t];
+    if (cible || coup.boite) {
+      const p = point(Math.max(0, (cible ? tCible : coup.t) - 0.05));
+      if (pr.type === 'trou_noir') { this.ouvrirTrouNoir(pr, p, arme, Date.now()); return; }
+      if (pr.type === 'roquette' || arme.explose) { this.exploserProjectile(pr, p, arme); return; }
+    }
     if (cible) {
       const p = point(Math.max(0, tCible - 0.05));
-      if (pr.type === 'roquette') { this.exploser(pr, p, arme); return; }
       this.finProjectile(pr, p, { cible: cible.id });
       this.infliger(pr.tireur, cible, Math.round(arme.degats * (tete ? arme.multiplicateurTete || 1 : 1)), tete, n, pr.a);
       if (pr.type === 'fusee' && cible.vivant && this.etat !== 'attente') {
@@ -784,8 +904,7 @@ class Partie {
     }
     if (coup.boite) {
       const p = point(Math.max(0, coup.t - 0.05));
-      if (pr.type === 'roquette') { this.exploser(pr, p, arme); return; }
-      if (!rebondit) { this.finProjectile(pr, p, { mur: 1 }); return; }
+      if (!rebondit) { this.finProjectile(pr, p, { mur: 1 }); return; } // (carreau et clou restent plantés)
       // Rebond : la vitesse "rebondit" sur la face touchée et ralentit
       const nn = coup.normale;
       const vn = pr.v[0] * nn[0] + pr.v[1] * nn[1] + pr.v[2] * nn[2];
@@ -797,12 +916,178 @@ class Partie {
     pr.p = point(L);
   }
 
-  // Explosion (roquette ou grenade) : dégâts autour, et le souffle projette les joueurs.
-  exploser(pr, pos, arme) {
+  // Un projectile qui explose (roquette, obus, plasma, feu d'artifice). Le feu d'artifice éclate ensuite en petites
+  // explosions colorées tout autour (« bouquet »). Les nouvelles armes poussent aussi les bots.
+  exploserProjectile(pr, p, arme) {
+    if (pr.type === 'roquette') { this.exploser(pr, p, arme); return; }
+    const bouquet = arme.bouquet;
+    this.exploser(pr, p, arme, { bots: true, ...(bouquet ? { c: Math.floor(Math.random() * 6) } : {}) });
+    if (!bouquet) return;
+    const now = Date.now();
+    const sous = { rayon: bouquet.rayon, degats: bouquet.degats, degatsMin: bouquet.degatsMin, poussee: bouquet.poussee, autoDegats: arme.autoDegats || 0 };
+    for (let i = 0; i < bouquet.nombre; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const r = bouquet.distance * (0.4 + 0.6 * Math.random());
+      const dir = G.normaliser([Math.cos(ang), 0.15 + Math.random() * 0.35, Math.sin(ang)]);
+      const t = Math.max(0, Math.min(r, G.rayonCarte(p, dir, this.boites, r) - 0.3)); // pas à travers les murs
+      const q = [p[0] + dir[0] * t, p[1] + dir[1] * t, p[2] + dir[2] * t];
+      const c = i % 6;
+      const at = now + bouquet.delaiMinMs + Math.random() * (bouquet.delaiMaxMs - bouquet.delaiMinMs);
+      this.retards.push({ at, f: () => this.exploser({ id: 0, type: 'artifice', tireur: pr.tireur, a: pr.a }, q, sous, { bots: true, c }) });
+    }
+  }
+
+  // ---------- Mine ----------
+  // Posée au sol devant le joueur (au plus « distancePose » mètres, moins s'il y a un mur). Renvoie false s'il n'y a pas de sol.
+  poserMine(j, a, arme) {
+    const f = devant(j);
+    const depart = [j.x, j.y + 0.5, j.z];
+    const t = Math.max(0, Math.min(arme.distancePose || 1.5, G.rayonCarte(depart, f, this.boites, arme.distancePose || 1.5) - 0.3));
+    const p = [j.x + f[0] * t, j.y + 0.5, j.z + f[2] * t];
+    const bas = G.rayonCarte(p, [0, -1, 0], this.boites, 6);
+    if (bas >= 6) return false; // dans le vide
+    // Pas plus de « maxPosees » mines : la plus vieille disparaît
+    const miennes = [...this.projectiles.values()].filter((pr) => pr.type === 'mine' && pr.tireur === j).sort((x, y) => x.nee - y.nee);
+    while (miennes.length >= (arme.maxPosees || 2)) { const vieille = miennes.shift(); this.finProjectile(vieille, vieille.p); }
+    this.creerProjectile(j, a, 'mine', [p[0], p[1] - bas + 0.03, p[2]], [0, 0, 0]);
+    return true;
+  }
+
+  // Une mine posée : elle s'arme au bout d'un moment, puis explose si un adversaire passe tout près.
+  majMine(pr, arme, age, now) {
+    if (age > (arme.dureeVieMs || 60000)) { this.finProjectile(pr, pr.p); return; }
+    if (age < (arme.armementMs || 1000)) return;
+    for (const autre of this.joueurs.values()) {
+      if (autre === pr.tireur || !autre.vivant) continue;
+      if (this.mode === 'equipes' && autre.equipe === pr.tireur.equipe) continue;
+      if (G.distancePointBoite(pr.p, G.boitesJoueur(autre.x, autre.y, autre.z).corps) > (arme.rayonDeclenchement || 2)) continue;
+      this.exploser(pr, pr.p, arme, { bots: true });
+      return;
+    }
+  }
+
+  // ---------- Grenade flash ----------
+  // Un éclair aveuglant : tous ceux qui sont dans le rayon et la voient (pas de mur entre) sont éblouis.
+  // Le lanceur l'est moitié moins longtemps, les coéquipiers pas du tout. Pas de dégâts.
+  flash(pr, arme) {
+    const now = Date.now();
     this.projectiles.delete(pr.id);
-    this.diffuser({ t: 'explosion', id: pr.id, type: pr.type, p: arrondir(pos), rayon: arme.rayon });
+    this.diffuser({ t: 'explosion', id: pr.id, type: 'flash', p: arrondir(pr.p), rayon: arme.rayon });
+    for (const j of this.joueurs.values()) {
+      if (!j.vivant) continue;
+      if (this.mode === 'equipes' && j !== pr.tireur && j.equipe === pr.tireur.equipe) continue;
+      const oeil = [j.x, j.y + G.HAUTEUR_YEUX, j.z];
+      const v = [oeil[0] - pr.p[0], oeil[1] - pr.p[1], oeil[2] - pr.p[2]];
+      const L = Math.hypot(v[0], v[1], v[2]);
+      if (L > arme.rayon) continue;
+      if (L > 0.3 && G.rayonCarte(pr.p, [v[0] / L, v[1] / L, v[2] / L], this.boites, L) < L - 0.3) continue; // caché derrière un mur
+      const ms = Math.round(arme.eblouissementMs * (j === pr.tireur ? 0.5 : 1));
+      if (j.bot) { j.bot.aveugleJusqua = now + ms; j.bot.cible = null; } // un bot ébloui ne voit plus personne
+      else this.envoyer(j, { t: 'eblouir', ms });
+    }
+  }
+
+  // ---------- Trou noir de l'admin ----------
+  // La boule s'arrête et ouvre une zone qui aspire les adversaires (et blesse ceux qui sont tout près),
+  // puis tout explose à la fin (voir majZones).
+  ouvrirTrouNoir(pr, p, arme, now) {
+    this.finProjectile(pr, p);
+    const z = arme.zone;
+    const id = this.prochaineZone++;
+    this.zones.set(id, { id, type: 'trou_noir', p, fin: now + z.dureeMs, prochain: now, tireur: pr.tireur, a: pr.a, arme });
+    this.diffuser({ t: 'zone', id, type: 'trou_noir', p: arrondir(p), ms: z.dureeMs, rayon: z.rayon });
+  }
+
+  // Aspiration : on vise une vitesse vers le centre (plus forte en se rapprochant, plus douce tout au centre)
+  // et on pousse de la différence avec la vitesse actuelle du joueur (mesurée avec ses positions récentes).
+  // Ainsi l'aspiration ne s'emballe pas, même si les poussées s'ajoutent.
+  aspirer(zone, now) {
+    const z = zone.arme.zone;
+    const centre = zone.p;
+    for (const cible of this.joueurs.values()) {
+      if (cible === zone.tireur || !cible.vivant) continue;
+      if (this.mode === 'equipes' && cible.equipe === zone.tireur.equipe) continue;
+      if (cible.admin && cible.pouvoirs.invincible) continue;
+      const pos = [cible.x, cible.y + 0.9, cible.z];
+      const vers = [centre[0] - pos[0], centre[1] - pos[1], centre[2] - pos[2]];
+      const dist = Math.hypot(vers[0], vers[1], vers[2]);
+      if (dist > z.rayon) continue;
+      const dir = dist > 0.01 ? [vers[0] / dist, vers[1] / dist, vers[2] / dist] : [0, 1, 0];
+      const vitesse = (z.forceMin + (z.forceMax - z.forceMin) * (1 - dist / z.rayon)) * Math.min(1, dist / 1.5);
+      let vAct;
+      if (cible.bot) vAct = cible.bot.vit;
+      else {
+        const avant = this.positionPassee(cible, now - 200);
+        vAct = [(cible.x - avant[0]) / 0.2, (cible.y - avant[1]) / 0.2, (cible.z - avant[2]) / 0.2];
+      }
+      let dx = dir[0] * vitesse - vAct[0];
+      let dz = dir[2] * vitesse - vAct[2];
+      const h = Math.hypot(dx, dz);
+      if (h > z.forceMax) { dx *= z.forceMax / h; dz *= z.forceMax / h; }
+      // en hauteur : on flotte vers le centre (le navigateur fait vitesse = max(vitesse, 0) + poussée)
+      const vyVoulue = Math.max(-4, Math.min(6, vers[1] * 2));
+      const dy = Math.max(-6, Math.min(8, vyVoulue - Math.max(vAct[1], 0)));
+      this.pousser(cible, [dx, dy, dz]);
+      cible.libreJusqua = now + 1500;
+      if (dist < z.rayonDegats) this.infliger(zone.tireur, cible, z.degats, false, dir, zone.a);
+    }
+  }
+
+  majZones(now) {
+    for (const zone of [...this.zones.values()]) {
+      if (now >= zone.fin) {
+        this.zones.delete(zone.id);
+        this.diffuser({ t: 'zoneFin', id: zone.id });
+        if (zone.type === 'trou_noir') {
+          const arme = zone.arme;
+          this.exploser({ id: 0, type: 'trou_noir', tireur: zone.tireur, a: zone.a }, zone.p,
+            { rayon: arme.rayon, degats: arme.degats, degatsMin: arme.degatsMin, poussee: arme.poussee, autoDegats: 0 },
+            { sansTireur: true, bots: true });
+        }
+        continue;
+      }
+      if (zone.type === 'trou_noir' && now >= zone.prochain) {
+        zone.prochain = now + zone.arme.zone.toutesLesMs;
+        this.aspirer(zone, now);
+      }
+    }
+  }
+
+  // ---------- Pluie de météores de l'admin ----------
+  // La balise s'allume (zone rouge), puis des météores tombent du ciel au hasard autour d'elle.
+  pluieMeteores(pr, arme, now) {
+    this.finProjectile(pr, pr.p);
+    const pl = arme.pluie;
+    const id = this.prochaineZone++;
+    this.zones.set(id, { id, type: 'meteores', p: pr.p, fin: now + pl.dureeZoneMs, tireur: pr.tireur, a: pr.a, arme });
+    this.diffuser({ t: 'zone', id, type: 'meteores', p: arrondir(pr.p), ms: pl.dureeZoneMs, rayon: pl.rayonZone });
+    const souffle = { rayon: arme.rayon, degats: arme.degats, degatsMin: arme.degatsMin, poussee: arme.poussee, autoDegats: arme.autoDegats || 0 };
+    for (let i = 0; i < pl.nombre; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const r = pl.distance * Math.sqrt(Math.random());
+      const haut = [pr.p[0] + Math.cos(ang) * r, pr.p[1] + 8, pr.p[2] + Math.sin(ang) * r];
+      const bas = G.rayonCarte(haut, [0, -1, 0], this.boites, 40);
+      const cible = bas < 40 ? [haut[0], haut[1] - bas + 0.05, haut[2]] : [haut[0], pr.p[1], haut[2]];
+      const depart = [cible[0], cible[1] + pl.hauteur, cible[2]];
+      this.retards.push({
+        at: now + Math.random() * pl.dureeMs,
+        f: () => {
+          this.diffuser({ t: 'meteore', p: arrondir(depart), cible: arrondir(cible), ms: pl.chuteMs });
+          this.retards.push({ at: Date.now() + pl.chuteMs, f: () => this.exploser({ id: 0, type: 'meteore', tireur: pr.tireur, a: pr.a }, cible, souffle, { bots: true }) });
+        },
+      });
+    }
+  }
+
+  // Explosion : dégâts autour, et le souffle projette les joueurs.
+  // opts : sansTireur (ni dégâts ni poussée pour le tireur), bots (le souffle pousse aussi les bots),
+  //        haut (le souffle envoie surtout vers le haut), c (couleur du feu d'artifice, envoyée aux navigateurs).
+  exploser(pr, pos, arme, opts = {}) {
+    this.projectiles.delete(pr.id);
+    this.diffuser({ t: 'explosion', id: pr.id, type: pr.type, p: arrondir(pos), rayon: arme.rayon, ...(opts.c !== undefined ? { c: opts.c } : {}) });
     for (const cible of [...this.joueurs.values()]) {
       if (!cible.vivant) continue;
+      if (opts.sansTireur && cible === pr.tireur) continue;
       if (this.mode === 'equipes' && cible !== pr.tireur && cible.equipe === pr.tireur.equipe) continue;
       const b = G.boitesJoueur(cible.x, cible.y, cible.z);
       const dist = G.distancePointBoite(pos, b.corps);
@@ -817,10 +1102,12 @@ class Partie {
       if (cible === pr.tireur) degats *= arme.autoDegats;
       // Le souffle de l'explosion projette les joueurs (et permet le "rocket jump" !)
       let dir = L > 0.05 ? G.normaliser(vers) : [0, 1, 0];
-      dir = G.normaliser([dir[0], dir[1] + 0.6, dir[2]]);
+      dir = opts.haut ? G.normaliser([dir[0] * 0.35, 1, dir[2] * 0.35]) : G.normaliser([dir[0], dir[1] + 0.6, dir[2]]);
       const force = arme.poussee * (0.35 + 0.65 * k);
       cible.libreJusqua = Date.now() + 1500;
-      this.envoyer(cible, { t: 'pousse', v: arrondir([dir[0] * force, dir[1] * force, dir[2] * force]) });
+      const v = [dir[0] * force, dir[1] * force, dir[2] * force];
+      if (opts.bots) this.pousser(cible, v);
+      else this.envoyer(cible, { t: 'pousse', v: arrondir(v) });
       if (degats <= 0) continue; // (explosions de l'admin : elles le poussent mais ne le blessent pas)
       this.infliger(pr.tireur, cible, Math.max(1, Math.round(degats)), false, dir, pr.a, { explosion: 1 });
     }
@@ -930,6 +1217,9 @@ class Partie {
     this.redemarrageA = 0;
     for (const pr of this.projectiles.values()) this.diffuser({ t: 'projectileFin', id: pr.id, type: pr.type, p: arrondir(pr.p) });
     this.projectiles.clear();
+    for (const id of this.zones.keys()) this.diffuser({ t: 'zoneFin', id });
+    this.zones.clear();
+    this.retards = [];
     for (const j of this.joueurs.values()) { j.kills = 0; j.morts = 0; j.serie = 0; }
     this.diffuser({ t: 'debut', finDans: this.finA - Date.now(), scores: this.scoresEquipes });
     for (const j of this.joueurs.values()) {
@@ -989,6 +1279,15 @@ class Partie {
     if (avecBots && !this.botsFiges()) this.bots.gerer(now, TICK_MS / 1000);
     this.reparerBoites(now); // la carte cassée par le laser se répare
     this.majProjectiles(TICK_MS / 1000);
+    // Événements prévus (petites explosions du feu d'artifice, météores) et zones (trou noir, pluie de météores)
+    if (this.retards.length) {
+      const prets = this.retards.filter((r) => now >= r.at);
+      if (prets.length) {
+        this.retards = this.retards.filter((r) => now < r.at);
+        for (const r of prets) r.f(); // (un météore peut en prévoir un autre : il s'ajoute à la nouvelle liste)
+      }
+    }
+    if (this.zones.size) this.majZones(now);
     // Frappes orbitales de l'admin : l'explosion arrive après le compte à rebours
     if (this.frappes.length) {
       this.frappes = this.frappes.filter((f) => {
@@ -1033,10 +1332,10 @@ class Partie {
           j.arme, (j.visee ? 1 : 0) | (j.rechargeA ? 2 : 0) | (j.soinA ? 4 : 0)]);
       }
     }
-    // Position des grenades et fumigènes (ils rebondissent : les navigateurs se recalent dessus)
+    // Position des projectiles qui rebondissent (grenades, fumigènes, flash, balise) : les navigateurs se recalent dessus
     const pr = [];
     for (const x of this.projectiles.values()) {
-      if (x.type === 'grenade' || x.type === 'fumigene') pr.push([x.id, arrondi(x.p[0]), arrondi(x.p[1]), arrondi(x.p[2])]);
+      if (this.armes[x.a].rebond) pr.push([x.id, arrondi(x.p[0]), arrondi(x.p[1]), arrondi(x.p[2])]);
     }
     this.diffuser(pr.length ? { t: 's', j: etats, pr } : { t: 's', j: etats });
 

@@ -148,13 +148,17 @@ export class Personnage {
   soigner(dureeMs) { this.anim = { type: 'soin', t: 0, duree: dureeMs / 1000 }; }
 
   // La poêle dans le dos (elle arrête les balles qui arrivent par derrière).
-  afficherPoeleDos(oui) {
+  // (id : la poêle ou la pelle, les deux protègent le dos)
+  afficherPoeleDos(oui, id = 'poele') {
+    if (oui && this.poeleDos && this.poeleDosId !== id) { this.poeleDos.removeFromParent(); this.poeleDos = null; }
     if (oui && !this.poeleDos) {
-      const m = modeleArme('poele', true);
+      const m = modeleArme(id, true);
       m.rotation.x = Math.PI / 2;            // à plat contre le dos, manche vers le bas
-      m.position.set(0, -0.29, 2 * PX + 0.022);
+      if (id === 'pelle') { m.position.set(0, -0.25, 2 * PX + 0.02); m.scale.setScalar(0.8); } // lame en haut, au-dessus de l'épaule
+      else m.position.set(0, -0.29, 2 * PX + 0.022);
       this.parties.corps.mesh.add(m);        // sur le corps : elle suit aussi le ragdoll
       this.poeleDos = m;
+      this.poeleDosId = id;
     }
     if (this.poeleDos) this.poeleDos.visible = !!oui;
   }

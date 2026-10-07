@@ -15,29 +15,29 @@
   <section id="hall" class="ecran">
     <div class="boite hall-boite">
       <a class="retour" href="/">← Plycube</a>
-      <h1><span aria-hidden="true">🦎</span> Caméléon</h1>
+      <h1><span aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#cameleon"/></svg></span> Caméléon</h1>
       <p class="sous-titre">Cache-cache en blocs : peins-toi aux couleurs du décor pour devenir invisible… ou trouve ceux qui se cachent !</p>
-      <div class="petit">🤖 JOUER TOUT DE SUITE AVEC DES BOTS</div>
+      <div class="petit"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#robot"/></svg> JOUER TOUT DE SUITE AVEC DES BOTS</div>
       <div class="ligne">
-        <button id="btn-bots-cacher" class="btn btn-grand" type="button">🦎 Me cacher</button>
-        <button id="btn-bots-chercher" class="btn btn-grand" type="button">🔫 Chercher</button>
+        <button id="btn-bots-cacher" class="btn btn-grand" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#cameleon"/></svg> Me cacher</button>
+        <button id="btn-bots-chercher" class="btn btn-grand" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#arme"/></svg> Chercher</button>
       </div>
       <div class="ligne">
         <label class="visuellement-cache" for="choix-carte">Carte</label>
         <select id="choix-carte"></select>
-        <button id="btn-creer" class="btn" type="button">➕ Créer un salon</button>
+        <button id="btn-creer" class="btn" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#plus"/></svg> Créer un salon</button>
       </div>
       <div class="ligne">
         <label class="visuellement-cache" for="code">Code du salon</label>
         <input id="code" maxlength="4" placeholder="CODE" autocomplete="off" spellcheck="false">
-        <button id="btn-rejoindre" class="btn" type="button">🔑 Rejoindre</button>
+        <button id="btn-rejoindre" class="btn" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#cle"/></svg> Rejoindre</button>
       </div>
       <h2>Salons ouverts</h2>
       <ul id="salons" class="salons"></ul>
       <div class="hall-bas">
-        <a id="lien-perso" class="btn btn-petit" href="/games/fps/?personnage=1&amp;retour=/games/cameleon/">👤 Mon personnage</a>
-        <button id="btn-regles" class="btn btn-petit" type="button">❓ Règles</button>
-        <button id="btn-reglages" class="btn btn-petit" type="button">⚙ Réglages</button>
+        <a id="lien-perso" class="btn btn-petit" href="/games/fps/?personnage=1&amp;retour=/games/cameleon/"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#perso"/></svg> Mon personnage</a>
+        <button id="btn-regles" class="btn btn-petit" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#aide"/></svg> Règles</button>
+        <button id="btn-reglages" class="btn btn-petit" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#reglages"/></svg> Réglages</button>
       </div>
       <p id="hall-etat" class="etat" role="status"></p>
     </div>
@@ -51,7 +51,7 @@
       <div id="att-carte" class="carte-nom"></div>
       <ul id="att-joueurs" class="joueurs"></ul>
       <p id="att-info" class="etat"></p>
-      <button id="btn-commencer" class="btn btn-grand" type="button">▶ Commencer</button>
+      <button id="btn-commencer" class="btn btn-grand" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#jouer"/></svg> Commencer</button>
       <button id="btn-quitter-att" class="btn btn-petit" type="button">Quitter</button>
     </div>
   </section>
@@ -68,7 +68,7 @@
     <div id="toasts" aria-live="polite"></div>
   </div>
   <div id="bandeau" hidden>
-    <div class="grand">🙈 Les cacheurs se cachent…</div>
+    <div class="grand"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#cache"/></svg> Les cacheurs se cachent…</div>
     <div id="bandeau-chrono" class="chrono-grand"></div>
     <p>Tu es <b>chercheur</b>. Quand le temps est écoulé, trouve-les et tire-leur dessus avec ton pistolet à peinture !<br>
       Attention : un tir raté te bloque 2,5 secondes. Toutes les 30 secondes, les cacheurs sifflent (écoute bien d'où ça vient).</p>
@@ -80,27 +80,27 @@
   <div id="pause" class="ecran" hidden>
     <div class="boite">
       <h2>Pause</h2>
-      <button id="btn-reprendre" class="btn btn-grand" type="button">▶ Reprendre</button>
-      <button id="btn-regles2" class="btn" type="button">❓ Règles</button>
-      <button id="btn-reglages2" class="btn" type="button">⚙ Réglages</button>
+      <button id="btn-reprendre" class="btn btn-grand" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#jouer"/></svg> Reprendre</button>
+      <button id="btn-regles2" class="btn" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#aide"/></svg> Règles</button>
+      <button id="btn-reglages2" class="btn" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#reglages"/></svg> Réglages</button>
       <button id="btn-quitter" class="btn btn-rouge" type="button">Quitter le salon</button>
     </div>
   </div>
 
   <div id="regles" class="ecran" hidden>
     <div class="boite boite-large">
-      <h2>❓ Comment on joue ?</h2>
+      <h2><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#aide"/></svg> Comment on joue ?</h2>
       <p>Au début de chaque manche, il y a <b>1 chercheur pour 4 joueurs</b> (2 à partir de 5 joueurs, 3 à partir de 9…). Tous les autres sont <b>cacheurs</b>.</p>
-      <h3>🦎 Cacheur</h3>
+      <h3><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#cameleon"/></svg> Cacheur</h3>
       <ul>
         <li><b>60 secondes</b> pour te cacher pendant que les chercheurs ont les yeux bandés.</li>
-        <li><b>Peins-toi</b> (touche <kbd>P</kbd>) : 💧 la pipette prend une couleur du décor, 🪣 remplir colore une partie du corps d'un coup, 🖌 le pinceau fait les détails.</li>
+        <li><b>Peins-toi</b> (touche <kbd>P</kbd>) : <svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#pipette"/></svg> la pipette prend une couleur du décor, <svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#seau"/></svg> remplir colore une partie du corps d'un coup, <svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#pinceau"/></svg> le pinceau fait les détails.</li>
         <li><b>Prends une pose</b> : <kbd>1</kbd> statue, <kbd>2</kbd> accroupi, <kbd>3</kbd> allongé. Bouger te remet debout.</li>
         <li><b>Leurre</b> (<kbd>L</kbd>, une fois par manche) : une copie de toi qui ne bouge pas. Si un chercheur tire dessus, il perd du temps et tu gagnes des points.</li>
         <li>Toutes les 30 secondes, tu <b>siffles</b> sans le vouloir : les chercheurs entendent d'où ça vient.</li>
         <li>Si tu es touché, tu deviens <b>chercheur</b> à ton tour.</li>
       </ul>
-      <h3>🔫 Chercheur</h3>
+      <h3><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#arme"/></svg> Chercheur</h3>
       <ul>
         <li>Tire de la peinture (clic) sur ce qui te semble louche. <b>Raté</b> = bloqué 2,5 secondes ; <b>leurre</b> = bloqué 3,5 secondes.</li>
         <li><b>Radar</b> (<kbd>R</kbd>, une fois par manche) : des flèches montrent pendant 2 secondes la direction des cacheurs.</li>
@@ -114,7 +114,7 @@
 
   <div id="reglages" class="ecran" hidden>
     <div class="boite">
-      <h2>⚙ Réglages</h2>
+      <h2><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#reglages"/></svg> Réglages</h2>
       <label class="reglage">Sensibilité de la souris <input id="r-sensibilite" type="range" min="0.3" max="2.5" step="0.05"></label>
       <label class="reglage">Volume <input id="r-volume" type="range" min="0" max="1" step="0.05"></label>
       <label class="reglage case"><input id="r-inverser" type="checkbox"> Inverser haut / bas</label>

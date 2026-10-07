@@ -28,7 +28,7 @@
             wrap.querySelector('.menu').remove();
             try {
               await Plateforme.inviter(f.id, g.id, null);
-              App.toast('Invitation envoyée à ' + f.username + ' ✔', { type: 'success' });
+              App.toast('Invitation envoyée à ' + f.username, { type: 'success' });
             } catch (err) { fail(err); }
           } }, g.name);
         })));
@@ -77,7 +77,7 @@
   async function respond(id, accept) {
     try {
       await Plateforme.repondreDemande(id, accept);
-      if (accept) App.toast('Nouvel ami ajouté 🎉', { type: 'success' });
+      if (accept) App.toast('Nouvel ami ajouté !', { type: 'success' });
       load();
     } catch (e) { fail(e); }
   }
@@ -122,7 +122,7 @@
       if (!name) return;
       try {
         var r = await Plateforme.demanderAmi(name);
-        App.toast(r.accepted ? 'Vous êtes maintenant amis avec ' + r.username + ' 🎉' : 'Demande envoyée à ' + r.username + ' ✔', { type: 'success' });
+        App.toast(r.accepted ? 'Vous êtes maintenant amis avec ' + r.username + ' !' : 'Demande envoyée à ' + r.username, { type: 'success' });
         form.reset();
         load();
       } catch (err) { fail(err); }

@@ -8,6 +8,9 @@
 //
 // Ils tirent avec les mêmes règles que les joueurs (Partie.tir) : le serveur reste l'arbitre.
 // Ils ne visent que les joueurs qui sont vraiment en train de jouer (pas ceux qui sont dans un menu).
+//
+// Mode classé : ils complètent la partie (jusqu'à 6 joueurs) pendant toute la manche, et leur niveau (1 à 20)
+// règle leur force : visée plus précise, réaction plus rapide, un peu plus rapides, et de meilleures armes.
 const G = require('./geometrie');
 
 const CASE = 0.5;          // taille d'une case du plan (m)
@@ -21,6 +24,29 @@ const REGLAGES_DEFAUT = {
   nombre: 3, precisionDegres: 2.5, reactionMs: 450, fontDegats: true,
   armes: ['fusil', 'smg', 'rafale', 'pompe', 'precision'],
 };
+// Mode classé
+const JOUEURS_CLASSE = 6;  // les bots complètent jusqu'à ce nombre de joueurs
+const NIVEAU_MAX = 20;
+// Armes principales des bots selon leur niveau (à partir du niveau indiqué)
+const ARMES_PAR_NIVEAU = [
+  [1, ['smg', 'pompe', 'rafale']],
+  [5, ['fusil', 'smg', 'rafale', 'pompe']],
+  [10, ['fusil', 'rafale', 'precision', 'mitrailleuse']],
+  [16, ['fusil', 'precision', 'mitrailleuse', 'sniper']],
+];
+
+// Force des bots au niveau n (1 = facile, 20 = très fort)
+function forceDuNiveau(n) {
+  const k = Math.max(0, Math.min(NIVEAU_MAX, n) - 1);
+  let armes = ARMES_PAR_NIVEAU[0][1];
+  for (const [des, liste] of ARMES_PAR_NIVEAU) if (n >= des) armes = liste;
+  return {
+    precisionDegres: Math.max(0.6, 6 - 0.45 * k), // erreur de visée (degrés)
+    reactionMs: Math.max(150, 700 - 45 * k),      // temps avant de tirer
+    vitesse: 1 + (0.2 * k) / (NIVEAU_MAX - 1),     // jusqu'à 20 % plus rapides
+    armes,
+  };
+}
 
 const hasard = (a, b) => a + Math.random() * (b - a);
 const angleVers = (dx, dz) => Math.atan2(-dx, -dz); // même convention que le jeu (yaw)
@@ -309,6 +335,43 @@ class Bots {
     this.suivant = 0;            // pour donner un numéro à chaque bot
     this.dernierAjout = 0;
     this.dernierJoueurActif = 0;
+    this.niveau = 0;             // classé : niveau actuel des bots (0 = pas encore calculé)
+    this.boost = 1;              // classé : vitesse en plus
+  }
+
+  // Classé : niveau effectif = niveau de la partie + 1 tous les 3 éliminations du meilleur vrai joueur (max 20).
+  niveauEffectif() {
+    const p = this.partie;
+    let meilleur = 0;
+    for (const j of p.joueurs.values()) if (!j.bot && j.kills > meilleur) meilleur = j.kills;
+    return Math.min(NIVEAU_MAX, p.niveau + Math.floor(meilleur / 3));
+  }
+
+  // Classé : applique le niveau (tout de suite pour la visée et la réaction, à la prochaine apparition pour les armes).
+  majNiveau() {
+    const p = this.partie;
+    const n = this.niveauEffectif();
+    if (n === this.niveau) return;
+    const monte = this.niveau > 0 && n > this.niveau;
+    this.niveau = n;
+    const f = forceDuNiveau(n);
+    this.r.precisionDegres = f.precisionDegres;
+    this.r.reactionMs = f.reactionMs;
+    this.r.armes = f.armes;
+    this.boost = f.vitesse;
+    for (const j of this.liste()) {
+      const eq = this.equipementBot();
+      if (eq && j.vivant) j.prochainEquipement = eq; else if (eq) j.equipement = eq;
+    }
+    if (monte && p.etat === 'jeu') p.diffuser({ t: 'niveauBots', n });
+  }
+
+  // 4 armes d'un bot : une arme principale au hasard parmi celles de son niveau
+  equipementBot() {
+    const p = this.partie;
+    const armes = this.r.armes.filter((id) => p.indexArme.has(id));
+    const arme = armes[Math.floor(Math.random() * armes.length)] || 'fusil';
+    return p.validerEquipement({ principale: arme, secondaire: 'pistolet', melee: 'couteau', gadget: 'grenade' }) || p.equipementDefaut;
   }
 
   liste() { return [...this.partie.joueurs.values()].filter((j) => j.bot); }
@@ -316,17 +379,25 @@ class Bots {
   // Un joueur humain est-il en train de jouer (pas dans un menu, et il a bougé récemment) ?
   actif(j, now) { return !j.bot && j.vivant && j.actif && now - j.derniereMaj < 3000; }
 
-  // Appelé à chaque tour pendant la salle d'attente : ajoute ou retire des bots.
+  // Appelé à chaque tour pendant la salle d'attente (et pendant la manche en classé) : ajoute ou retire des bots.
   gerer(now, dt) {
     const p = this.partie;
     const humains = [...p.joueurs.values()].filter((j) => !j.bot);
     if (humains.some((j) => this.actif(j, now))) this.dernierJoueurActif = now;
     const bots = this.liste();
-    // Nombre de bots voulus : propre à la carte (les cartes XXL en ont plus), sans dépasser la partie.
-    // Personne ne s'entraîne depuis 30 s : les bots s'en vont.
-    const voulusCarte = Math.max(0, (p.carte.botsMax || this.r.nombre) + (p.botsBonus || 0)); // (+ ceux ajoutés par l'admin)
-    const voulu = now - this.dernierJoueurActif < 30000
-      ? Math.max(0, Math.min(voulusCarte, p.max - humains.length)) : 0;
+    let voulu;
+    if (p.mode === 'classe') {
+      // Classé : les bots complètent la partie tant qu'il y a un vrai joueur (+ ceux ajoutés ou enlevés par l'admin).
+      this.majNiveau();
+      const complet = Math.min(p.max, JOUEURS_CLASSE) - humains.length + (p.botsBonus || 0);
+      voulu = humains.length ? Math.max(0, Math.min(complet, p.max - humains.length)) : 0;
+    } else {
+      // Nombre de bots voulus : propre à la carte (les cartes XXL en ont plus), sans dépasser la partie.
+      // Personne ne s'entraîne depuis 30 s : les bots s'en vont.
+      const voulusCarte = Math.max(0, (p.carte.botsMax || this.r.nombre) + (p.botsBonus || 0)); // (+ ceux ajoutés par l'admin)
+      voulu = now - this.dernierJoueurActif < 30000
+        ? Math.max(0, Math.min(voulusCarte, p.max - humains.length)) : 0;
+    }
     if (bots.length > voulu) this.retirer(bots[bots.length - 1]);
     else if (bots.length < voulu && now - this.dernierAjout > 800) { this.dernierAjout = now; this.ajouter(); }
     for (const j of this.liste()) this.penser(j, now, dt);
@@ -339,9 +410,7 @@ class Bots {
     const pris = new Set(this.liste().map((j) => j.nom));
     const nom = `Bot ${NOMS.find((x) => !pris.has(`Bot ${x}`)) || this.suivant}`;
     const j = p.creerJoueur({ id: -this.suivant, nom, ws: { readyState: 3, send() {} }, style: null, bot: true });
-    const armes = this.r.armes.filter((id) => p.indexArme.has(id));
-    const arme = armes[Math.floor(Math.random() * armes.length)] || 'fusil';
-    j.equipement = p.validerEquipement({ principale: arme, secondaire: 'pistolet', melee: 'couteau', gadget: 'grenade' }) || p.equipementDefaut;
+    j.equipement = this.equipementBot();
     j.actif = true;
     j.bot = {
       vit: [0, 0, 0], auSol: false, solSous: null, dir: [0, 0], vitesse: 1, sauter: false, bloque: false,
@@ -429,6 +498,7 @@ class Bots {
 
     // 3) Se déplacer
     this.choisirDeplacement(j, cible, now);
+    b.vitesse *= this.boost; // (classé : plus rapides aux niveaux élevés)
     physique(plan, j, b, dt, p.r);
     if (j.y < -4) { p.apparaitre(j); b.chemin = null; return; } // tombé dans le vide : on le replace
     // Coincé ? (il n'avance plus) : il saute, puis il change de chemin

@@ -9,14 +9,15 @@ import {
   catalogue, normaliserStyle, styleAleatoire, visageParDefaut, visageVersCouleurs, couleursVersVisage,
 } from './apparence.js';
 import { el } from './hud.js';
+import { icone } from './icones.js';
 
 const ONGLETS = [
-  { id: 'visage', nom: '😀 Visage' },
-  { id: 'tete', nom: '💇 Tête' },
-  { id: 'haut', nom: '👕 Haut' },
-  { id: 'bas', nom: '👖 Bas' },
-  { id: 'chapeau', nom: '🎩 Chapeau' },
-  { id: 'accessoires', nom: '🕶 Accessoires' },
+  { id: 'visage', nom: 'Visage', ic: 'visage' },
+  { id: 'tete', nom: 'Tête', ic: 'cheveux' },
+  { id: 'haut', nom: 'Haut', ic: 'haut' },
+  { id: 'bas', nom: 'Bas', ic: 'bas' },
+  { id: 'chapeau', nom: 'Chapeau', ic: 'chapeau' },
+  { id: 'accessoires', nom: 'Accessoires', ic: 'lunettes' },
 ];
 const EFFETS = [
   { id: 'normal', nom: 'Normal' }, { id: 'vif', nom: 'Couleurs vives' }, { id: 'pop', nom: 'Pop art' },
@@ -68,17 +69,17 @@ export class Atelier {
   construire() {
     this.canvas = el('canvas', { class: 'apercu-3d' });
     this.erreur = el('p', { class: 'erreur', role: 'alert' });
-    this.btnSauver = el('button', { class: 'btn', type: 'button', text: '✓ Enregistrer', onclick: () => this.enregistrer() });
+    this.btnSauver = el('button', { class: 'btn', type: 'button', text: 'Enregistrer', onclick: () => this.enregistrer() });
     this.panneau = el('div', { class: 'panneau' });
     this.barreOnglets = el('nav', { class: 'onglets' }, ONGLETS.map((o) => el('button', {
-      class: 'onglet', type: 'button', 'data-onglet': o.id, text: o.nom, onclick: () => { this.onglet = o.id; this.afficherPanneau(); },
-    })));
+      class: 'onglet', type: 'button', 'data-onglet': o.id, onclick: () => { this.onglet = o.id; this.afficherPanneau(); },
+    }, icone(o.ic), ' ' + o.nom)));
     this.racine = el('div', { id: 'atelier', class: 'ecran', hidden: true },
       el('div', { class: 'atelier carte' },
         el('header', {},
           el('h2', { text: 'Mon personnage' }),
           el('div', { class: 'actions' },
-            el('button', { class: 'btn secondaire', type: 'button', text: '🎲 Au hasard', onclick: () => this.auHasard() }),
+            el('button', { class: 'btn secondaire', type: 'button', onclick: () => this.auHasard() }, icone('de'), ' Au hasard'),
             el('button', { class: 'btn secondaire', type: 'button', text: 'Annuler', 'data-retour': true, onclick: () => this.fermer() }),
             this.btnSauver)),
         this.erreur,
@@ -297,10 +298,10 @@ export class Atelier {
     grille.addEventListener('pointerup', fin);
     grille.addEventListener('pointercancel', fin);
 
-    const outil = (id, texte) => el('button', {
-      type: 'button', class: `option${this.outil === id ? ' choisie' : ''}`, text: texte,
+    const outil = (id, ic, texte) => el('button', {
+      type: 'button', class: `option${this.outil === id ? ' choisie' : ''}`,
       onclick: () => { this.outil = id; this.afficherPanneau(); },
-    });
+    }, icone(ic), ' ' + texte);
     const palette = [...new Set(['#222222', '#ffffff', ...c.peaux.slice(0, 8), ...c.cheveux.slice(0, 6), ...c.yeux.slice(0, 4), ...c.couleurs])];
     const libre = el('input', { type: 'color', value: this.couleur, 'aria-label': 'Autre couleur' });
     libre.addEventListener('input', () => { this.couleur = libre.value; this.majCouleurChoisie(); });
@@ -322,14 +323,14 @@ export class Atelier {
       el('div', { class: 'visage-ligne' },
         grille,
         el('div', { class: 'outils' },
-          outil('pinceau', '🖌 Pinceau'), outil('remplir', '🪣 Remplir'), outil('pipette', '💧 Pipette'), outil('gomme', '🧽 Gomme'),
-          el('button', { type: 'button', class: 'option', text: '↶ Annuler', onclick: () => this.annuler() }),
-          el('button', { type: 'button', class: 'option', text: '♻ Visage de base', onclick: () => { this.memoriser(); this.modifier({ visage: null }); } }))),
+          outil('pinceau', 'pinceau', 'Pinceau'), outil('remplir', 'seau', 'Remplir'), outil('pipette', 'pipette', 'Pipette'), outil('gomme', 'gomme', 'Gomme'),
+          el('button', { type: 'button', class: 'option', onclick: () => this.annuler() }, icone('recharger'), ' Annuler'),
+          el('button', { type: 'button', class: 'option', onclick: () => { this.memoriser(); this.modifier({ visage: null }); } }, icone('visage'), ' Visage de base'))),
       this.titre('Couleur du pinceau'), this.paletteVisage,
       this.titre('Ou à partir d\'une photo'),
       el('div', { class: 'choix' },
-        el('button', { type: 'button', class: 'option', text: '📷 Prendre une photo', onclick: () => photo.click() }),
-        el('button', { type: 'button', class: 'option', text: '🖼 Choisir une image', onclick: () => image.click() })),
+        el('button', { type: 'button', class: 'option', onclick: () => photo.click() }, icone('appareil'), ' Prendre une photo'),
+        el('button', { type: 'button', class: 'option', onclick: () => image.click() }, icone('image'), ' Choisir une image')),
       el('p', { class: 'sous', text: 'La photo reste sur ton appareil : elle devient un visage de 8 × 8 pixels, et seuls ces pixels sont enregistrés.' }),
       photo, image, this.zonePhoto,
     ];
@@ -448,7 +449,7 @@ export class Atelier {
       })(), ' Effet miroir'),
       this.titre('Effet rigolo'), effets,
       el('div', { class: 'choix' },
-        el('button', { type: 'button', class: 'btn', text: '✓ Utiliser ce visage', onclick: () => this.utiliserPhoto() }),
+        el('button', { type: 'button', class: 'btn', text: 'Utiliser ce visage', onclick: () => this.utiliserPhoto() }),
         el('button', { type: 'button', class: 'btn secondaire', text: 'Annuler', onclick: () => this.fermerPhoto() })));
     this.zonePhoto.hidden = false;
     this.majPhoto();
@@ -516,7 +517,7 @@ export function boutonPersonnage(ouvrir) {
   const vignette = el('canvas', { width: 8, height: 8, 'aria-hidden': 'true' });
   const b = el('button', { class: 'bouton-perso', type: 'button', onclick: ouvrir },
     vignette,
-    el('div', {}, el('b', { text: '👕 Mon personnage' }), el('span', { text: 'Visage (dessin ou photo), coiffure, vêtements, chapeaux, accessoires…' })));
+    el('div', {}, el('b', {}, icone('perso'), ' Mon personnage'), el('span', { text: 'Visage (dessin ou photo), coiffure, vêtements, chapeaux, accessoires…' })));
   b.majVignette = (style) => {
     const s = normaliserStyle(style);
     const g = vignette.getContext('2d');

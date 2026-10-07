@@ -1,6 +1,7 @@
 // Salle d'attente avant la partie : le code de la partie, la carte, les joueurs
 // (avec leur tête en pixels) et le compte à rebours du départ automatique.
 import { el } from './hud.js';
+import { icone } from './icones.js';
 import { normaliserStyle, visageParDefaut, visageVersCouleurs } from './apparence.js';
 
 const COULEURS_EQUIPES = ['#3d8bff', '#ff5a5a'];
@@ -50,9 +51,9 @@ export class SalleAttente {
         this.statut,
         this.liste,
         el('div', { class: 'actions-attente' },
-          el('button', { class: 'btn', type: 'button', text: '🔫 Choisir mes armes', onclick: () => this.actions.armes() }),
-          el('button', { class: 'btn entrainer', type: 'button', text: '🏃 S\'entraîner en attendant', onclick: () => this.actions.entrainer() }),
-          el('button', { class: 'btn secondaire', type: 'button', text: '👥 Inviter des amis', onclick: () => this.actions.inviter() }),
+          el('button', { class: 'btn', type: 'button', onclick: () => this.actions.armes() }, icone('arme'), ' Choisir mes armes'),
+          el('button', { class: 'btn entrainer', type: 'button', onclick: () => this.actions.entrainer() }, icone('course'), ' S\'entraîner en attendant'),
+          el('button', { class: 'btn secondaire', type: 'button', onclick: () => this.actions.inviter() }, icone('joueurs'), ' Inviter des amis'),
           el('button', { class: 'btn danger', type: 'button', text: 'Quitter', onclick: () => this.actions.quitter() }))));
     document.body.append(this.racine);
   }
@@ -60,8 +61,9 @@ export class SalleAttente {
   ouvrir({ code, nomCarte, mode }) {
     this.code.textContent = code || '';
     this.carte.textContent = nomCarte || '';
-    this.mode.textContent = mode === 'equipes' ? 'Bleus contre Rouges' : 'Chacun pour soi';
+    this.mode.textContent = mode === 'equipes' ? 'Bleus contre Rouges' : mode === 'classe' ? 'Classé' : 'Chacun pour soi';
     this.mode.classList.toggle('equipes', mode === 'equipes');
+    this.mode.classList.toggle('classe', mode === 'classe');
     this.modeJeu = mode;
     this.racine.hidden = false;
     this.estOuvert = true;
@@ -116,10 +118,15 @@ export class SalleAttente {
   majStatut() {
     if (this.finA === null) {
       const points = '.'.repeat(1 + (Math.floor(performance.now() / 500) % 3));
-      const texte = (this.nbJoueurs || 0) >= 2 ? 'Préparation de la partie' : 'En attente d\'un 2e joueur';
-      if (!this.statut.classList.contains('attend')) {
+      const classe = this.modeJeu === 'classe';
+      const texte = classe ? 'Choisis tes armes pour commencer' : (this.nbJoueurs || 0) >= 2 ? 'Préparation de la partie' : 'En attente d\'un 2e joueur';
+      if (!this.statut.classList.contains('attend') || this.statut.dataset.mode !== this.modeJeu) {
         this.statut.className = 'statut-attente attend';
-        this.statut.replaceChildren(el('span', { class: 'texte' }), el('small', { text: 'Invite tes amis ou partage le code ! La partie démarre toute seule 30 s après l\'arrivée du 2e joueur.' }));
+        this.statut.dataset.mode = this.modeJeu;
+        this.statut.replaceChildren(el('span', { class: 'texte' }), el('small', {
+          text: classe ? 'Classé : des bots complètent la partie, et ils deviennent de plus en plus forts. Tes amis peuvent aussi venir avec le code !'
+            : 'Invite tes amis ou partage le code ! La partie démarre toute seule 30 s après l\'arrivée du 2e joueur.',
+        }));
       }
       this.statut.querySelector('.texte').textContent = `${texte}${points}`;
       return;

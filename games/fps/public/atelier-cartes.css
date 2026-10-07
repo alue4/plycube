@@ -76,3 +76,7 @@ select { max-width: 100%; }
   .vue { height: 60vh; }
   .panneau.gauche, .panneau.droite { border: 0; border-bottom: 1px solid var(--bord); }
 }
+
+/* Icônes maison (voir /assets/img/icones.svg). Taille = police, couleur = texte. */
+.ic { width: 1em; height: 1em; display: inline-block; vertical-align: -0.14em; flex: none; overflow: visible; }
+.ic.gros { width: 1.4em; height: 1.4em; vertical-align: -0.28em; }

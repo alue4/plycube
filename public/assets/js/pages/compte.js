@@ -11,7 +11,7 @@
     try {
       await Plateforme.api('POST', '/api/auth/password', { current: cur.value, next: nw.value });
       form.reset();
-      App.toast('Mot de passe changé ✔', { type: 'success' });
+      App.toast('Mot de passe changé !', { type: 'success' });
     } catch (err) {
       App.showFormError(form, err.message);
     }

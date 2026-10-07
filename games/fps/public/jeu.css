@@ -426,3 +426,31 @@ body.tactile .radar-admin { left: auto; right: 12px; top: 38%; width: 130px; hei
 .vision-nocturne { position: fixed; inset: 0; z-index: 4; pointer-events: none;
   background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .18) 0 1px, transparent 1px 3px), radial-gradient(ellipse at center, transparent 50%, rgba(0, 20, 0, .85) 100%); }
 .vision-matrix { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; opacity: .5; mix-blend-mode: screen; }
+
+/* Icônes maison (voir /assets/img/icones.svg). Taille = police, couleur = texte. */
+.ic { width: 1em; height: 1em; display: inline-block; vertical-align: -0.14em; flex: none; overflow: visible; }
+.ic.gros { width: 1.4em; height: 1.4em; vertical-align: -0.28em; }
+
+/* ---------- Mode classé ---------- */
+.btn.classe { background: linear-gradient(180deg, #b26bff, #6a3dd8); border-bottom-color: #43228f; }
+.badge-classe, .resultat-classe { --couleur-rang: #d08a4c; display: flex; align-items: center; gap: 12px; text-align: left;
+  background: #0a1124; border: 1px solid var(--bord); border-radius: 14px; padding: 10px 12px; margin: 2px 0 8px; }
+.rang-embleme { flex: none; width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; font-size: 1.7rem;
+  color: var(--couleur-rang); background: rgba(255, 255, 255, .06); border: 2px solid rgba(255, 255, 255, .2); /* (anciens navigateurs) */
+  background: color-mix(in srgb, var(--couleur-rang) 16%, transparent);
+  border: 2px solid color-mix(in srgb, var(--couleur-rang) 60%, transparent); }
+.rang-infos { flex: 1; min-width: 0; }
+.rang-ligne { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.rang-nom { color: var(--couleur-rang); font-size: 1.1rem; font-weight: 900; }
+.rang-niveau { color: var(--gris); font-size: .85rem; font-weight: 700; }
+.rang-barre { height: 8px; border-radius: 99px; background: #1c2742; overflow: hidden; margin: 6px 0 4px; }
+.rang-barre i { display: block; height: 100%; border-radius: inherit; background: var(--couleur-rang); transition: width .6s ease; }
+.rang-infos small { display: block; color: var(--gris); font-size: .8rem; }
+.rang-infos small.rang-aide { margin-top: 3px; opacity: .8; }
+.rang-gain { font-weight: 900; font-size: 1.05rem; color: var(--gris); }
+.resultat-classe { margin: 0 0 12px; }
+.resultat-classe.gagne .rang-gain { color: #4ade80; }
+.resultat-classe.perdu .rang-gain { color: var(--rouge); }
+#classe-hud { position: absolute; top: 78px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+  font-size: .78rem; font-weight: 800; color: #d9c2ff; background: rgba(106, 61, 216, .35); border: 1px solid rgba(178, 107, 255, .5);
+  border-radius: 99px; padding: 3px 10px; }

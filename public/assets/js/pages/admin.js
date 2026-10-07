@@ -187,12 +187,12 @@
               others.map(function (c) {
                 return el('button', { class: 'icon-btn', type: 'button', title: 'Déplacer vers « ' + COLS[c] + ' »', onclick: function () {
                   act(function () { return api('PATCH', '/api/admin/roadmap/' + i.id, { col: c }); }, loaders.roadmap);
-                } }, c === 'en_cours' ? '▶' : c === 'prochainement' ? '⋯' : '✓');
+                } }, c === 'en_cours' ? App.ic('jouer') : c === 'prochainement' ? '⋯' : App.ic('valider'));
               }),
-              el('button', { class: 'icon-btn', type: 'button', title: 'Modifier', onclick: function () { editItem(i); } }, '✎'),
+              el('button', { class: 'icon-btn', type: 'button', title: 'Modifier', onclick: function () { editItem(i); } }, App.ic('crayon')),
               el('button', { class: 'icon-btn danger', type: 'button', title: 'Supprimer', onclick: function () {
                 if (confirm('Supprimer « ' + i.title + ' » ?')) act(function () { return api('DELETE', '/api/admin/roadmap/' + i.id); }, loaders.roadmap);
-              } }, '✕'))));
+              } }, App.ic('croix')))));
         });
       });
     } catch (e) { fail(e); }

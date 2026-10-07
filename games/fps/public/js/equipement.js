@@ -2,13 +2,14 @@
 // Le dernier choix est gardé dans ce navigateur.
 import * as THREE from '../vendor/three.min.js';
 import { el } from './hud.js';
+import { icone } from './icones.js';
 import { modeleArme } from './armes-modeles.js';
 
 export const CATEGORIES = [
-  { id: 'principale', nom: 'Arme principale', touche: 1, icone: '🔫' },
-  { id: 'secondaire', nom: 'Arme secondaire', touche: 2, icone: '🔫' },
-  { id: 'melee', nom: 'Mêlée', touche: 3, icone: '🔪' },
-  { id: 'gadget', nom: 'Gadget', touche: 4, icone: '💣' },
+  { id: 'principale', nom: 'Arme principale', touche: 1, icone: 'arme' },
+  { id: 'secondaire', nom: 'Arme secondaire', touche: 2, icone: 'arme' },
+  { id: 'melee', nom: 'Mêlée', touche: 3, icone: 'couteau' },
+  { id: 'gadget', nom: 'Gadget', touche: 4, icone: 'bombe' },
 ];
 const CLE = 'fps-equipement';
 const DEFAUT = ['fusil', 'pistolet', 'couteau', 'grenade'];
@@ -249,9 +250,9 @@ export class ChoixEquipement {
   }
 
   resumer(a) {
-    if (a.categorie === 'gadget') return [el('span', { text: `⏱ ${Math.round((a.rechargeGadgetMs || 0) / 1000)} s` })];
-    if (a.categorie === 'melee') return [el('span', { text: `💥 ${a.degats}` })];
-    return [el('span', { text: `💥 ${a.degats}${a.plombs > 1 ? ` ×${a.plombs}` : ''}` }), el('span', { text: `🔄 ${a.chargeur}` })];
+    if (a.categorie === 'gadget') return [el('span', {}, icone('chrono'), ` ${Math.round((a.rechargeGadgetMs || 0) / 1000)} s`)];
+    if (a.categorie === 'melee') return [el('span', {}, icone('degats'), ` ${a.degats}`)];
+    return [el('span', {}, icone('degats'), ` ${a.degats}${a.plombs > 1 ? ` ×${a.plombs}` : ''}`), el('span', {}, icone('recharger'), ` ${a.chargeur}`)];
   }
 
   details(a) {

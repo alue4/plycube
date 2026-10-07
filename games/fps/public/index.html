@@ -22,10 +22,11 @@
       <div id="score-b" class="score"></div>
     </div>
     <div id="objectif"></div>
+    <div id="classe-hud" hidden><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#rang"/></svg> <span></span></div>
     <ul id="fil"></ul>
     <div id="annonce"><div class="grand"></div><div class="petit"></div></div>
     <div id="bas-gauche">
-      <div id="protege" hidden>🛡 Protégé</div>
+      <div id="protege" hidden><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#bouclier"/></svg> Protégé</div>
       <div class="vie">
         <b id="pv">100</b>
         <div class="barre"><span id="pv-barre"></span></div>
@@ -44,7 +45,7 @@
 
   <!-- Menu des danses (touche B) : rempli par js/main.js -->
   <div id="menu-danses" class="menu-danses" hidden>
-    <h3>💃 Danses</h3>
+    <h3><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#danse"/></svg> Danses</h3>
     <ol id="liste-danses"></ol>
     <p class="aide-clavier" id="aide-danses">Appuie sur le chiffre de la danse · <kbd>B</kbd> pour fermer</p>
     <p class="aide-tactile">Touche une danse</p>
@@ -52,7 +53,7 @@
 
   <!-- Commandes tactiles (tablette) : remplies par js/tactile.js -->
   <div id="tactile" hidden></div>
-  <div id="tourne" aria-hidden="true">↻ Tourne ta tablette en mode paysage</div>
+  <div id="tourne" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#recharger"/></svg> Tourne ta tablette en mode paysage</div>
 
   <!-- Vue dans la lunette du sniper -->
   <div id="lunette" hidden><div class="verre"></div><i class="lh"></i><i class="lv"></i></div>
@@ -61,7 +62,7 @@
     <div class="titre">Éliminé !</div>
     <div class="par"></div>
     <div class="compte"></div>
-    <button id="btn-changer-armes" class="btn" type="button">🔫 Changer d'armes <kbd id="kbd-changer-armes">C</kbd></button>
+    <button id="btn-changer-armes" class="btn" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#arme"/></svg> Changer d'armes <kbd id="kbd-changer-armes">C</kbd></button>
   </div>
 
   <div id="tableau" hidden>
@@ -82,25 +83,25 @@
     <div class="carte">
       <h2>Partie <span id="pause-code" class="code"></span></h2>
       <p class="sous" id="pause-mode"></p>
-      <button id="btn-reprendre" class="btn gros" data-premier>▶ Cliquer pour jouer</button>
+      <button id="btn-reprendre" class="btn gros" data-premier><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#jouer"/></svg> Cliquer pour jouer</button>
       <div class="rangee">
-        <button id="btn-armes-pause" class="btn">🔫 Changer d'armes</button>
-        <button id="btn-inviter" class="btn">👥 Inviter des amis</button>
-        <button id="btn-reglages-pause" class="btn">⚙ Réglages</button>
+        <button id="btn-armes-pause" class="btn"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#arme"/></svg> Changer d'armes</button>
+        <button id="btn-inviter" class="btn"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#joueurs"/></svg> Inviter des amis</button>
+        <button id="btn-reglages-pause" class="btn"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#reglages"/></svg> Réglages</button>
         <button id="btn-quitter" class="btn danger">Quitter la partie</button>
       </div>
-      <button id="btn-disposition-pause" class="btn lien aide-tactile">✥ Personnaliser les boutons</button>
+      <button id="btn-disposition-pause" class="btn lien aide-tactile"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#deplacer"/></svg> Personnaliser les boutons</button>
       <ul id="liste-amis" hidden></ul>
       <!-- aides remplies par js/main.js (avec les touches choisies dans les réglages) -->
       <div class="aide aide-clavier" id="aide-clavier-pause"></div>
       <div class="aide aide-manette" id="aide-manette-pause"></div>
       <div class="aide aide-tactile">
-        <span>🕹 Joystick à gauche : se déplacer</span>
-        <span>☝ Glisser le doigt sur l'écran : regarder</span>
+        <span><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#joystick"/></svg> Joystick à gauche : se déplacer</span>
+        <span><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#doigt"/></svg> Glisser le doigt sur l'écran : regarder</span>
         <span>TIRER (on peut aussi glisser dessus pour viser)</span>
         <span>VISER : plus précis, avec zoom</span>
         <span>1 à 4 en bas : principale, secondaire, mêlée, gadget</span>
-        <span>↻ recharger · ☰ menu · 🏆 scores</span>
+        <span><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#recharger"/></svg> recharger · <svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#menu"/></svg> menu · <svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#trophee"/></svg> scores</span>
         <span>Couteau : VISER dans le dos d'un adversaire = élimination d'un coup !</span>
       </div>
     </div>
@@ -121,19 +122,19 @@
         </button>
         <div id="hall-perso"></div>
         <button id="btn-armes" class="bouton-hall" type="button">
-          <span class="icone" aria-hidden="true">🔫</span>
+          <span class="icone" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#arme"/></svg></span>
           <span><b>Mes armes</b><small>Principale, secondaire, mêlée, gadget</small></span>
         </button>
         <button id="btn-reglages" class="bouton-hall" type="button">
-          <span class="icone" aria-hidden="true">⚙</span>
+          <span class="icone" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#reglages"/></svg></span>
           <span><b>Réglages</b><small>Commandes, son, graphismes</small></span>
         </button>
         <a id="btn-atelier-anim" class="bouton-hall" href="atelier-animations.html" hidden>
-          <span class="icone" aria-hidden="true">🎬</span>
+          <span class="icone" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#film"/></svg></span>
           <span><b>Atelier d'animations</b><small>Admin : animer les armes</small></span>
         </a>
         <a id="btn-atelier-cartes" class="bouton-hall" href="atelier-cartes.html" hidden>
-          <span class="icone" aria-hidden="true">🗺️</span>
+          <span class="icone" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#carte"/></svg></span>
           <span><b>Éditeur de cartes</b><small>Admin : créer ses cartes</small></span>
         </a>
       </nav>
@@ -146,12 +147,12 @@
         <div class="aide aide-clavier" id="aide-clavier-hall"></div>
         <div class="aide aide-manette" id="aide-manette-hall"></div>
         <div class="aide aide-tactile">
-          <span>🕹 Joystick à gauche : se déplacer</span>
-          <span>☝ Glisser le doigt sur l'écran : regarder</span>
+          <span><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#joystick"/></svg> Joystick à gauche : se déplacer</span>
+          <span><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#doigt"/></svg> Glisser le doigt sur l'écran : regarder</span>
           <span>TIRER : appuie (et glisse dessus pour viser en tirant)</span>
           <span>VISER : plus précis, avec zoom</span>
           <span>1 à 4 en bas de l'écran : principale, secondaire, mêlée, gadget</span>
-          <span>Les boutons se déplacent dans ⚙ Réglages → Personnaliser les boutons.</span>
+          <span>Les boutons se déplacent dans <svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#reglages"/></svg> Réglages → Personnaliser les boutons.</span>
           <span>Les blocs bleus fléchés sont des <b>trampolines</b> !</span>
         </div>
       </details>
@@ -161,7 +162,7 @@
     <div id="panneau-jouer" class="panneau-jouer" aria-hidden="true" role="dialog" aria-label="Jouer">
       <div class="panneau-entete">
         <h2>Jouer</h2>
-        <button id="btn-fermer-jouer" class="btn-fermer-panneau" type="button" aria-label="Fermer" data-retour>✕</button>
+        <button id="btn-fermer-jouer" class="btn-fermer-panneau" type="button" aria-label="Fermer" data-retour><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#croix"/></svg></button>
       </div>
       <div class="panneau-contenu">
         <section class="bloc-jouer">
@@ -169,8 +170,10 @@
           <div class="sous">1. Choisis la carte</div>
           <div id="choix-cartes" role="radiogroup" aria-label="Carte"></div>
           <div class="sous">2. Choisis le mode</div>
-          <button class="btn gros" data-mode="solo">⚔ Chacun pour soi</button>
+          <button class="btn gros" data-mode="solo"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#epees"/></svg> Chacun pour soi</button>
           <button class="btn gros bleu-rouge" data-mode="equipes">Équipes : Bleus contre Rouges</button>
+          <button class="btn gros classe" data-mode="classe"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#rang"/></svg> Classé</button>
+          <div id="badge-classe" class="badge-classe" aria-live="polite"></div>
           <p id="carte-choisie" class="carte-choisie"></p>
         </section>
         <section class="bloc-jouer">
@@ -196,14 +199,14 @@
           <option value="tactile">Tactile (tablette)</option>
           <option value="clavier">Clavier et souris</option>
         </select></label>
-      <button id="btn-disposition" type="button" class="btn">✥ Personnaliser les boutons tactiles</button>
+      <button id="btn-disposition" type="button" class="btn"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#deplacer"/></svg> Personnaliser les boutons tactiles</button>
       <label>Sensibilité tactile <output id="o-sensibilite-tactile"></output>
         <input type="range" id="r-sensibilite-tactile" min="0.2" max="3" step="0.05"></label>
       <label>Sensibilité de la souris <output id="o-sensibilite"></output>
         <input type="range" id="r-sensibilite" min="0.2" max="3" step="0.05"></label>
-      <button id="btn-touches" type="button" class="btn">⌨ 🎮 Changer les touches (clavier, souris, manette)</button>
+      <button id="btn-touches" type="button" class="btn"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#clavier"/></svg> <svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#manette"/></svg> Changer les touches (clavier, souris, manette)</button>
       <div class="reglages-manette">
-        <h3>🎮 Manette</h3>
+        <h3><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#manette"/></svg> Manette</h3>
         <p class="sous" id="etat-manette"></p>
         <label>Sensibilité de la manette <output id="o-sensibilite-manette"></output>
           <input type="range" id="r-sensibilite-manette" min="0.2" max="3" step="0.05"></label>
@@ -248,8 +251,8 @@
     <div class="carte">
       <h2>Touches</h2>
       <div class="onglets-touches" role="tablist">
-        <button id="onglet-clavier" class="onglet" type="button" role="tab">⌨ Clavier et souris</button>
-        <button id="onglet-manette" class="onglet" type="button" role="tab">🎮 Manette</button>
+        <button id="onglet-clavier" class="onglet" type="button" role="tab"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#clavier"/></svg> Clavier et souris</button>
+        <button id="onglet-manette" class="onglet" type="button" role="tab"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#manette"/></svg> Manette</button>
       </div>
       <p class="sous" id="aide-touches"></p>
       <p class="info-touches" id="info-touches" role="status"></p>

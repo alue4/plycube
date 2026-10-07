@@ -891,7 +891,9 @@
     "joueursMaxChacunPourSoi": 8,
     "joueursMaxEquipes": 10,
     "pauseFinSecondes": 12,
-    "attenteSecondes": 30
+    "attenteSecondes": 30,
+    "objectifClasse": 15,
+    "attenteClasseSecondes": 5
   },
   "fun": {
     "forceRagdoll": 1,

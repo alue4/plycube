@@ -50,7 +50,7 @@
         el('h3', { text: g.name }),
         el('p', { text: g.description }),
         g.tags.length || g.players ? el('div', { class: 'tags' },
-          g.players ? el('span', { class: 'tag' }, '👥 ' + g.players) : null,
+          g.players ? el('span', { class: 'tag' }, App.ic('joueurs'), ' ' + g.players) : null,
           g.tags.map(function (t) { return el('span', { class: 'tag' }, t); })) : null,
         action));
   }

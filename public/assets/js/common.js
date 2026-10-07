@@ -59,6 +59,19 @@
     return svg;
   }
 
+  // Icône du jeu commun (dessin dans /assets/img/icones.svg). Taille = police, couleur = texte.
+  function ic(name, cls) {
+    var ns = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('class', 'ic' + (cls ? ' ' + cls : ''));
+    svg.setAttribute('aria-hidden', 'true');
+    var use = document.createElementNS(ns, 'use');
+    use.setAttribute('href', '/assets/img/icones.svg#' + name);
+    use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '/assets/img/icones.svg#' + name);
+    svg.appendChild(use);
+    return svg;
+  }
+
   // ---------- Notifications (en bas à droite) ----------
   function toast(message, opts) {
     opts = opts || {};
@@ -202,7 +215,7 @@
   }
 
   window.App = {
-    el: el, clear: clear, icon: icon, toast: toast, dialog: dialog, avatar: avatar,
+    el: el, clear: clear, icon: icon, ic: ic, toast: toast, dialog: dialog, avatar: avatar,
     timeAgo: timeAgo, formatDate: formatDate, showFormError: showFormError,
     refreshFriendBadge: refreshFriendBadge,
     me: function () { return me; },

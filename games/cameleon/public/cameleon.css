@@ -116,3 +116,7 @@ select, input[type="text"], #code { padding: 11px 12px; border-radius: 12px; bor
 #boutons-tactiles button .ico { display: block; font-size: 1.5rem; }
 body.tactile #aide-touches { display: none; }
 body.tactile #mes-points { bottom: auto; top: 10px; right: 10px; }
+
+/* Icônes maison (voir /assets/img/icones.svg). Taille = police, couleur = texte. */
+.ic { width: 1em; height: 1em; display: inline-block; vertical-align: -0.14em; flex: none; overflow: visible; }
+.ic.gros { width: 1.4em; height: 1.4em; vertical-align: -0.28em; }

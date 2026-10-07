@@ -11,6 +11,10 @@
 //   jeu     → la vraie partie (avec les scores).
 //   fin     → le classement, puis une nouvelle manche démarre.
 //
+// Mode classé ('classe') : comme chacun pour soi, mais la partie démarre dès qu'un seul joueur est prêt,
+// et des bots complètent la partie pendant toute la manche. Ils sont de plus en plus forts : niveau de départ
+// (le rang du joueur), +1 tous les 3 éliminations du meilleur joueur, +1 à chaque manche gagnée (voir bots.js).
+//
 // Chaque joueur a 4 emplacements : arme principale, secondaire, mêlée, gadget.
 const G = require('./geometrie');
 const { Bots } = require('./bots');
@@ -52,9 +56,10 @@ function degatsBalle(arme, distance, tete) {
 const devant = (j) => [-Math.sin(j.yaw), 0, -Math.cos(j.yaw)];
 
 class Partie {
-  constructor({ code, mode, reglages, carte, surVide, danseExiste = () => false }) {
+  constructor({ code, mode, reglages, carte, surVide, danseExiste = () => false, niveau = 1 }) {
     this.code = code;
-    this.mode = mode; // 'solo' (chacun pour soi) ou 'equipes'
+    this.mode = mode; // 'solo' (chacun pour soi), 'equipes' ou 'classe' (chacun pour soi contre des bots)
+    this.niveau = mode === 'classe' ? niveau : 1; // classé : niveau de départ des bots (1 à 20)
     this.r = reglages;
     this.armes = reglages.armes;
     this.indexArme = new Map(this.armes.map((a, i) => [a.id, i]));
@@ -69,7 +74,8 @@ class Partie {
     this.boites = this.boitesSolides.map((x) => x.b); // ce qui arrête les balles (recalculé quand ça casse)
     // Nombre de joueurs max : propre à la carte (les cartes XXL en acceptent plus), sinon celui des réglages.
     this.max = (carte.joueursMax && carte.joueursMax[mode]) || (mode === 'equipes' ? reglages.partie.joueursMaxEquipes : reglages.partie.joueursMaxChacunPourSoi);
-    this.objectif = mode === 'equipes' ? reglages.partie.objectifEquipes : reglages.partie.objectifChacunPourSoi;
+    this.objectif = mode === 'equipes' ? reglages.partie.objectifEquipes
+      : mode === 'classe' ? (reglages.partie.objectifClasse || reglages.partie.objectifChacunPourSoi) : reglages.partie.objectifChacunPourSoi;
     this.joueurs = new Map(); // id du compte -> joueur
     this.projectiles = new Map(); // roquettes, carreaux, fusées, grenades, fumigènes
     this.prochainProjectile = 1;
@@ -98,6 +104,7 @@ class Partie {
     return {
       code: this.code, mode: this.mode, carte: this.carte.id, nomCarte: this.carte.nom,
       n: this.humains(), max: this.max, etat: this.etat,
+      ...(this.mode === 'classe' ? { niveau: this.bots.niveau || this.niveau } : {}),
     };
   }
 
@@ -231,6 +238,7 @@ class Partie {
     this.joueurs.set(j.id, j);
     this.envoyer(j, {
       t: 'bienvenue', code: this.code, mode: this.mode, carte: this.carte.id, moi: j.id, objectif: this.objectif,
+      niveauBots: this.mode === 'classe' ? (this.bots.niveau || this.niveau) : undefined,
       carteData: this.carte.perso ? this.carte : undefined, // carte faite dans l'éditeur : on envoie tout
 
       joueurs: [...this.joueurs.values()].map((x) => this.infosPubliques(x)),
@@ -290,8 +298,12 @@ class Partie {
   annoncerAttente() {
     if (this.etat !== 'attente') return;
     const prets = [...this.joueurs.values()].filter((x) => x.equipement && !x.bot);
-    if (prets.length >= 2 && !this.attenteFinA) this.attenteFinA = Date.now() + this.r.partie.attenteSecondes * 1000;
-    if (prets.length < 2) this.attenteFinA = 0;
+    // Classé : on joue contre des bots, donc un seul joueur prêt suffit, et ça démarre vite.
+    const classe = this.mode === 'classe';
+    const besoin = classe ? 1 : 2;
+    const secondes = classe ? (this.r.partie.attenteClasseSecondes || 5) : this.r.partie.attenteSecondes;
+    if (prets.length >= besoin && !this.attenteFinA) this.attenteFinA = Date.now() + secondes * 1000;
+    if (prets.length < besoin) this.attenteFinA = 0;
     this.diffuser({
       t: 'attente',
       dans: this.attenteFinA ? Math.max(0, this.attenteFinA - Date.now()) : null,
@@ -902,7 +914,7 @@ class Partie {
 
   // ---------- Déroulement de la partie ----------
   nouvelleManche() {
-    this.bots.toutRetirer(); // la vraie partie se joue sans bots
+    if (this.mode !== 'classe') this.bots.toutRetirer(); // la vraie partie se joue sans bots (sauf en classé)
     this.toutReparer(); // on repart avec une carte intacte
     this.etat = 'jeu';
     this.attenteFinA = 0;
@@ -933,9 +945,15 @@ class Partie {
     } else if (classement.length) {
       gagnant = { id: classement[0].id, nom: classement[0].nom };
     }
+    // Classé : un vrai joueur a gagné → les bots de la prochaine manche sont plus forts ; un bot a gagné → un peu moins.
+    if (this.mode === 'classe' && gagnant) {
+      const premier = this.joueurs.get(gagnant.id);
+      this.niveau = premier && !premier.bot ? Math.min(20, this.niveau + 1) : Math.max(1, this.niveau - 1);
+    }
     this.diffuser({
       t: 'fin', gagnant, classement, scores: this.scoresEquipes,
       redemarrageDans: this.r.partie.pauseFinSecondes * 1000,
+      ...(this.mode === 'classe' ? { niveau: this.niveau } : {}),
     });
   }
 
@@ -948,7 +966,9 @@ class Partie {
     }
     if (this.etat === 'jeu' && now >= this.finA) this.terminer();
     if (this.etat === 'fin' && now >= this.redemarrageA) this.nouvelleManche();
-    if (this.etat === 'attente' && !this.botsFiges()) this.bots.gerer(now, TICK_MS / 1000); // (bots figés par l'admin)
+    // Bots : seulement dans la salle d'attente, sauf en classé où ils jouent aussi la vraie manche (figés par l'admin : rien)
+    const avecBots = this.etat === 'attente' || (this.etat === 'jeu' && this.mode === 'classe');
+    if (avecBots && !this.botsFiges()) this.bots.gerer(now, TICK_MS / 1000);
     this.reparerBoites(now); // la carte cassée par le laser se répare
     this.majProjectiles(TICK_MS / 1000);
     // Frappes orbitales de l'admin : l'explosion arrive après le compte à rebours

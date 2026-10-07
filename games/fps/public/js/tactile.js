@@ -3,6 +3,7 @@
 // Chaque joueur peut déplacer et agrandir les boutons : la disposition est gardée
 // dans le navigateur (mode "édition").
 import { el } from './hud.js';
+import { icone } from './icones.js';
 
 // Position du centre de chaque commande, en % de l'écran (x de gauche à droite, y de haut en bas).
 export const DISPOSITION_DEFAUT = {
@@ -11,6 +12,7 @@ export const DISPOSITION_DEFAUT = {
   visee: { x: 72, y: 80, taille: 1 },
   saut: { x: 90, y: 84, taille: 1 },
   recharge: { x: 75, y: 46, taille: 1 },
+  inspection: { x: 62, y: 46, taille: 1 },
   armes: { x: 50, y: 92, taille: 1 },
   menu: { x: 5, y: 9, taille: 1 },
   scores: { x: 13, y: 9, taille: 1 },
@@ -18,7 +20,7 @@ export const DISPOSITION_DEFAUT = {
 };
 const NOMS = {
   joystick: 'Déplacement', tir: 'Tirer', visee: 'Viser', saut: 'Sauter', recharge: 'Recharger',
-  armes: 'Armes', menu: 'Menu', scores: 'Scores', danse: 'Danser',
+  inspection: 'Regarder son arme', armes: 'Armes', menu: 'Menu', scores: 'Scores', danse: 'Danser',
 };
 
 export class Tactile {
@@ -61,13 +63,15 @@ export class Tactile {
     this.suivreGlisser(this.btnVisee, { debut: () => this.marquerVisee(this.actions.viser()) });
     const saut = bouton('saut', 'SAUTER');
     this.suivreGlisser(saut, { debut: () => this.actions.saut(true), fin: () => this.actions.saut(false) });
-    const recharge = bouton('recharge', '↻', 'petit');
+    const recharge = bouton('recharge', icone('recharger'), 'petit');
     this.suivreGlisser(recharge, { debut: () => this.actions.recharger() });
-    const menu = bouton('menu', '☰', 'petit');
+    const inspection = bouton('inspection', icone('oeil'), 'petit');
+    this.suivreGlisser(inspection, { debut: () => this.actions.inspecter && this.actions.inspecter() });
+    const menu = bouton('menu', icone('menu'), 'petit');
     this.suivreGlisser(menu, { debut: () => this.actions.menu() });
-    const scores = bouton('scores', '🏆', 'petit');
+    const scores = bouton('scores', icone('trophee'), 'petit');
     this.suivreGlisser(scores, { debut: () => this.actions.scores(true), fin: () => this.actions.scores(false) });
-    const danse = bouton('danse', '💃', 'petit');
+    const danse = bouton('danse', icone('danse'), 'petit');
     this.suivreGlisser(danse, { debut: () => this.actions.danse && this.actions.danse() });
 
     // Armes 1 à 5

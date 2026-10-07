@@ -3,6 +3,7 @@
 // Le navigateur se connecte en WebSocket sur /games/fps/ws (le site vérifie qu'il
 // est connecté). On y trouve :
 //   - le hall : liste des parties, créer une partie (mode + carte), rejoindre avec un code ;
+//     modes : chacun pour soi, équipes, ou classé (des bots complètent et deviennent de plus en plus forts) ;
 //   - les parties elles-mêmes (voir serveur/partie.js).
 // Et, en HTTP, ce qui est fait dans l'atelier d'animations : animations des armes (serveur/animations.js),
 // danses (serveur/danses.js) et sons envoyés par l'admin (serveur/sons-perso.js).
@@ -149,12 +150,14 @@ module.exports = function ({ app, realtime, game, db, auth, security }) {
       return ws.partie.message(ws.joueur, data);
     }
     if (data.t === 'creer') {
-      const mode = data.mode === 'equipes' ? 'equipes' : 'solo';
+      const mode = ['equipes', 'classe'].includes(data.mode) ? data.mode : 'solo';
+      // Mode classé : le niveau de départ des bots (le rang du joueur, gardé dans son navigateur), de 1 à 20.
+      const niveau = Math.max(1, Math.min(20, Math.round(Number(data.niveau)) || 1));
       if (parties.size >= MAX_PARTIES) return envoyer(ws, { t: 'erreur', message: 'Trop de parties en cours, rejoins-en une !' });
       const carte = trouverCarte(data.carte);
       const code = nouveauCode();
       const partie = new Partie({
-        code, mode, reglages, carte, danseExiste: (id) => danses.existe(id),
+        code, mode, niveau, reglages, carte, danseExiste: (id) => danses.existe(id),
         surVide: (c) => { parties.delete(c); annoncerSalons(); },
       });
       parties.set(code, partie);

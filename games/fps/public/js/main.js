@@ -26,6 +26,8 @@ import { Commandes, ACTIONS, ACTION } from './commandes.js';
 import * as Menus from './menus-manette.js';
 import { PanneauAdmin, POUVOIRS } from './panneau-admin.js';
 import { RadarHud, EcranVisions } from './pouvoirs-ecran.js';
+import { icone } from './icones.js';
+import { rang, finDeManche } from './classe.js';
 
 const $ = (id) => document.getElementById(id);
 const DELAI_INTERPOLATION = 100; // on affiche les autres joueurs avec 0,1 s de retard : c'est plus fluide
@@ -218,7 +220,7 @@ async function demarrer() {
 
   // ---------- État de la partie ----------
   const E = {
-    enPartie: false, code: null, mode: null, moiId: null, moiNom: '', objectif: 0,
+    enPartie: false, code: null, mode: null, moiId: null, moiNom: '', objectif: 0, niveauBots: 0,
     joueurs: new Map(), // id -> { id, nom, equipe, style, kills, morts, vivant, perso, tampon, protegeJusqua, ... }
     scores: [0, 0], finA: 0, etat: 'jeu', redemarrageA: 0,
     vie: 0, pv: 100,
@@ -312,6 +314,7 @@ async function demarrer() {
     E.enPartie = true;
     E.code = msg.code;
     E.mode = msg.mode;
+    E.niveauBots = msg.niveauBots || 0;
     E.moiId = msg.moi;
     E.objectif = msg.objectif;
     E.scores = msg.scores;
@@ -333,13 +336,14 @@ async function demarrer() {
     $('hall').hidden = true;
     panneauJouer(false);
     $('pause-code').textContent = E.code;
-    $('pause-mode').textContent = `${carte.nom || ''} · ${E.mode === 'equipes'
-      ? `Équipes · tu es chez les ${NOMS_EQUIPES[moi().equipe]}` : 'Chacun pour soi'}`;
+    majModePause();
     $('liste-amis').hidden = true;
     hud.afficher(true);
     hud.fin(false);
     musiqueMenu(false);
+    majClasseHud();
     if (E.mode === 'equipes') hud.annonce(`ÉQUIPE ${NOMS_EQUIPES[moi().equipe].toUpperCase()}`, `Partie ${E.code}`);
+    if (E.mode === 'classe') hud.annonce('CLASSÉ', `Bots niveau ${E.niveauBots} · ton rang : ${rang().nom}`);
     history.replaceState(null, '', `?room=${E.code}`);
     if (window.Plateforme) Plateforme.definirActivite({ jeu: 'fps', salle: E.code, rejoignable: true });
     // Carte déjà cassée par le laser quand on arrive
@@ -404,7 +408,7 @@ async function demarrer() {
   const invitationsSalle = el('ul', { class: 'liste-amis', hidden: true });
   {
     const actions = salle.racine.querySelector('.actions-attente');
-    actions.insertBefore(el('button', { class: 'btn secondaire', type: 'button', text: '⚙ Réglages', onclick: () => { son('clic'); ouvrirReglages(); } }), actions.querySelector('.danger'));
+    actions.insertBefore(el('button', { class: 'btn secondaire', type: 'button', onclick: () => { son('clic'); ouvrirReglages(); } }, icone('reglages'), ' Réglages'), actions.querySelector('.danger'));
     actions.after(invitationsSalle);
   }
   function ouvrirSalle() {
@@ -583,7 +587,7 @@ async function demarrer() {
       const p = joueur.pos;
       return {
         nom: E.adminNom, partie: E.enPartie ? E.code : null, carte: E.enPartie && carte ? carte.nom : null,
-        mode: E.enPartie ? (E.mode === 'equipes' ? 'Équipes' : 'Chacun pour soi') : null,
+        mode: E.enPartie ? (E.mode === 'equipes' ? 'Équipes' : E.mode === 'classe' ? 'Classé' : 'Chacun pour soi') : null,
         joueurs: E.joueurs.size, bots: [...E.joueurs.values()].filter((j) => j.bot).length, ping: E.rtt, fps,
         position: vivant ? `${p.x.toFixed(1)} ${p.y.toFixed(1)} ${p.z.toFixed(1)}` : null,
         pv: vivant ? Math.round(E.pv) : null, arme: vivant ? ARMES[E.arme].nom : null,
@@ -930,7 +934,7 @@ async function demarrer() {
     if (a === 'voler') {
       if (!E.admin) return;
       changerPouvoir('vol', !pouvoir('vol'));
-      hud.toast(pouvoir('vol') ? `⚡ Vol activé : ${commandes.libelle('sauter')} pour monter, ${commandes.libelle('descendre') || '?'} pour descendre` : 'Vol coupé');
+      hud.toast(pouvoir('vol') ? `Vol activé : ${commandes.libelle('sauter')} pour monter, ${commandes.libelle('descendre') || '?'} pour descendre` : 'Vol coupé');
       return;
     }
     if (a === 'teleporter') { if (E.admin) teleporter(); return; }
@@ -973,7 +977,7 @@ async function demarrer() {
   commandes.surSaisie = () => majSaisie();
   commandes.surManette = (branchee) => {
     document.body.classList.toggle('avec-manette', branchee);
-    if (branchee) hud.toast(`🎮 Manette détectée${commandes.pad.ps ? ' (PlayStation)' : ''}`);
+    if (branchee) hud.toast(`Manette détectée${commandes.pad.ps ? ' (PlayStation)' : ''}`);
     // manette débranchée en pleine partie (sans souris capturée) : pause
     else if (E.enPartie && joueur.actif && !modeTactile() && document.pointerLockElement !== canvas) mettreEnPause();
     majEtatManette();
@@ -1013,6 +1017,7 @@ async function demarrer() {
     viser: () => { E.viser = !E.viser; return E.viser; },
     saut: (oui) => { joueur.sautTactile = oui; },
     recharger: () => recharger(),
+    inspecter: () => { if (joueur.vivant && arme) arme.inspecter(); },
     arme: (i) => changerSlot(i),
     menu: () => mettreEnPause(),
     danse: () => ouvrirMenuDanses(),
@@ -1184,7 +1189,7 @@ async function demarrer() {
       if (a.admin && !E.admin) continue;
       if (a.groupe !== groupe) {
         groupe = a.groupe;
-        liste.append(el('h3', { text: groupe === 'Admin' ? '⚡ Admin' : groupe }));
+        liste.append(groupe === 'Admin' ? el('h3', {}, icone('eclair'), ' Admin') : el('h3', { text: groupe }));
         if (manette && groupe === 'Se déplacer') liste.append(el('div', { class: 'ligne-touche' }, el('span', { class: 'nom-action', text: 'Regarder' }), el('span', { class: 'fixe', text: 'Stick droit' })));
       }
       const ligne = el('div', { class: 'ligne-touche' }, el('span', { class: 'nom-action', text: a.nom }));
@@ -1257,10 +1262,10 @@ async function demarrer() {
       hall ? null : ['Couteau : vise dans le dos d\'un adversaire pour l\'éliminer d\'un coup !'],
       hall ? [...k('scores'), ' scores'] : [...k('scores'), ' scores · ', el('kbd', { text: 'Échap' }), ' menu'],
       hall ? ['Les blocs bleus fléchés sont des ', el('b', { text: 'trampolines' }), ' ! Tire à tes pieds au lance-roquettes pour t\'envoler.'] : null,
-      ['Les touches se changent dans ⚙ Réglages → Changer les touches.'],
+      ['Les touches se changent dans ', icone('reglages'), ' Réglages → Changer les touches.'],
     ];
     const lignesManette = [
-      ['🕹 Stick gauche : se déplacer · stick droit : regarder'],
+      [icone('joystick'), ' Stick gauche : se déplacer · stick droit : regarder'],
       [...b('tirer'), ' tirer · ', ...b('viser'), ' viser · ', ...b('sauter'), ' sauter · ', ...b('recharger'), ' recharger'],
       [...b('armePrecedente'), ' ', ...b('armeSuivante'), ' changer d\'arme · ', ...b('arme3'), ' mêlée · ', ...b('arme4'), ' gadget'],
       [...b('inspecter'), ' regarder son arme · ', ...b('danser'), ' danser · ', ...b('scores'), ' scores · ', ...b('menu'), ' menu'],
@@ -1280,13 +1285,13 @@ async function demarrer() {
     const nom = commandes.libelle('changerArmes', { court: true });
     kbdArmes.textContent = nom;
     kbdArmes.hidden = !nom || (t && !manette);
-    $('btn-reprendre').textContent = manette ? `▶ Jouer (${commandes.nomBouton(0)})` : t ? '▶ Toucher pour jouer' : '▶ Cliquer pour jouer';
+    $('btn-reprendre').replaceChildren(icone('jouer'), manette ? ` Jouer (${commandes.nomBouton(0)})` : t ? ' Toucher pour jouer' : ' Cliquer pour jouer');
     E.libellesArmes = ['arme1', 'arme2', 'arme3', 'arme4'].map((a) => commandes.libelle(a, { court: true }));
   }
   // État de la manette dans les réglages
   function majEtatManette() {
     $('etat-manette').textContent = commandes.pad.connecte
-      ? `🎮 Manette détectée${commandes.pad.ps ? ' (PlayStation)' : ''}.`
+      ? `Manette détectée${commandes.pad.ps ? ' (PlayStation)' : ''}.`
       : 'Aucune manette : branche-la (ou connecte-la en Bluetooth) puis appuie sur un de ses boutons.';
   }
 
@@ -1832,7 +1837,7 @@ async function demarrer() {
   reseau.on('pv', (msg) => {
     E.pv = msg.pv;
     if (msg.soin) { E.soinFin = 0; son('soin_fini', { vol: 0.7 }); hud.toast('Vie rendue : +50 !'); }
-    if (msg.admin) { son('soin_fini', { vol: 0.7 }); hud.toast('⚡ Vie au maximum'); }
+    if (msg.admin) { son('soin_fini', { vol: 0.7 }); hud.toast('Vie au maximum'); }
   });
   // Pouvoirs de l'admin visibles par tous : géant, mini, invisible, traînée arc-en-ciel, aura dorée
   reseau.on('look', (msg) => {
@@ -1847,13 +1852,13 @@ async function demarrer() {
     const p = new THREE.Vector3(msg.p[0], msg.p[1], msg.p[2]);
     effets.marqueFrappe(p, msg.dans || 1300);
     son('lobby_pret', { position: p, portee: 4, vol: 0.9 });
-    if (msg.id === E.moiId) hud.toast('☄ Frappe orbitale en approche…');
+    if (msg.id === E.moiId) hud.toast('Frappe orbitale en approche…');
   });
   reseau.on('adminOk', (msg) => {
     const textes = {
       reparer: 'Carte réparée', 'bots+': `Bots en plus : +${msg.bonus}`, bots0: 'Plus de bots', botsNormal: 'Bots normaux',
     };
-    if (textes[msg.a]) hud.toast(`⚡ ${textes[msg.a]}`);
+    if (textes[msg.a]) hud.toast(`${textes[msg.a]}`);
   });
   reseau.on('gadget', (msg) => {
     E.gadgetPretA = performance.now() + (msg.pretDans || 0);
@@ -1931,7 +1936,7 @@ async function demarrer() {
     if (victime) victime.morts = msg.morts;
     E.scores = msg.scores;
     hud.elimination({
-      tueur, victime, tete: msg.tete, arme: msg.dos ? '🔪 Dans le dos' : msg.brule ? 'Brûlure' : (ARMES[msg.a] ? ARMES[msg.a].nom : ''),
+      tueur, victime, tete: msg.tete, arme: msg.dos ? 'Dans le dos' : msg.brule ? 'Brûlure' : (ARMES[msg.a] ? ARMES[msg.a].nom : ''),
       moi: msg.tueur === E.moiId || msg.victime === E.moiId,
     });
     if (!victime) return;
@@ -2016,11 +2021,39 @@ async function demarrer() {
       }
     } else if (g) {
       gagne = g.id === E.moiId;
-      titre = gagne ? 'TU AS GAGNÉ ! 🏆' : `${g.nom} GAGNE !`;
+      titre = gagne ? 'TU AS GAGNÉ !' : `${g.nom} GAGNE !`;
     }
     if (gagne) son('victoire', { vol: 0.8, variation: 0 });
-    hud.fin(true, { titre, couleur, contenu: hud.tableau(msg.classement, E.mode, E.moiId) });
+    const tableau = hud.tableau(msg.classement, E.mode, E.moiId);
+    // Classé : on gagne (ou perd) des points de rang selon sa place
+    const place = msg.classement.findIndex((c) => c.id === E.moiId) + 1;
+    if (E.mode === 'classe' && place > 0) {
+      const r = finDeManche(place);
+      if (msg.niveau) E.niveauBots = msg.niveau;
+      majBadgeClasse();
+      hud.fin(true, { titre, couleur, contenu: el('div', {}, resultatClasse(place, r, msg.niveau), tableau) });
+      return;
+    }
+    hud.fin(true, { titre, couleur, contenu: tableau });
   });
+  // Bloc « rang » de l'écran de fin (classé)
+  function resultatClasse(place, { gain, avant, apres }, niveauBots) {
+    const monte = apres.niveau > avant.niveau;
+    const descend = apres.niveau < avant.niveau;
+    const bloc = el('div', { class: `resultat-classe${gain > 0 ? ' gagne' : gain < 0 ? ' perdu' : ''}` },
+      el('div', { class: 'rang-embleme' }, icone('rang')),
+      el('div', { class: 'rang-infos' },
+        el('div', { class: 'rang-ligne' },
+          el('b', { class: 'rang-nom', text: apres.nom }),
+          el('span', { class: 'rang-gain', text: `${gain > 0 ? '+' : ''}${gain} pts` })),
+        barreRang(apres.progres),
+        el('small', {
+          text: `${place}${place === 1 ? 're' : 'e'} place · niveau ${apres.niveau}${monte ? ' : tu montes de niveau !' : descend ? ' : tu descends d\'un niveau' : ''}`
+            + (niveauBots ? ` · prochaine manche : bots niveau ${niveauBots}` : ''),
+        })));
+    bloc.style.setProperty('--couleur-rang', apres.couleur);
+    return bloc;
+  }
 
   reseau.on('munitions', (msg) => {
     if (typeof msg.a === 'number') E.munitions[msg.a] = msg.n;
@@ -2084,7 +2117,7 @@ async function demarrer() {
         el('span', { class: 'code', text: s.code }),
         el('div', { class: 'infos' },
           el('div', {}, el('span', { class: 'nom-carte', text: s.nomCarte || '' }), ` · ${s.n} / ${s.max} joueurs`),
-          el('div', { class: 'mode', text: s.mode === 'equipes' ? 'Équipes Bleus vs Rouges' : 'Chacun pour soi' })),
+          el('div', { class: 'mode', text: s.mode === 'equipes' ? 'Équipes Bleus vs Rouges' : s.mode === 'classe' ? `Classé · bots niveau ${s.niveau || 1}` : 'Chacun pour soi' })),
         el('button', {
           class: 'btn', type: 'button', disabled: plein, text: plein ? 'Pleine' : 'Rejoindre',
           onclick: () => { demarrerSons(); son('clic'); reseau.envoyer({ t: 'rejoindre', code: s.code }); },
@@ -2096,9 +2129,51 @@ async function demarrer() {
       demarrerSons();
       son('clic');
       $('hall-erreur').textContent = '';
-      reseau.envoyer({ t: 'creer', mode: b.dataset.mode, carte: E.carteChoisie });
+      const mode = b.dataset.mode;
+      // Classé : les bots commencent au niveau de ton rang (gardé dans ce navigateur)
+      reseau.envoyer({ t: 'creer', mode, carte: E.carteChoisie, ...(mode === 'classe' ? { niveau: rang().niveau } : {}) });
     });
   }
+
+  // ---------- Mode classé ----------
+  // Le badge du rang, dans le panneau « Jouer »
+  function majBadgeClasse() {
+    const r = rang();
+    const box = $('badge-classe');
+    box.style.setProperty('--couleur-rang', r.couleur);
+    box.replaceChildren(
+      el('div', { class: 'rang-embleme' }, icone('rang')),
+      el('div', { class: 'rang-infos' },
+        el('div', { class: 'rang-ligne' }, el('b', { class: 'rang-nom', text: r.nom }), el('span', { class: 'rang-niveau', text: `Niveau ${r.niveau}` })),
+        barreRang(r.progres),
+        el('small', { text: r.max ? `${r.points} points · rang maximum !` : `${r.points} points · encore ${r.reste} pour le niveau ${r.niveau + 1}` }),
+        el('small', { class: 'rang-aide', text: 'Des bots complètent la partie et deviennent de plus en plus forts. Finis dans les 3 premiers pour monter !' })));
+  }
+  // (la page interdit les attributs style : on passe par element.style)
+  function barreRang(progres) {
+    const i = el('i');
+    i.style.width = `${Math.round(progres * 100)}%`;
+    return el('div', { class: 'rang-barre' }, i);
+  }
+  majBadgeClasse();
+  // En partie : « Classé · bots niveau N » sous le score
+  function majClasseHud() {
+    const b = $('classe-hud');
+    b.hidden = !(E.enPartie && E.mode === 'classe');
+    if (!b.hidden) b.querySelector('span').textContent = `Classé · bots niveau ${E.niveauBots}`;
+  }
+  function majModePause() {
+    const m = moi();
+    $('pause-mode').textContent = `${(carte && carte.nom) || ''} · ${E.mode === 'equipes' && m
+      ? `Équipes · tu es chez les ${NOMS_EQUIPES[m.equipe]}` : E.mode === 'classe' ? `Classé · bots niveau ${E.niveauBots}` : 'Chacun pour soi'}`;
+  }
+  reseau.on('niveauBots', (msg) => {
+    E.niveauBots = msg.n;
+    majClasseHud();
+    majModePause();
+    hud.toast(`Les bots passent au niveau ${msg.n} : ils visent mieux et réagissent plus vite !`);
+    son('lobby_pret', { vol: 0.6, variation: 0 });
+  });
   $('form-code').addEventListener('submit', (e) => {
     e.preventDefault();
     const code = $('code').value.trim().toUpperCase();
@@ -2137,7 +2212,7 @@ async function demarrer() {
             onclick: (ev) => {
               ev.target.disabled = true;
               Plateforme.inviter(f.id, 'fps', E.code)
-                .then(() => { ev.target.textContent = 'Invité ✓'; })
+                .then(() => { ev.target.textContent = 'Invité'; })
                 .catch((err) => { ev.target.disabled = false; hud.toast(err.message); });
             },
           })));
@@ -2269,8 +2344,9 @@ async function demarrer() {
       if (s <= 5 && s !== dernierCompte && s > 0) son('lobby_pret', { vol: 0.6, variation: 0 });
       dernierCompte = s;
     } else {
-      const touche = commandes.saisie === 'manette' ? commandes.libelle('menu') : modeTactile() ? '☰' : 'Échap';
-      bandeau.textContent = `Échauffement : en attente d'un 2e joueur… (${touche} : salle d'attente)`;
+      const touche = commandes.saisie === 'manette' ? commandes.libelle('menu') : modeTactile() ? 'Menu' : 'Échap';
+      bandeau.textContent = E.mode === 'classe' ? 'Classé : choisis tes armes, la partie démarre tout de suite'
+        : `Échauffement : en attente d'un 2e joueur… (${touche} : salle d'attente)`;
     }
   }
 

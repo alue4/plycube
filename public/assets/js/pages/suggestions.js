@@ -80,7 +80,7 @@
         await Plateforme.api('POST', '/api/suggestions', { title: document.getElementById('s-title').value, body: body.value });
         form.reset();
         count.textContent = '0';
-        App.toast('Merci pour ton idée ! 💡', { type: 'success' });
+        App.toast('Merci pour ton idée !', { type: 'success' });
         loadSuggestions();
       } catch (err) {
         App.showFormError(form, err.message);

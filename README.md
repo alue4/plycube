@@ -233,6 +233,18 @@ Elles sont écrites dans `games/fps/public/js/animations-origine.js`, au même f
 - Chaque carte existe en **version normale** et en **version XXL** (deux fois plus grande, avec plus de bots à l'entraînement et plus de joueurs possibles).
 - **Bots d'entraînement** : leur nombre dépend de la carte (jusqu'à 7 sur les grandes).
 
+### Mode classé
+
+Bouton **Classé** dans le panneau « Jouer ». C'est du chacun pour soi, mais :
+
+- la partie démarre **5 secondes** après que tu as choisi tes armes, même tout seul (premier à **15** éliminations) ;
+- des **bots complètent la partie** jusqu'à 6 joueurs, pendant toute la manche (tes amis peuvent venir avec le code : un bot leur laisse sa place) ;
+- les bots deviennent **de plus en plus forts** : ils commencent au niveau de ton rang, gagnent **+1 niveau toutes les 3 éliminations** du meilleur joueur, et **+1 à chaque manche gagnée** par un vrai joueur (−1 si un bot gagne). Niveau 1 à 20 : visée plus précise (6° d'erreur → 0,6°), réaction plus rapide (0,7 s → 0,15 s), un peu plus rapides, et de meilleures armes (sniper au niveau 16).
+
+**Ton rang** (Bronze, Argent, Or, Platine, Diamant de I à III, puis Champion) est affiché dans le panneau « Jouer ». Fin de manche : 1er **+30** points, 2e **+15**, 3e **+5**, sinon **−10** ; un niveau tous les 50 points. Il est gardé **dans le navigateur seulement** (rien dans la base du site) : sur un autre appareil, on recommence en Bronze.
+
+Réglages dans `games/fps/public/reglages.json` (`partie.objectifClasse`, `partie.attenteClasseSecondes`) ; la force des bots par niveau est dans `games/fps/serveur/bots.js` (`forceDuNiveau`).
+
 ### L'éditeur de cartes (admin)
 
 L'admin a un bouton **🗺️ Éditeur de cartes** (dans le menu et dans l'atelier d'animations ; page `games/fps/public/atelier-cartes.html`). On construit sa propre carte en posant des blocs en 3D (comme dans Minecraft), puis on l'enregistre : elle apparaît alors dans le choix des cartes du jeu.

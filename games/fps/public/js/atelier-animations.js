@@ -20,6 +20,7 @@ import {
   ANIMATIONS, ANIMATION, INSPECTION_DEFAUT, NOMS_PISTES, pistesDe, dureeAnimation, valeurPiste, evaluer,
 } from './animations-perso.js';
 import { animationOrigine } from './animations-origine.js';
+import { icone } from './icones.js';
 
 const $ = (id) => document.getElementById(id);
 const r4 = (v) => Math.round(v * 10000) / 10000;
@@ -55,7 +56,7 @@ function reparerTours() {
   if (!n) { E.historique.pop(); majEtat('Rien à réparer : toutes les pièces tournent dans le bon sens.'); return; }
   marquerModifie();
   majTout();
-  majEtat(`✓ ${n} clé(s) remise(s) dans le bon sens. Regarde avec ▶ puis Enregistrer.`);
+  majEtat(`✓ ${n} clé(s) remise(s) dans le bon sens. Regarde avec Lecture puis Enregistrer.`);
 }
 
 // Sons qu'on peut placer dans une animation : [fichier, nom affiché]
@@ -678,13 +679,13 @@ function lire() {
   jouerSonsEntre(E.t - 1e-6, E.t);
   // danse : la musique tourne en boucle pendant la lecture
   if (enDanse() && E.anim.musique) E.musique = jouerEnBoucle(E.anim.musique, { vol: 0.9, depuis: E.t });
-  $('btn-lecture').textContent = '⏸';
+  $('btn-lecture').replaceChildren(icone('pause'));
 }
 function arreter() {
   E.lecture = false;
   if (E.musique) { E.musique.arreter(); E.musique = null; }
   couperSons(); // les sons déjà lancés s'arrêtent aussi
-  $('btn-lecture').textContent = '▶';
+  $('btn-lecture').replaceChildren(icone('jouer'));
   E.sale = true;
 }
 
@@ -934,7 +935,7 @@ async function chargerModele(m) {
   majTout();
   majEtat(sons.length < (d.sons || []).length
     ? 'Modèle chargé, mais sa musique n\'est pas dans tes sons : envoie-la puis place-la à 0 s. Enregistre pour le garder.'
-    : 'Modèle chargé : regarde-le avec ▶, modifie-le si tu veux, puis Enregistrer.');
+    : 'Modèle chargé : regarde-le avec Lecture, modifie-le si tu veux, puis Enregistrer.');
 }
 
 // Envoie des fichiers son au serveur (un par un)
@@ -1062,11 +1063,12 @@ function majTout() {
   E.sale = true;
 }
 
-function bouton(texte, classe, quandClic) {
+function bouton(texte, classe, quandClic, ic) {
   const b = document.createElement('button');
   b.type = 'button';
   b.className = classe || '';
-  b.textContent = texte;
+  if (ic) b.append(icone(ic));
+  if (texte) b.append(document.createTextNode((ic ? ' ' : '') + texte));
   b.addEventListener('click', quandClic);
   return b;
 }
@@ -1151,7 +1153,7 @@ function majListesDanses() {
   }
   const l2 = $('liste-anims');
   l2.textContent = '';
-  l2.append(bouton('📁 Envoyer des sons…', 'nouveau', () => $('fichier-son').click()));
+  l2.append(bouton('Envoyer des sons…', 'nouveau', () => $('fichier-son').click(), 'dossier'));
   if (!sonsPerso.length) {
     const i = document.createElement('div');
     i.className = 'info';
@@ -1164,7 +1166,7 @@ function majListesDanses() {
     const n = document.createElement('span');
     n.textContent = x.nom;
     n.title = `${x.nom} (${Math.round(x.taille / 1024)} Ko)`;
-    ligne.append(bouton('▶', '', () => ecouter(`perso:${x.id}`)), n, bouton('🗑', '', () => supprimerSon(x)));
+    ligne.append(bouton('', '', () => ecouter(`perso:${x.id}`), 'son'), n, bouton('', '', () => supprimerSon(x), 'poubelle'));
     l2.append(ligne);
   }
 }
@@ -1229,7 +1231,7 @@ function majEtat(message) {
   else if (sauvee) { st.textContent = 'Ton animation (enregistrée) : c\'est elle qui est utilisée dans le jeu.'; st.classList.add('perso'); } else st.textContent = 'Animation d\'origine du jeu, recopiée en clés. Modifie-la puis enregistre.';
   const etat = $('etat-sauvegarde');
   etat.className = `etat${E.modifie ? ' modifie' : ''}`;
-  etat.textContent = message || (demiTours ? `⚠ ${demiTours} clé(s) font repartir une pièce dans l'autre sens : clique sur « ↻ Réparer les tours »` : E.modifie ? '● Pas enregistré' : '');
+  etat.textContent = message || (demiTours ? `⚠ ${demiTours} clé(s) font repartir une pièce dans l'autre sens : clique sur « Réparer les tours »` : E.modifie ? '● Pas enregistré' : '');
   $('btn-annuler').disabled = !E.historique.length;
   $('btn-retablir').disabled = !E.futur.length;
 }
@@ -1422,7 +1424,7 @@ function majFrise() {
   for (const p of [...pistes, 'sons']) {
     const n = document.createElement('div');
     n.dataset.piste = p;
-    n.textContent = p === 'sons' ? '♪ Sons' : nomPiste(p);
+    if (p === 'sons') n.replaceChildren(icone('note'), document.createTextNode(' Sons')); else n.textContent = nomPiste(p);
     if (p === E.piste) n.className = 'actif';
     noms.append(n);
     const ligne = document.createElement('div');
@@ -1434,7 +1436,7 @@ function majFrise() {
         m.className = `son${estSelectionne({ type: 'son', son: s }) ? ' choisie' : ''}`;
         m.dataset.i = i;
         m.style.left = `${(s[0] / d) * 100}%`;
-        m.textContent = `♪ ${nomSon(s[1])}`;
+        m.replaceChildren(icone('note'), document.createTextNode(' ' + nomSon(s[1])));
         m.title = `${nomSon(s[1])} à ${secondes(s[0])}`;
         ligne.append(m);
       });

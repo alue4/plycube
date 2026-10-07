@@ -12,15 +12,15 @@
     <a class="retour" href="./">← Retour au jeu</a>
     <h1>ATELIER <span>D'ANIMATIONS</span></h1>
     <div class="groupe-mode" role="group" aria-label="Que veux-tu animer ?">
-      <button id="mode-armes" class="choix actif" type="button">🔫 Armes</button>
-      <button id="mode-danses" class="choix" type="button">💃 Danses</button>
+      <button id="mode-armes" class="choix actif" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#arme"/></svg> Armes</button>
+      <button id="mode-danses" class="choix" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#danse"/></svg> Danses</button>
     </div>
-    <a class="retour" href="atelier-cartes.html" title="Créer tes propres cartes">🗺️ Éditeur de cartes</a>
+    <a class="retour" href="atelier-cartes.html" title="Créer tes propres cartes"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#carte"/></svg> Éditeur de cartes</a>
     <div class="barre-droite">
       <span id="etat-sauvegarde" class="etat"></span>
       <button id="btn-annuler" class="btn petit" type="button" title="Annuler (Ctrl+Z)">↶</button>
       <button id="btn-retablir" class="btn petit" type="button" title="Rétablir (Ctrl+Y)">↷</button>
-      <button id="btn-enregistrer" class="btn" type="button">💾 Enregistrer</button>
+      <button id="btn-enregistrer" class="btn" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#enregistrer"/></svg> Enregistrer</button>
     </div>
   </header>
 
@@ -39,11 +39,11 @@
       <canvas id="vue3d"></canvas>
       <div class="outils-vue">
         <div class="groupe" role="group" aria-label="Caméra">
-          <button id="vue-joueur" class="choix actif" type="button" title="Exactement comme dans le jeu">👁 Vue joueur</button>
-          <button id="vue-libre" class="choix" type="button" title="Tourner autour : clic gauche ; zoom : molette ; déplacer : clic droit">🔄 Vue libre</button>
+          <button id="vue-joueur" class="choix actif" type="button" title="Exactement comme dans le jeu"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#oeil"/></svg> Vue joueur</button>
+          <button id="vue-libre" class="choix" type="button" title="Tourner autour : clic gauche ; zoom : molette ; déplacer : clic droit"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#recharger"/></svg> Vue libre</button>
         </div>
         <div class="groupe" role="group" aria-label="Outil">
-          <button id="outil-deplacer" class="choix actif" type="button" title="Déplacer (touche G)">✥ Déplacer</button>
+          <button id="outil-deplacer" class="choix actif" type="button" title="Déplacer (touche G)"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#deplacer"/></svg> Déplacer</button>
           <button id="outil-tourner" class="choix" type="button" title="Tourner (touche R)">⟳ Tourner</button>
         </div>
       </div>
@@ -110,8 +110,8 @@
       <h2>Toute l'animation</h2>
       <div class="boutons colonne">
         <button id="btn-importer" class="btn petit gris" type="button">↺ Repartir de l'animation du jeu</button>
-        <button id="btn-tours" class="btn petit gris" type="button" title="Une pièce qui fait un tour complet repart dans l'autre sens ? Ce bouton la remet dans le bon sens">↻ Réparer les tours</button>
-        <button id="btn-effacer" class="btn petit gris" type="button">🧹 Tout effacer</button>
+        <button id="btn-tours" class="btn petit gris" type="button" title="Une pièce qui fait un tour complet repart dans l'autre sens ? Ce bouton la remet dans le bon sens"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#recharger"/></svg> Réparer les tours</button>
+        <button id="btn-effacer" class="btn petit gris" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#balai"/></svg> Tout effacer</button>
         <button id="btn-origine" class="btn petit danger" type="button">Supprimer mon animation (remettre celle du jeu)</button>
       </div>
     </aside>
@@ -120,9 +120,9 @@
   <!-- Ligne de temps -->
   <footer class="temps">
     <div class="transport">
-      <button id="btn-debut" class="btn petit gris" type="button" title="Début (Origine)">⏮</button>
-      <button id="btn-lecture" class="btn petit" type="button" title="Lecture / pause (Espace)">▶</button>
-      <button id="btn-fin" class="btn petit gris" type="button" title="Fin">⏭</button>
+      <button id="btn-debut" class="btn petit gris" type="button" title="Début (Origine)"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#debut"/></svg></button>
+      <button id="btn-lecture" class="btn petit" type="button" title="Lecture / pause (Espace)"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#jouer"/></svg></button>
+      <button id="btn-fin" class="btn petit gris" type="button" title="Fin"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#fin"/></svg></button>
       <span id="temps-actuel" class="chrono">0,00 s</span>
       <label class="option"><input id="boucle" type="checkbox" checked> En boucle</label>
       <label class="option">Vitesse
@@ -137,8 +137,8 @@
       <label class="option">Son
         <select id="choix-son"></select>
       </label>
-      <button id="btn-ajout-son" class="btn petit gris" type="button">♪ Ajouter ici</button>
-      <button id="btn-ecouter" class="btn petit gris" type="button" title="Écouter">🔊</button>
+      <button id="btn-ajout-son" class="btn petit gris" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#note"/></svg> Ajouter ici</button>
+      <button id="btn-ecouter" class="btn petit gris" type="button" title="Écouter"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#son"/></svg></button>
     </div>
     <div class="frise">
       <div id="noms-pistes" class="noms"></div>

@@ -104,3 +104,4 @@
   .actions-attente, .joueurs-attente.par-equipe { grid-template-columns: 1fr; }
   .infos-partie { align-items: flex-start; }
 }
+.badge-mode.classe { background: linear-gradient(90deg, #b26bff, #6a3dd8); border: 0; }

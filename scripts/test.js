@@ -278,6 +278,68 @@ function testerPouvoirsAdmin() {
   clearInterval(p.timer);
 }
 
+// Mode classé du FPS : niveau de départ, démarrage avec un seul joueur, bots pendant la vraie manche,
+// bots plus forts quand le niveau monte, niveau ajusté à la fin de la manche. (Le chacun pour soi garde ses bots d'entraînement.)
+function testerClasse() {
+  const { Partie } = require(path.join(ROOT, 'games/fps/serveur/partie.js'));
+  const reglages = JSON.parse(fs.readFileSync(path.join(ROOT, 'games/fps/public/reglages.json'), 'utf8'));
+  const carte = { id: 'test', nom: 'Test', taille: 60, boites: [[-60, -1, -60, 60, 0, 60, 'herbe']],
+    apparitions: [{ x: -5, z: 0, angle: 0 }, { x: 5, z: 0, angle: 0 }, { x: 0, z: -12, angle: 0 }, { x: 0, z: 12, angle: 0 }, { x: -15, z: -15, angle: 0 }, { x: 15, z: 15, angle: 0 }] };
+  const fauxWs = () => ({ readyState: 1, recus: [], send(x) { this.recus.push(JSON.parse(x)); } });
+  const EQ = { principale: 'fusil', secondaire: 'pistolet', melee: 'couteau', gadget: 'grenade' };
+  const nouvelle = (mode, niveau) => { const p = new Partie({ code: 'CLAS', mode, niveau, reglages, carte, surVide: () => {} }); clearInterval(p.timer); return p; };
+  const bots = (p) => [...p.joueurs.values()].filter((j) => j.bot);
+
+  const p = nouvelle('classe', 3);
+  check('classé : la partie garde son niveau de départ et son objectif', p.niveau === 3 && p.infos().niveau === 3 && p.infos().mode === 'classe'
+    && p.objectif === (reglages.partie.objectifClasse || reglages.partie.objectifChacunPourSoi), [p.niveau, p.objectif]);
+  const w = fauxWs();
+  const moi = p.ajouter(w, { id: 1, username: 'Solo' });
+  p.message(moi, { t: 'equipement', e: EQ });
+  const delai = p.attenteFinA - Date.now();
+  check('classé : un seul joueur prêt suffit, et la partie démarre vite', p.attenteFinA > 0 && delai <= (reglages.partie.attenteClasseSecondes || 5) * 1000 + 50, delai);
+  let now = Date.now();
+  for (let i = 0; i < 10; i++) { now += 900; p.bots.gerer(now, 0.05); }
+  check('classé : des bots complètent la partie (6 joueurs)', bots(p).length === Math.min(p.max, 6) - 1, bots(p).length);
+  p.nouvelleManche();
+  check('classé : les bots restent pour la vraie manche', p.etat === 'jeu' && bots(p).length === Math.min(p.max, 6) - 1, bots(p).length);
+  p.tick();
+  check('classé : les bots jouent pendant la manche, au niveau de la partie', p.bots.niveau === 3, p.bots.niveau);
+  const avant = { prec: p.bots.r.precisionDegres, reaction: p.bots.r.reactionMs };
+  w.recus.length = 0;
+  moi.kills = 9; // 3 éliminations = +1 niveau
+  p.bots.gerer(now + 900, 0.05);
+  check('classé : le niveau des bots monte avec les éliminations du joueur (annoncé à tous)', p.bots.niveau === 6 && w.recus.some((m) => m.t === 'niveauBots' && m.n === 6), [p.bots.niveau, w.recus.filter((m) => m.t === 'niveauBots')]);
+  check('classé : plus de niveau = visée plus précise et réaction plus rapide', p.bots.r.precisionDegres < avant.prec && p.bots.r.reactionMs < avant.reaction, [avant, p.bots.r.precisionDegres, p.bots.r.reactionMs]);
+  moi.kills = 90;
+  p.bots.gerer(now + 1800, 0.05);
+  check('classé : niveau des bots limité à 20', p.bots.niveau === 20 && p.bots.r.precisionDegres >= 0.6, p.bots.niveau);
+  // fin de manche : un vrai joueur gagne → la manche suivante commence un niveau plus haut
+  w.recus.length = 0;
+  p.terminer();
+  const fin = w.recus.find((m) => m.t === 'fin');
+  check('classé : manche gagnée par le joueur → bots un niveau plus haut', p.niveau === 4 && fin && fin.niveau === 4, [p.niveau, fin && fin.niveau]);
+  p.nouvelleManche();
+  bots(p)[0].kills = 50; // un bot gagne la manche
+  p.terminer();
+  check('classé : manche gagnée par un bot → bots un niveau plus bas', p.niveau === 3, p.niveau);
+  const fort = nouvelle('classe', 20); const faible = nouvelle('classe', 1);
+  for (const x of [fort, faible]) { x.ajouter(fauxWs(), { id: 1, username: 'Solo' }); x.bots.gerer(Date.now(), 0.05); }
+  check('classé : bots de niveau 20 bien plus précis que ceux du niveau 1', fort.bots.r.precisionDegres < faible.bots.r.precisionDegres - 4, [fort.bots.r.precisionDegres, faible.bots.r.precisionDegres]);
+
+  // Chacun pour soi : les bots d'entraînement partent quand la vraie partie commence (inchangé)
+  const s = nouvelle('solo', 1);
+  const js = s.ajouter(fauxWs(), { id: 1, username: 'Solo' });
+  s.message(js, { t: 'equipement', e: EQ });
+  check('chacun pour soi : un seul joueur ne lance pas la partie', !s.attenteFinA, s.attenteFinA);
+  let t = Date.now();
+  for (let i = 0; i < 3; i++) { t += 900; js.derniereMaj = t; s.bots.gerer(t, 0.05); }
+  const avantDebut = bots(s).length;
+  s.nouvelleManche();
+  check('chacun pour soi : les bots d\'entraînement partent au début de la vraie partie', avantDebut > 0 && bots(s).length === 0, [avantDebut, bots(s).length]);
+  for (const x of [p, fort, faible, s]) clearInterval(x.timer);
+}
+
 // Caméléon (cache-cache) : rôles, chercheurs figés pendant la cachette, tir qui touche / rate / leurre,
 // peinture, radar, fin de manche, bots quand on est seul.
 function testerCameleon() {
@@ -993,6 +1055,12 @@ async function main() {
     wsJeu.send(JSON.stringify({ t: 'quitter' }));
     const apres = await attendre('salons');
     check('quitter : la partie vide est supprimée', apres && apres.liste.length === 0, apres);
+    wsJeu.send(JSON.stringify({ t: 'creer', mode: 'classe', niveau: 99 }));
+    const bClasse = await attendre('bienvenue');
+    check('classé : création d\'une partie, niveau des bots limité à 20', bClasse && bClasse.mode === 'classe' && bClasse.niveauBots === 20, bClasse && [bClasse.mode, bClasse.niveauBots]);
+    wsJeu.send(JSON.stringify({ t: 'quitter' }));
+    const apresClasse = await attendre('salons');
+    check('classé : la partie vide est supprimée (avec ses bots)', apresClasse && apresClasse.liste.length === 0, apresClasse);
 
     console.log('\n— Jeu FPS : atelier d\'animations —');
     const anims = '/games/fps/api/animations';
@@ -1098,6 +1166,8 @@ async function main() {
     console.log('\n— Jeu FPS : laser de l\'admin —');
     testerLaser();
     testerPouvoirsAdmin();
+    console.log('\n— Jeu FPS : mode classé —');
+    testerClasse();
     testerCameleon();
 
     console.log('\n— Journal —');

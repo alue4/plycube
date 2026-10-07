@@ -1,6 +1,7 @@
 // Affichage par-dessus le jeu : vie, munitions, scores, fil des éliminations...
 // Sécurité : les pseudos sont toujours écrits avec textContent (jamais innerHTML).
 import { COULEURS_EQUIPES, NOMS_EQUIPES } from './personnage.js';
+import { icone } from './icones.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -99,7 +100,7 @@ export const hud = {
     const nom = (j) => el('span', { class: j && j.equipe === 0 ? 'b' : j && j.equipe === 1 ? 'r' : '', text: j ? j.nom : '?' });
     const li = el('li', { class: moi ? 'moi' : '' },
       tueur && tueur !== victime ? nom(tueur) : null,
-      el('span', { class: 'arme', text: `${arme ? `[${arme}]` : '⟶'}${tete ? ' 🎯' : ''}` }),
+      el('span', { class: 'arme' }, arme ? `[${arme}] ` : '⟶ ', tete ? icone('cible') : null),
       nom(victime));
     fil.prepend(li);
     while (fil.children.length > 5) fil.lastChild.remove();

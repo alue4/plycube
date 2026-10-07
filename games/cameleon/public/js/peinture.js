@@ -7,6 +7,7 @@
 import * as THREE from '/games/fps/vendor/three.min.js';
 import { Personnage, dessinerSkin } from '/games/fps/js/personnage.js';
 import { el } from '/games/fps/js/hud.js';
+import { icone } from '/games/fps/js/icones.js';
 
 // Zone de chaque partie dans la peau : [u, v, largeur, hauteur, profondeur]
 export const ZONES = {
@@ -89,8 +90,8 @@ export class Peinture {
   construire() {
     this.canvas = el('canvas', { class: 'peinture-apercu', width: 300, height: 380 });
     this.boutonsOutils = {};
-    const outil = (id, texte, titre) => {
-      const b = el('button', { type: 'button', class: 'pt-outil', title: titre, text: texte, onclick: () => this.choisirOutil(id) });
+    const outil = (id, ic, texte, titre) => {
+      const b = el('button', { type: 'button', class: 'pt-outil', title: titre, onclick: () => this.choisirOutil(id) }, icone(ic), ' ' + texte);
       this.boutonsOutils[id] = b;
       return b;
     };
@@ -102,19 +103,19 @@ export class Peinture {
     const presets = el('div', { class: 'pt-couleurs' }, PRESETS.map((c) => this.carreCouleur(c)));
     this.message = el('p', { class: 'pt-message' });
     this.racine = el('div', { id: 'peinture', class: 'peinture', hidden: true, role: 'dialog', 'aria-label': 'Peindre mon personnage' },
-      el('header', { class: 'pt-entete' }, el('b', { text: '🎨 Peindre mon perso' }),
-        el('button', { type: 'button', class: 'pt-fermer', 'aria-label': 'Fermer', text: '✕', onclick: () => this.fermer() })),
+      el('header', { class: 'pt-entete' }, el('b', {}, icone('palette'), ' Peindre mon perso'),
+        el('button', { type: 'button', class: 'pt-fermer', 'aria-label': 'Fermer', onclick: () => this.fermer() }, icone('croix'))),
       el('div', { class: 'pt-apercu' }, this.canvas, el('small', { text: 'Glisse sur le perso pour peindre · à côté pour le tourner' })),
-      el('div', { class: 'pt-ligne' }, outil('pinceau', '🖌 Pinceau', 'Pinceau (B)'), outil('remplir', '🪣 Remplir', 'Remplir une partie du corps (F)'), outil('pipette', '💧 Pipette', 'Prendre une couleur dans le décor (I)')),
+      el('div', { class: 'pt-ligne' }, outil('pinceau', 'pinceau', 'Pinceau', 'Pinceau (B)'), outil('remplir', 'seau', 'Remplir', 'Remplir une partie du corps (F)'), outil('pipette', 'pipette', 'Pipette', 'Prendre une couleur dans le décor (I)')),
       el('div', { class: 'pt-ligne pt-tailles' }, el('span', { text: 'Taille :' }), this.boutonsTaille),
       el('div', { class: 'pt-ligne' }, this.pastille, this.choixCouleur, el('span', { class: 'pt-petit', text: 'couleur actuelle' })),
       el('div', { class: 'pt-titre', text: 'Couleurs prises dans le décor' }), this.listePrises,
       el('div', { class: 'pt-titre', text: 'Couleurs de base' }), presets,
       el('div', { class: 'pt-ligne pt-actions' },
-        el('button', { type: 'button', text: '↶ Annuler', title: 'Ctrl + Z', onclick: () => this.annuler() }),
-        el('button', { type: 'button', text: '⬜ Tout en blanc', onclick: () => this.toutRemplir('#ffffff') }),
-        el('button', { type: 'button', text: '🎨 Tout de cette couleur', onclick: () => this.toutRemplir(this.couleur) }),
-        el('button', { type: 'button', text: '👤 Mon perso', title: 'Revenir à ton personnage de départ', onclick: () => this.revenirAuDepart() })),
+        el('button', { type: 'button', onclick: () => this.annuler(), title: 'Ctrl + Z' }, icone('recharger'), ' Annuler'),
+        el('button', { type: 'button', onclick: () => this.toutRemplir('#ffffff') }, icone('seau'), ' Tout en blanc'),
+        el('button', { type: 'button', onclick: () => this.toutRemplir(this.couleur) }, icone('palette'), ' Tout de cette couleur'),
+        el('button', { type: 'button', title: 'Revenir à ton personnage de départ', onclick: () => this.revenirAuDepart() }, icone('perso'), ' Mon perso')),
       this.message);
     document.body.append(this.racine);
     this.majOutils();
@@ -171,7 +172,7 @@ export class Peinture {
     if (!this.perso) return;
     this.estOuvert = true;
     this.racine.hidden = false;
-    this.message.textContent = 'Astuce : avec la 💧 pipette, clique sur le décor à côté du panneau pour prendre sa couleur.';
+    this.message.textContent = 'Astuce : avec la pipette, clique sur le décor à côté du panneau pour prendre sa couleur.';
     const boucle = () => {
       if (!this.estOuvert) return;
       requestAnimationFrame(boucle);
@@ -203,9 +204,9 @@ export class Peinture {
   choisirOutil(id) {
     this.outil = id;
     this.majOutils();
-    if (id === 'pipette') this.message.textContent = '💧 Clique sur le décor (à côté du panneau) ou sur ton perso pour prendre une couleur.';
-    else if (id === 'remplir') this.message.textContent = '🪣 Clique sur une partie de ton perso : elle prend la couleur d\'un coup.';
-    else this.message.textContent = '🖌 Glisse sur ton perso pour peindre.';
+    if (id === 'pipette') this.message.textContent = 'Clique sur le décor (à côté du panneau) ou sur ton perso pour prendre une couleur.';
+    else if (id === 'remplir') this.message.textContent = 'Clique sur une partie de ton perso : elle prend la couleur d\'un coup.';
+    else this.message.textContent = 'Glisse sur ton perso pour peindre.';
   }
 
   choisirTaille(t) { this.taille = t; this.majOutils(); }
@@ -234,7 +235,7 @@ export class Peinture {
     if (!couleur) return;
     this.choisirCouleur(couleur, true);
     this.son('pinceau');
-    this.message.textContent = `💧 Couleur prise : ${couleur}. Choisis le 🖌 pinceau ou 🪣 remplir pour l'utiliser.`;
+    this.message.textContent = `Couleur prise : ${couleur}. Choisis le pinceau ou remplir pour l'utiliser.`;
   }
 
   // ---------- Peindre sur l'aperçu ----------
@@ -266,7 +267,7 @@ export class Peinture {
       for (const [x, y, w, h] of faces(ZONES[nom])) g.fillRect(x, y, w, h);
       this.majPeau(true);
       this.son('pinceau');
-      this.message.textContent = `🪣 ${NOMS_PARTIES[nom]} : ${this.couleur}`;
+      this.message.textContent = `${NOMS_PARTIES[nom]} : ${this.couleur}`;
       this.glisser = null;
       return;
     }

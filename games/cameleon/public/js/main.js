@@ -11,6 +11,7 @@ import { ArmeVue } from '/games/fps/js/arme.js';
 import { choisirStyleArmes } from '/games/fps/js/armes-glb.js';
 import { Effets } from '/games/fps/js/effets.js';
 import { el } from '/games/fps/js/hud.js';
+import { icone, svgIcone } from '/games/fps/js/icones.js';
 import { Peinture, sansAccessoires, remplirParties, couleursMoyennes } from './peinture.js';
 import * as S from './sons.js';
 
@@ -407,18 +408,18 @@ async function demarrer() {
   function majBoutonsTactiles() {
     if (!tactile) return;
     const b = (ico, texte, action, maintenu = false) => {
-      const x = el('button', { type: 'button' }, el('span', { class: 'ico', text: ico }), texte);
+      const x = el('button', { type: 'button' }, el('span', { class: 'ico' }, icone(ico)), texte);
       if (maintenu) {
         x.addEventListener('touchstart', (e) => { e.preventDefault(); action(true); }, { passive: false });
         x.addEventListener('touchend', (e) => { e.preventDefault(); action(false); }, { passive: false });
       } else x.addEventListener('touchstart', (e) => { e.preventDefault(); action(); }, { passive: false });
       return x;
     };
-    const saut = b('⬆', 'Sauter', (oui) => { joueur.sautTactile = oui; }, true);
+    const saut = b('monter', 'Sauter', (oui) => { joueur.sautTactile = oui; }, true);
     const liste = E.role === 'chercheur'
-      ? [b('🔫', 'Tirer', () => tirer()), b('📡', 'Radar', () => demanderRadar()), saut, b('☰', 'Menu', () => { $('pause').hidden = false; })]
-      : [b('🎨', 'Peindre', () => (peinture.ouvert ? peinture.fermer() : ouvrirPeinture())), b('🧍', 'Pose', () => changerPose((E.pose + 1) % 4)),
-        b('🦎', 'Leurre', () => poserLeurre()), saut, b('☰', 'Menu', () => { $('pause').hidden = false; })];
+      ? [b('arme', 'Tirer', () => tirer()), b('radar', 'Radar', () => demanderRadar()), saut, b('menu', 'Menu', () => { $('pause').hidden = false; })]
+      : [b('palette', 'Peindre', () => (peinture.ouvert ? peinture.fermer() : ouvrirPeinture())), b('pose', 'Pose', () => changerPose((E.pose + 1) % 4)),
+        b('cameleon', 'Leurre', () => poserLeurre()), saut, b('menu', 'Menu', () => { $('pause').hidden = false; })];
     $('boutons-tactiles').replaceChildren(...liste);
   }
 
@@ -495,7 +496,7 @@ async function demarrer() {
     majAttente();
   }
   function majAttente(info, listeAussi = true) {
-    if (listeAussi) $('att-joueurs').replaceChildren(...[...E.joueurs.values()].map((j) => el('li', { text: `${j.bot ? '🤖 ' : ''}${j.nom}${j.id === E.moiId ? ' (toi)' : ''}` })));
+    if (listeAussi) $('att-joueurs').replaceChildren(...[...E.joueurs.values()].map((j) => el('li', {}, j.bot ? icone('robot') : null, `${j.bot ? ' ' : ''}${j.nom}${j.id === E.moiId ? ' (toi)' : ''}`)));
     const n = [...E.joueurs.values()].filter((j) => !j.bot).length;
     let t = n < 2 ? 'Tout seul ? Clique sur « Commencer » : des bots viendront jouer avec toi.' : 'La partie démarre toute seule bientôt, ou clique sur « Commencer ».';
     if (E.departA) t = `Départ dans ${Math.max(0, Math.ceil((E.departA - performance.now()) / 1000))} s… (ou « Commencer » tout de suite)`;
@@ -521,10 +522,10 @@ async function demarrer() {
   function majRole() {
     const cacheur = E.role === 'cacheur';
     $('role').className = cacheur ? 'cacheur' : 'chercheur';
-    $('role').textContent = cacheur ? '🦎 CACHEUR' : '🔫 CHERCHEUR';
+    $('role').replaceChildren(icone(cacheur ? 'cameleon' : 'arme'), document.createTextNode(cacheur ? ' CACHEUR' : ' CHERCHEUR'));
     $('viseur').hidden = cacheur;
     $('aide-touches').replaceChildren(...(cacheur
-      ? ['<kbd>P</kbd> se peindre (pipette 💧 dans le décor)', '<kbd>1</kbd> statue · <kbd>2</kbd> accroupi · <kbd>3</kbd> allongé', '<kbd>L</kbd> leurre (1 par manche) · molette : caméra']
+      ? [`<kbd>P</kbd> se peindre (pipette ${svgIcone('pipette')} dans le décor)`, '<kbd>1</kbd> statue · <kbd>2</kbd> accroupi · <kbd>3</kbd> allongé', '<kbd>L</kbd> leurre (1 par manche) · molette : caméra']
       : ['<kbd>Clic</kbd> tirer de la peinture (raté = bloqué 2,5 s)', '<kbd>R</kbd> radar (1 par manche)', '<kbd>Tab</kbd> scores']).map((h) => { const d = document.createElement('div'); d.innerHTML = h; return d; }));
     if (!cacheur && !armeVue) armeVue = new ArmeVue(normaliserStyle(E.monStyle || styleParDefaut(E.moiId)), [armePeinture]);
     if (!cacheur) peinture.fermer();
@@ -546,14 +547,14 @@ async function demarrer() {
     }
     entrerJeu();
     S.son('lobby_depart', { vol: 0.8 });
-    toast(E.role === 'cacheur' ? '🦎 Tu es CACHEUR : cache-toi et peins-toi (touche P) !' : '🔫 Tu es CHERCHEUR : attends que les cacheurs se cachent…');
+    toast(E.role === 'cacheur' ? 'Tu es CACHEUR : cache-toi et peins-toi (touche P) !' : 'Tu es CHERCHEUR : attends que les cacheurs se cachent…');
   });
   on('etat', (m) => {
     E.etat = m.etat;
     E.finA = performance.now() + m.finDans;
     if (m.etat === 'recherche') {
       S.son('apparition');
-      toast(E.role === 'chercheur' ? '🔍 À toi de jouer : trouve-les !' : '⚠ Les chercheurs arrivent ! Ne bouge plus…');
+      toast(E.role === 'chercheur' ? 'À toi de jouer : trouve-les !' : 'Les chercheurs arrivent ! Ne bouge plus…');
     }
   });
   on('fin', (m) => {
@@ -561,9 +562,10 @@ async function demarrer() {
     E.finA = performance.now() + m.finDans;
     peinture.fermer();
     const gagne = (m.gagnants === 'cacheurs' && m.restants.includes(E.moiId)) || (m.gagnants === 'chercheurs' && E.role === 'chercheur');
-    $('fin-titre').textContent = m.gagnants === 'cacheurs' ? '🦎 Les cacheurs gagnent !' : '🔫 Les chercheurs ont trouvé tout le monde !';
+    $('fin-titre').replaceChildren(icone(m.gagnants === 'cacheurs' ? 'cameleon' : 'arme'),
+      document.createTextNode(m.gagnants === 'cacheurs' ? ' Les cacheurs gagnent !' : ' Les chercheurs ont trouvé tout le monde !'));
     $('fin-classement').replaceChildren(...m.classement.map((c) => el('li', {}, el('b', { text: c.nom }), ` — ${c.points} pts`,
-      el('span', { class: 'role', text: m.restants.includes(c.id) ? '🦎 jamais trouvé' : '' }))));
+      m.restants.includes(c.id) ? el('span', { class: 'role' }, icone('cameleon'), ' jamais trouvé') : null)));
     $('fin-info').textContent = 'Nouvelle manche dans quelques secondes (avec de nouveaux chercheurs)…';
     $('fin').hidden = false;
     if (document.pointerLockElement) document.exitPointerLock();
@@ -608,7 +610,7 @@ async function demarrer() {
   on('rate', (m) => {
     E.bloqueJusqua = performance.now() + m.ms;
     S.rate();
-    toast(m.leurre ? `🦎 C'était un leurre ! Bloqué ${(m.ms / 1000).toFixed(1).replace('.', ',')} s` : `Raté ! Bloqué ${(m.ms / 1000).toFixed(1).replace('.', ',')} s`);
+    toast(m.leurre ? `C'était un leurre ! Bloqué ${(m.ms / 1000).toFixed(1).replace('.', ',')} s` : `Raté ! Bloqué ${(m.ms / 1000).toFixed(1).replace('.', ',')} s`);
   });
   on('trouve', (m) => {
     const j = E.joueurs.get(m.id);
@@ -619,23 +621,23 @@ async function demarrer() {
     if (m.id === E.moiId) {
       E.role = 'chercheur'; E.pose = 0;
       S.son('elimination');
-      toast(`🎯 ${par ? par.nom : 'Quelqu\'un'} t'a trouvé ! Tu deviens chercheur 🔫`);
+      toast(`${par ? par.nom : 'Quelqu\'un'} t'a trouvé ! Tu deviens chercheur.`);
       if (j) { j.role = 'chercheur'; j.pose = 0; j.peauPng = null; creerPerso(j); }
       majRole();
     } else {
       S.trouve();
-      toast(`🎯 ${par ? par.nom : '?'} a trouvé ${j ? j.nom : '?'} !`);
+      toast(`${par ? par.nom : '?'} a trouvé ${j ? j.nom : '?'} !`);
       if (j) { j.role = 'chercheur'; j.pose = 0; j.peauPng = null; j.couleurs = null; creerPerso(j); }
     }
     const mm = moi(); if (mm) E.points = mm.points;
   });
-  on('leurre', (m) => { creerLeurre(m); if (m.owner === E.moiId) toast('🦎 Leurre posé ! Il ne bouge pas, mais il te ressemble.'); });
-  on('leurreDetruit', (m) => { detruireLeurre(m.id, true); if (m.par && m.par !== E.moiId) { const j = E.joueurs.get(m.par); if (j) toast(`🦎 ${j.nom} a tiré sur un leurre !`); } });
+  on('leurre', (m) => { creerLeurre(m); if (m.owner === E.moiId) toast('Leurre posé ! Il ne bouge pas, mais il te ressemble.'); });
+  on('leurreDetruit', (m) => { detruireLeurre(m.id, true); if (m.par && m.par !== E.moiId) { const j = E.joueurs.get(m.par); if (j) toast(`${j.nom} a tiré sur un leurre !`); } });
   on('sifflet', (m) => {
     for (const p of m.p) {
       const v = new THREE.Vector3(p[0], p[1], p[2]);
       S.sifflet(v);
-      if (E.role === 'cacheur' && v.distanceTo(new THREE.Vector3(joueur.pos.x, joueur.pos.y + 1.2, joueur.pos.z)) < 1.5) toast('🎵 Tu as sifflé ! Les chercheurs ont entendu d\'où ça vient…');
+      if (E.role === 'cacheur' && v.distanceTo(new THREE.Vector3(joueur.pos.x, joueur.pos.y + 1.2, joueur.pos.z)) < 1.5) toast('Tu as sifflé ! Les chercheurs ont entendu d\'où ça vient…');
     }
   });
   on('radar', (m) => { E.radar = { dirs: m.dirs, fin: performance.now() + m.ms }; S.radar(); });
@@ -645,11 +647,11 @@ async function demarrer() {
     $('tableau').hidden = !oui;
     if (!oui) return;
     const lignes = [...E.joueurs.values()].sort((a, b) => b.points - a.points)
-      .map((j) => `<tr><td>${j.role === 'cacheur' ? '🦎' : '🔫'}</td><td></td><td>${j.points}</td></tr>`);
+      .map((j) => `<tr><td>${j.role === 'cacheur' ? svgIcone('cameleon') : svgIcone('arme')}</td><td></td><td>${j.points}</td></tr>`);
     $('tableau').innerHTML = `<table><tr><th></th><th>Joueur</th><th>Points</th></tr>${lignes.join('')}</table>`;
     // (les noms sont écrits avec textContent : jamais de code dans un pseudo)
     const noms = [...E.joueurs.values()].sort((a, b) => b.points - a.points);
-    $('tableau').querySelectorAll('tr td:nth-child(2)').forEach((td, i) => { td.textContent = `${noms[i].bot ? '🤖 ' : ''}${noms[i].nom}${noms[i].id === E.moiId ? ' (toi)' : ''}`; });
+    $('tableau').querySelectorAll('tr td:nth-child(2)').forEach((td, i) => { td.textContent = `${noms[i].nom}${noms[i].id === E.moiId ? ' (toi)' : noms[i].bot ? ' (bot)' : ''}`; });
   }
 
   // ---------- Boucle ----------
@@ -744,13 +746,13 @@ async function demarrer() {
 
     // --- HUD ---
     const reste = E.finA - now;
-    $('phase').textContent = E.etat === 'cachette' ? (cacheur ? '🙈 Cache-toi !' : '🙈 Ils se cachent…') : E.etat === 'recherche' ? '🔍 Recherche' : E.etat === 'fin' ? '🏁 Fin de la manche' : '⏳ Attente';
+    $('phase').textContent = E.etat === 'cachette' ? (cacheur ? 'Cache-toi !' : 'Ils se cachent…') : E.etat === 'recherche' ? 'Recherche' : E.etat === 'fin' ? 'Fin de la manche' : 'Attente';
     $('chrono').textContent = mmss(reste);
     $('chrono').classList.toggle('urgent', reste < 20000 && E.etat !== 'fin');
     const nCacheurs = [...E.joueurs.values()].filter((j) => j.role === 'cacheur').length;
     const nChercheurs = [...E.joueurs.values()].filter((j) => j.role === 'chercheur').length;
-    $('compte').textContent = `🦎 ${nCacheurs} · 🔫 ${nChercheurs}`;
-    $('mes-points').textContent = `⭐ ${E.points} pts${E.role === 'cacheur' && E.pose ? ` · ${NOMS_POSES[E.pose]}` : ''}`;
+    $('compte').textContent = `Cachés : ${nCacheurs} · Chercheurs : ${nChercheurs}`;
+    $('mes-points').textContent = `${E.points} pts${E.role === 'cacheur' && E.pose ? ` · ${NOMS_POSES[E.pose]}` : ''}`;
     const bloque = E.role === 'chercheur' && now < E.bloqueJusqua;
     $('viseur').classList.toggle('bloque', bloque);
     $('penalite').hidden = !bloque;

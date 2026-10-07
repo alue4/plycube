@@ -149,3 +149,7 @@ input[type="number"] { width: 100%; min-width: 0; }
 .aide-frise { margin: 6px 0 0; color: var(--gris); font-size: .75rem; }
 .aide-frise b { color: var(--texte); font-weight: 600; }
 .btn.alerte { background: linear-gradient(180deg, #ffb347, #ff8a1f); border-bottom-color: #a14e0a; color: #1a1205; }
+
+/* Icônes maison (voir /assets/img/icones.svg). Taille = police, couleur = texte. */
+.ic { width: 1em; height: 1em; display: inline-block; vertical-align: -0.14em; flex: none; overflow: visible; }
+.ic.gros { width: 1.4em; height: 1.4em; vertical-align: -0.28em; }

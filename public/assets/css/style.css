@@ -329,3 +329,7 @@ dialog .btn-row { justify-content: flex-end; margin-top: 18px; }
 .mb-0 { margin-bottom: 0; }
 main.container.narrow { max-width: 600px; }
 .search-input { max-width: 240px; }
+
+/* Icônes maison (voir /assets/img/icones.svg). Taille = police, couleur = texte. */
+.ic { width: 1em; height: 1em; display: inline-block; vertical-align: -0.14em; flex: none; overflow: visible; }
+.ic.gros { width: 1.4em; height: 1.4em; vertical-align: -0.28em; }

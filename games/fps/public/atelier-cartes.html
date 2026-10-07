@@ -13,8 +13,8 @@
     <h1>ÉDITEUR <span>DE CARTES</span></h1>
     <div class="barre-droite">
       <span id="etat" class="etat"></span>
-      <button id="btn-tester" class="btn gris" type="button" title="Enregistrer puis aller jouer sur cette carte">▶ Tester</button>
-      <button id="btn-enregistrer" class="btn" type="button">💾 Enregistrer</button>
+      <button id="btn-tester" class="btn gris" type="button" title="Enregistrer puis aller jouer sur cette carte"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#jouer"/></svg> Tester</button>
+      <button id="btn-enregistrer" class="btn" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#enregistrer"/></svg> Enregistrer</button>
     </div>
   </header>
 
@@ -24,17 +24,17 @@
       <h2>Mes cartes</h2>
       <select id="liste-cartes"><option value="">— Nouvelle carte —</option></select>
       <div class="boutons">
-        <button id="btn-nouvelle" class="btn petit gris" type="button">✚ Nouvelle</button>
+        <button id="btn-nouvelle" class="btn petit gris" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#plus"/></svg> Nouvelle</button>
         <button id="btn-partir" class="btn petit gris" type="button" title="Copier une carte du jeu pour la modifier">⧉ Partir d'une carte</button>
-        <button id="btn-supprimer" class="btn petit danger" type="button">🗑 Supprimer</button>
+        <button id="btn-supprimer" class="btn petit danger" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#poubelle"/></svg> Supprimer</button>
       </div>
 
       <h2>Outil</h2>
       <div id="outils" class="liste-outils" role="group" aria-label="Outil">
-        <button class="choix actif" data-outil="bloc" type="button" title="Ajouter un bloc (clic sur une face ou le sol)">🧱 Bloc</button>
-        <button class="choix" data-outil="boite" type="button" title="Deux clics : les deux coins d'une boîte">⬛ Boîte</button>
-        <button class="choix" data-outil="gomme" type="button" title="Supprimer le bloc cliqué">🧽 Gomme</button>
-        <button class="choix" data-outil="apparition" type="button" title="Poser un point d'apparition">🎯 Apparition</button>
+        <button class="choix actif" data-outil="bloc" type="button" title="Ajouter un bloc (clic sur une face ou le sol)"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#bloc"/></svg> Bloc</button>
+        <button class="choix" data-outil="boite" type="button" title="Deux clics : les deux coins d'une boîte"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#boite"/></svg> Boîte</button>
+        <button class="choix" data-outil="gomme" type="button" title="Supprimer le bloc cliqué"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#gomme"/></svg> Gomme</button>
+        <button class="choix" data-outil="apparition" type="button" title="Poser un point d'apparition"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#cible"/></svg> Apparition</button>
       </div>
       <label class="ligne" id="bloc-hauteur"><span>Hauteur</span><span><input id="hauteur" type="number" min="1" max="20" value="1"> blocs</span></label>
       <label class="ligne" id="bloc-decor" title="Un décor n'arrête pas les balles et n'a pas de collision"><span>Décor (sans collision)</span><input id="decor" type="checkbox"></label>
@@ -74,7 +74,7 @@
       <h2>Raccourcis</h2>
       <div class="boutons colonne">
         <button id="btn-sol" class="btn petit gris" type="button">▦ Remettre le sol et les bords</button>
-        <button id="btn-vider" class="btn petit gris" type="button">🧹 Tout effacer</button>
+        <button id="btn-vider" class="btn petit gris" type="button"><svg class="ic" aria-hidden="true"><use href="/assets/img/icones.svg#balai"/></svg> Tout effacer</button>
         <button id="btn-annuler" class="btn petit gris" type="button" title="Ctrl+Z">↶ Annuler</button>
       </div>
       <p id="statut" class="statut"></p>

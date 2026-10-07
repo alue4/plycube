@@ -360,6 +360,8 @@ Cache-cache en blocs, façon « Meccha Chameleon » : les **cacheurs se peignent
 
 ---
 
+**Sur tablette, les boutons se personnalisent** : *Réglages* → **Personnaliser les boutons (tablette)**. On glisse chaque bouton (et le joystick) où on veut, on le touche puis « Plus grand » / « Plus petit », et « Voir les boutons du chercheur » montre l'autre jeu de boutons. C'est gardé dans le navigateur (code : `games/cameleon/public/js/disposition.js`).
+
 ## Sécurité (ce qui est déjà en place)
 
 - Inscription **uniquement avec un code d'invitation**. Pas d'e-mail ni de nom réel : seulement un pseudo, filtré (mots grossiers, pseudos réservés…).

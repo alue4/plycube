@@ -109,10 +109,10 @@ select, input[type="text"], #code { padding: 11px 12px; border-radius: 12px; bor
 
 /* ---------- Commandes tactiles ---------- */
 #tactile { position: fixed; inset: 0; z-index: 6; pointer-events: none; }
-#joystick { position: absolute; left: 22px; bottom: 26px; width: 130px; height: 130px; border-radius: 50%; background: rgba(255, 255, 255, .12); border: 2px solid rgba(255, 255, 255, .3); pointer-events: auto; touch-action: none; }
+#joystick { position: absolute; left: 12%; top: 80%; transform: translate(-50%, -50%); width: 130px; height: 130px; border-radius: 50%; background: rgba(255, 255, 255, .12); border: 2px solid rgba(255, 255, 255, .3); pointer-events: auto; touch-action: none; }
 #joystick-bouton { position: absolute; left: 40px; top: 40px; width: 50px; height: 50px; border-radius: 50%; background: rgba(255, 255, 255, .55); }
-#boutons-tactiles { position: absolute; right: 18px; bottom: 22px; display: grid; grid-template-columns: repeat(2, 72px); gap: 10px; pointer-events: auto; }
-#boutons-tactiles button { width: 72px; height: 72px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .45); background: rgba(8, 24, 20, .6); color: #fff; font: 800 .75rem system-ui; touch-action: none; }
+#boutons-tactiles { position: absolute; inset: 0; pointer-events: none; }
+#boutons-tactiles button { position: absolute; left: 0; top: 0; pointer-events: auto; width: 72px; height: 72px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .45); background: rgba(8, 24, 20, .6); color: #fff; font: 800 .75rem system-ui; touch-action: none; }
 #boutons-tactiles button .ico { display: block; font-size: 1.5rem; }
 body.tactile #aide-touches { display: none; }
 body.tactile #mes-points { bottom: auto; top: 10px; right: 10px; }
@@ -120,3 +120,16 @@ body.tactile #mes-points { bottom: auto; top: 10px; right: 10px; }
 /* Icônes maison (voir /assets/img/icones.svg). Taille = police, couleur = texte. */
 .ic { width: 1em; height: 1em; display: inline-block; vertical-align: -0.14em; flex: none; overflow: visible; }
 .ic.gros { width: 1.4em; height: 1.4em; vertical-align: -0.28em; }
+
+/* Boutons tactiles personnalisés (js/disposition.js) : mode édition */
+body:not(.tactile) #btn-disposition { display: none; }
+#btn-disposition { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin: 6px 0 12px; }
+#tactile.edition { z-index: 40; pointer-events: auto; background: rgba(0, 0, 0, .45); }
+#tactile.edition .commande-tactile { cursor: grab; }
+#tactile.edition .commande-tactile.choisi { outline: 3px dashed #ffd23f; outline-offset: 6px; }
+.outils-edition { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 41; width: min(680px, 94vw); padding: 10px 12px;
+  border-radius: 14px; background: rgba(8, 24, 20, .94); border: 1px solid var(--bord); text-align: center; }
+.outils-edition[hidden] { display: none; }
+.outils-edition .consigne { margin: 0 0 8px; font-size: .9rem; }
+.outils-edition .rangee { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.btn-petit.danger { border-color: rgba(255, 107, 107, .7); color: #ffc2c2; }

@@ -12,6 +12,7 @@ import { choisirStyleArmes } from '/games/fps/js/armes-glb.js';
 import { Effets } from '/games/fps/js/effets.js';
 import { el } from '/games/fps/js/hud.js';
 import { icone, svgIcone } from '/games/fps/js/icones.js';
+import { DispositionTactile } from './disposition.js';
 import { Peinture, sansAccessoires, remplirParties, couleursMoyennes } from './peinture.js';
 import * as S from './sons.js';
 
@@ -373,9 +374,19 @@ async function demarrer() {
   });
 
   // ---------- Commandes tactiles ----------
+  // Disposition des boutons tactiles : positions et tailles personnalisées (Réglages → Personnaliser les boutons)
+  const dispo = new DispositionTactile($('tactile'), {
+    surRole: (role) => majBoutonsTactiles(role),
+    surFin: () => {
+      if (E.ecran === 'jeu') majBoutonsTactiles(); else $('boutons-tactiles').replaceChildren();
+      $('reglages').hidden = false; // on revient aux réglages
+    },
+  });
   if (tactile) {
     $('tactile').hidden = false;
     const joy = $('joystick'); const bouton = $('joystick-bouton');
+    joy.dataset.commande = 'joystick';
+    dispo.brancher(joy);
     let doigtJoy = null;
     const majJoy = (t) => {
       const r = joy.getBoundingClientRect();
@@ -386,8 +397,8 @@ async function demarrer() {
       joueur.analogique.cote = x; joueur.analogique.avant = -y;
       bouton.style.transform = `translate(${x * 40}px, ${y * 40}px)`;
     };
-    joy.addEventListener('touchstart', (e) => { e.preventDefault(); doigtJoy = e.changedTouches[0].identifier; majJoy(e.changedTouches[0]); }, { passive: false });
-    joy.addEventListener('touchmove', (e) => { e.preventDefault(); for (const t of e.changedTouches) if (t.identifier === doigtJoy) majJoy(t); }, { passive: false });
+    joy.addEventListener('touchstart', (e) => { e.preventDefault(); if (dispo.edition) return; doigtJoy = e.changedTouches[0].identifier; majJoy(e.changedTouches[0]); }, { passive: false });
+    joy.addEventListener('touchmove', (e) => { e.preventDefault(); if (dispo.edition) return; for (const t of e.changedTouches) if (t.identifier === doigtJoy) majJoy(t); }, { passive: false });
     const finJoy = (e) => { for (const t of e.changedTouches) if (t.identifier === doigtJoy) { doigtJoy = null; joueur.analogique.cote = 0; joueur.analogique.avant = 0; bouton.style.transform = ''; } };
     joy.addEventListener('touchend', finJoy); joy.addEventListener('touchcancel', finJoy);
     // regarder : glisser le doigt sur le jeu
@@ -405,23 +416,28 @@ async function demarrer() {
     const finRegard = (e) => { for (const t of e.changedTouches) regards.delete(t.identifier); };
     $('jeu').addEventListener('touchend', finRegard); $('jeu').addEventListener('touchcancel', finRegard);
   }
-  function majBoutonsTactiles() {
+  // role : le rôle dont on montre les boutons (par défaut le sien ; en mode édition, celui qu'on règle)
+  function majBoutonsTactiles(role = E.role) {
     if (!tactile) return;
-    const b = (ico, texte, action, maintenu = false) => {
-      const x = el('button', { type: 'button' }, el('span', { class: 'ico' }, icone(ico)), texte);
+    const b = (id, ico, texte, action, maintenu = false) => {
+      const x = el('button', { type: 'button', 'data-commande': id }, el('span', { class: 'ico' }, icone(ico)), texte);
       if (maintenu) {
-        x.addEventListener('touchstart', (e) => { e.preventDefault(); action(true); }, { passive: false });
-        x.addEventListener('touchend', (e) => { e.preventDefault(); action(false); }, { passive: false });
-      } else x.addEventListener('touchstart', (e) => { e.preventDefault(); action(); }, { passive: false });
+        x.addEventListener('touchstart', (e) => { e.preventDefault(); if (!dispo.edition) action(true); }, { passive: false });
+        x.addEventListener('touchend', (e) => { e.preventDefault(); if (!dispo.edition) action(false); }, { passive: false });
+      } else x.addEventListener('touchstart', (e) => { e.preventDefault(); if (!dispo.edition) action(); }, { passive: false });
+      dispo.brancher(x);
       return x;
     };
-    const saut = b('monter', 'Sauter', (oui) => { joueur.sautTactile = oui; }, true);
-    const liste = E.role === 'chercheur'
-      ? [b('arme', 'Tirer', () => tirer()), b('radar', 'Radar', () => demanderRadar()), saut, b('menu', 'Menu', () => { $('pause').hidden = false; })]
-      : [b('palette', 'Peindre', () => (peinture.ouvert ? peinture.fermer() : ouvrirPeinture())), b('pose', 'Pose', () => changerPose((E.pose + 1) % 4)),
-        b('cameleon', 'Leurre', () => poserLeurre()), saut, b('menu', 'Menu', () => { $('pause').hidden = false; })];
+    const saut = b('sauter', 'monter', 'Sauter', (oui) => { joueur.sautTactile = oui; }, true);
+    const menu = b('menu', 'menu', 'Menu', () => { $('pause').hidden = false; });
+    const liste = role === 'chercheur'
+      ? [b('tirer', 'arme', 'Tirer', () => tirer()), b('radar', 'radar', 'Radar', () => demanderRadar()), saut, menu]
+      : [b('peindre', 'palette', 'Peindre', () => (peinture.ouvert ? peinture.fermer() : ouvrirPeinture())), b('pose', 'pose', 'Pose', () => changerPose((E.pose + 1) % 4)),
+        b('leurre', 'cameleon', 'Leurre', () => poserLeurre()), saut, menu];
     $('boutons-tactiles').replaceChildren(...liste);
   }
+  // Réglages → Personnaliser les boutons (tablette)
+  $('btn-disposition').addEventListener('click', () => { $('reglages').hidden = true; dispo.editer(E.role || 'cacheur'); });
 
   // ---------- Hall et salle d'attente ----------
   on('salons', (m) => {

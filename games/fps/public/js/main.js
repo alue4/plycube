@@ -27,6 +27,7 @@ import * as Menus from './menus-manette.js';
 import { PanneauAdmin, POUVOIRS } from './panneau-admin.js';
 import { RadarHud, EcranVisions } from './pouvoirs-ecran.js';
 import { icone } from './icones.js';
+import { IndicateursDegats } from './indicateurs-degats.js';
 import { rang, resultat } from './classe.js';
 
 const $ = (id) => document.getElementById(id);
@@ -39,7 +40,8 @@ const PREFS_DEFAUT = {
   sensibiliteManette: 1, inverserY: false, vibrations: true, aideVisee: 'normale', // manette (et aide à la visée sur tablette)
   touches: null, // touches changées dans les réglages (voir commandes.js)
   pouvoirs: Object.fromEntries(POUVOIRS.map((p) => [p.cle, false])), // admin seulement (Réglages → ADMIN PANEL)
-  accesAdminFacile: false, // admin : bouton transparent « >_ ADMIN » en jeu (option ACCÈS FACILE du panneau)
+  accesAdminFacile: false,
+  chiffresDegats: true, // chiffres des dégâts qu'on fait, au-dessus de l'adversaire // admin : bouton transparent « >_ ADMIN » en jeu (option ACCÈS FACILE du panneau)
 };
 const prefs = (() => {
   try { return { ...PREFS_DEFAUT, ...JSON.parse(localStorage.getItem('fps-reglages') || '{}') }; } catch { return { ...PREFS_DEFAUT }; }
@@ -154,6 +156,7 @@ async function demarrer() {
   const camera = new THREE.PerspectiveCamera(prefs.fov, 1, 0.05, 900);
   scene.add(camera);
   const effets = new Effets(scene);
+  const indicateurs = new IndicateursDegats($('hud')); // chiffres de dégâts + arcs de direction des tirs reçus
   effets.fabriqueMeteore = Modeles.modeleMeteore; // (pluie de météores de l'admin)
   const joueur = new JoueurLocal({ boites: [], reglages });
   // Clavier, souris et manette : les touches se changent dans les réglages (écran « Touches »)
@@ -892,6 +895,7 @@ async function demarrer() {
     hud.lunette(false);
     if (!document.pointerLockElement) joueur.actif = false; // tablette, manette (sinon : plus bas, en libérant la souris)
     majTactile();
+    indicateurs.vider();
     if (silencieux) return;
     hud.afficher(false);
     hud.mort(false);
@@ -2089,21 +2093,23 @@ async function demarrer() {
     if (msg.dos) { son('dos_special', { vol: 1 }); hud.annonce('COUP DANS LE DOS !', cible ? cible.nom : ''); }
     if (cible && cible.perso) {
       const p = positionDe(cible);
+      if (prefs.chiffresDegats && msg.deg > 0) indicateurs.chiffre(new THREE.Vector3(p.x, p.y + (msg.tete ? 1.85 : 1.55), p.z), msg.deg, { tete: !!msg.tete, elim: !!msg.elim, cle: msg.id });
       effets.touche(new THREE.Vector3(p.x, p.y + (msg.tete ? 1.65 : 1.0), p.z), msg.tete);
       cible.perso.toucher();
     }
   });
 
   reseau.on('degats', (msg) => {
+    const perdu = Math.max(0, (E.pv || 0) - msg.pv);
     E.pv = msg.pv;
     son('degats', { vol: 0.7 });
     E.secousse = Math.max(E.secousse, 0.25);
     vibrer(0.8, 0.5, 200);
+    hud.flashDegats();
     const tireur = E.joueurs.get(msg.de);
     if (tireur && tireur.id !== E.moiId) {
-      const p = positionDe(tireur);
-      const angle = Math.atan2(-(p.x - joueur.pos.x), -(p.z - joueur.pos.z)) - joueur.yaw;
-      hud.degats(-angle);
+      // arc rouge autour du viseur, qui suit le tireur tant qu'il est là
+      indicateurs.direction(tireur.id, () => (E.joueurs.get(tireur.id) === tireur && tireur.perso ? positionDe(tireur) : null), perdu);
     }
   });
 
@@ -2454,6 +2460,8 @@ async function demarrer() {
     });
   }
   $('r-ombres').checked = prefs.ombres;
+  $('r-chiffres').checked = prefs.chiffresDegats !== false;
+  $('r-chiffres').addEventListener('change', () => { prefs.chiffresDegats = $('r-chiffres').checked; sauverPrefs(); });
   // manette et aide à la visée
   for (const [id, cle] of [['r-inverser', 'inverserY'], ['r-vibrations', 'vibrations']]) {
     $(id).checked = !!prefs[cle];
@@ -2888,6 +2896,7 @@ async function demarrer() {
     eblouissement.style.opacity = now < E.eblouiJusqua ? String(Math.min(1, ((E.eblouiJusqua - now) / E.eblouiDuree) * 1.4)) : '0';
     hud.protege(joueur.vivant && m && now < m.protegeJusqua);
     hud.chrono(E.etat === 'jeu' ? E.finA - now : E.etat === 'attente' && E.attenteFinA ? E.attenteFinA - now : 0);
+    indicateurs.maj(camera, joueur.pos, joueur.yaw);
     if (E.etat === 'fin') hud.finCompte(Math.max(0, Math.ceil((E.redemarrageA - now) / 1000)));
     let meilleur = 0;
     for (const j of E.joueurs.values()) meilleur = Math.max(meilleur, j.kills);
@@ -2923,7 +2932,7 @@ async function demarrer() {
   requestAnimationFrame(boucle);
   reseau.connecter();
   // Pour les tests automatiques uniquement (adresse terminée par ?debug).
-  if (location.search.includes('debug')) window.__fps = { joueur, E, camera, atelier, commandes, aide, effets, reseau, ARMES, get arme() { return arme; } };
+  if (location.search.includes('debug')) window.__fps = { joueur, E, camera, atelier, commandes, aide, effets, reseau, ARMES, indicateurs, get arme() { return arme; } };
 }
 
 demarrer();

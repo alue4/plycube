@@ -125,6 +125,13 @@ export const hud = {
     setTimeout(() => f.classList.remove('actif'), 60);
   },
 
+  // Le bord de l'écran rougit un instant quand on prend des dégâts
+  flashDegats() {
+    const f = $('flash-degats');
+    f.classList.add('actif');
+    setTimeout(() => f.classList.remove('actif'), 60);
+  },
+
   chrono(ms) {
     const s = Math.max(0, Math.ceil(ms / 1000));
     $('chrono').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;

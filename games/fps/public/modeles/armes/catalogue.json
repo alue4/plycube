@@ -110,7 +110,7 @@
       "auteur": "Quaternius",
       "licence": "CC0",
       "source": "https://poly.pizza/m/ZmPTnh7njL",
-      "longueurReelle": 1.0,
+      "longueurReelle": 1,
       "axe": "x",
       "bouche": "+",
       "haut": "+y",
@@ -545,6 +545,708 @@
       },
       "echelle": 0.223912,
       "notes": "Trousse de soin rouge avec croix (poignee vers +y)."
+    },
+    "pompe_auto": {
+      "fichier": "simple/pompe_auto.glb",
+      "nom": "Shotgun Auto West",
+      "auteur": "Pichuliru",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/f0USjc13vj",
+      "longueurReelle": 0.9,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 107,
+      "bornes": {
+        "min": [
+          -0.0943,
+          -0.205,
+          -0.371
+        ],
+        "max": [
+          0.093,
+          0.1148,
+          0.4098
+        ]
+      },
+      "echelle": 1.152664,
+      "notes": "Fusil à pompe automatique à chargeur tambour (Pichuliru)."
+    },
+    "double_canon": {
+      "fichier": "simple/double_canon.glb",
+      "nom": "Shotgun Double Barrel",
+      "auteur": "CreativeTrio",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/k0fA37Awl8",
+      "longueurReelle": 1.1,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "-x",
+      "tailleFichierKo": 60,
+      "bornes": {
+        "min": [
+          -0.0329,
+          -0.0146,
+          -1.183
+        ],
+        "max": [
+          0.3907,
+          0.0767,
+          0.8901
+        ]
+      },
+      "echelle": 0.530606,
+      "notes": "Fusil de chasse juxtaposé (CreativeTrio, petite texture-palette). Couché sur le côté dans le fichier (haut = -x)."
+    },
+    "vector": {
+      "fichier": "simple/vector.glb",
+      "nom": "Smg West",
+      "auteur": "Pichuliru",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/7Dh5JSbZcp",
+      "longueurReelle": 0.62,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 137,
+      "bornes": {
+        "min": [
+          -0.0232,
+          -0.1816,
+          -0.2218
+        ],
+        "max": [
+          0.0232,
+          0.0681,
+          0.339
+        ]
+      },
+      "echelle": 1.105563,
+      "notes": "Mitraillette compacte (Pichuliru, Smg West)."
+    },
+    "bullpup": {
+      "fichier": "simple/bullpup.glb",
+      "nom": "Aug",
+      "auteur": "Vindrue",
+      "licence": "CC BY 3.0",
+      "source": "https://poly.pizza/m/2JjzjjDq-3W",
+      "longueurReelle": 0.79,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 157,
+      "bornes": {
+        "min": [
+          -0.7335,
+          -0.3489,
+          -0.0389
+        ],
+        "max": [
+          0.6257,
+          0.0911,
+          0.0325
+        ]
+      },
+      "echelle": 0.581224,
+      "notes": "Fusil bullpup type AUG, couleurs unies sarcelle (Vindrue, CC BY)."
+    },
+    "lance_grenades": {
+      "fichier": "simple/lance_grenades.glb",
+      "nom": "Grenade Launcher",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/ZKvWhvu4tV",
+      "longueurReelle": 0.78,
+      "axe": "x",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 67,
+      "bornes": {
+        "min": [
+          -0.6902,
+          -0.2817,
+          -0.239
+        ],
+        "max": [
+          0.5146,
+          0.2733,
+          0.239
+        ]
+      },
+      "echelle": 0.64741,
+      "notes": "Lance-grenades à barillet (Quaternius) ; réduit à 85 % et décalé de 1,5 cm vers le bas pour que le barillet tourne sur son axe."
+    },
+    "plasma": {
+      "fichier": "simple/plasma.glb",
+      "nom": "Scifi Assault Rifle",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/RGtBoJNn3N",
+      "longueurReelle": 0.85,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 95,
+      "bornes": {
+        "min": [
+          -0.9926,
+          -0.0716,
+          -0.0678
+        ],
+        "max": [
+          0.4998,
+          0.4148,
+          0.0678
+        ]
+      },
+      "echelle": 0.569552,
+      "notes": "Fusil de science-fiction (Quaternius) ; la partie orange est devenue cyan lumineux."
+    },
+    "anti_materiel": {
+      "fichier": "simple/anti_materiel.glb",
+      "nom": "Sniper Rifle",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/i65hEldsw6",
+      "longueurReelle": 1.45,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 92,
+      "bornes": {
+        "min": [
+          -2.3579,
+          -0.9127,
+          -0.6201
+        ],
+        "max": [
+          3.9777,
+          0.9866,
+          0.6278
+        ]
+      },
+      "echelle": 0.228865,
+      "notes": "Fusil de précision avec bipied et lunette (Quaternius)."
+    },
+    "cloueuse": {
+      "fichier": "simple/cloueuse.glb",
+      "nom": "Fait pour Plycube",
+      "auteur": "Plycube",
+      "licence": "CC0",
+      "source": "fait pour Plycube (three.js)",
+      "longueurReelle": 0.45,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 47,
+      "bornes": {
+        "min": [
+          -0.036,
+          -0.194,
+          -0.245
+        ],
+        "max": [
+          0.0379,
+          0.093,
+          0.15
+        ]
+      },
+      "echelle": 1.139241,
+      "notes": "Fait pour Plycube : cloueuse sans fil (corps jaune, batterie, bande de clous animée)."
+    },
+    "pistolet_lourd": {
+      "fichier": "simple/pistolet_lourd.glb",
+      "nom": "Rigged Deagle Gun",
+      "auteur": "Rafael",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/VfYq08LCGm",
+      "longueurReelle": 0.27,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 79,
+      "bornes": {
+        "min": [
+          -0.2302,
+          -0.0863,
+          -2.6076
+        ],
+        "max": [
+          0.2302,
+          1.6525,
+          0.5847
+        ]
+      },
+      "echelle": 0.084579,
+      "notes": "Pistolet lourd type Desert Eagle (Rafael) ; culasse animée."
+    },
+    "pistolet_auto": {
+      "fichier": "simple/pistolet_auto.glb",
+      "nom": "Pistol Full East",
+      "auteur": "Pichuliru",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/pNHeIJFHcQ",
+      "longueurReelle": 0.25,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 66,
+      "bornes": {
+        "min": [
+          -0.0147,
+          -0.1104,
+          -0.1274
+        ],
+        "max": [
+          0.0146,
+          0.038,
+          0.0793
+        ]
+      },
+      "echelle": 1.209482,
+      "notes": "Pistolet (Pichuliru, Pistol Full East) ; culasse et chargeur animés."
+    },
+    "mini_arbalete": {
+      "fichier": "simple/mini_arbalete.glb",
+      "nom": "Fait pour Plycube",
+      "auteur": "Plycube",
+      "licence": "CC0",
+      "source": "fait pour Plycube (three.js)",
+      "longueurReelle": 0.5,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 30,
+      "bornes": {
+        "min": [
+          -0.177,
+          -0.1127,
+          -0.261
+        ],
+        "max": [
+          0.177,
+          0.056,
+          0.0783
+        ]
+      },
+      "echelle": 1.473622,
+      "notes": "Fait pour Plycube : arbalète-pistolet (branches courbes, poulies, carreau animé)."
+    },
+    "pistolet_eau": {
+      "fichier": "simple/pistolet_eau.glb",
+      "nom": "Water gun",
+      "auteur": "福岡のDaichi",
+      "licence": "CC BY 3.0",
+      "source": "https://poly.pizza/m/1W8CTzsXXRJ",
+      "longueurReelle": 0.55,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 109,
+      "bornes": {
+        "min": [
+          -0.2891,
+          -0.1404,
+          -0.0647
+        ],
+        "max": [
+          0.2813,
+          0.1582,
+          0.0653
+        ]
+      },
+      "echelle": 0.964236,
+      "notes": "Pistolet à eau en plastique (Daichi, CC BY) ; réservoir = chargeur, pompe animée."
+    },
+    "katana": {
+      "fichier": "simple/katana.glb",
+      "nom": "Katana",
+      "auteur": "Pichuliru",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/15A7InejC7",
+      "longueurReelle": 1,
+      "axe": "y",
+      "bouche": "+",
+      "haut": "+z",
+      "tailleFichierKo": 77,
+      "bornes": {
+        "min": [
+          -0.0279,
+          -0.1594,
+          -0.0647
+        ],
+        "max": [
+          0.0279,
+          0.6752,
+          0.0301
+        ]
+      },
+      "echelle": 1.198179,
+      "notes": "Katana (Pichuliru) ; pointe vers +y."
+    },
+    "hache": {
+      "fichier": "simple/hache.glb",
+      "nom": "Fire Axe",
+      "auteur": "Pichuliru",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/0kgjDkCRmx",
+      "longueurReelle": 0.75,
+      "axe": "y",
+      "bouche": "+",
+      "haut": "+z",
+      "tailleFichierKo": 15,
+      "bornes": {
+        "min": [
+          -0.013,
+          -0.5266,
+          -0.1094
+        ],
+        "max": [
+          0.013,
+          0.3174,
+          0.1151
+        ]
+      },
+      "echelle": 0.888626,
+      "notes": "Hache de pompier rouge (Pichuliru) ; tête vers +y."
+    },
+    "masse": {
+      "fichier": "simple/masse.glb",
+      "nom": "Sledgehammer",
+      "auteur": "Pichuliru",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/afT3MPtwOh",
+      "longueurReelle": 0.85,
+      "axe": "y",
+      "bouche": "+",
+      "haut": "+z",
+      "tailleFichierKo": 15,
+      "bornes": {
+        "min": [
+          -0.0375,
+          -0.5554,
+          -0.087
+        ],
+        "max": [
+          0.0375,
+          0.2731,
+          0.087
+        ]
+      },
+      "echelle": 1.025951,
+      "notes": "Masse (Pichuliru) ; tête vers +y."
+    },
+    "pelle": {
+      "fichier": "simple/pelle.glb",
+      "nom": "Shovel",
+      "auteur": "Pichuliru",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/jpKWAIVmXv",
+      "longueurReelle": 0.95,
+      "axe": "y",
+      "bouche": "+",
+      "haut": "+z",
+      "tailleFichierKo": 35,
+      "bornes": {
+        "min": [
+          -0.1078,
+          -0.4195,
+          -0.0186
+        ],
+        "max": [
+          0.1078,
+          0.4942,
+          0.0216
+        ]
+      },
+      "echelle": 1.039729,
+      "notes": "Pelle à poignée en D (Pichuliru) ; lame vers +y."
+    },
+    "grenade_flash": {
+      "fichier": "simple/grenade_flash.glb",
+      "nom": "Flashbang Grenade West",
+      "auteur": "Pichuliru",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/fiJvXydZUg",
+      "longueurReelle": 0.13,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 44,
+      "bornes": {
+        "min": [
+          -0.025,
+          -0.0636,
+          -0.0399
+        ],
+        "max": [
+          0.0262,
+          0.0851,
+          0.025
+        ]
+      },
+      "echelle": 2.003082,
+      "notes": "Grenade flash (Pichuliru, Flashbang Grenade West), debout."
+    },
+    "mine": {
+      "fichier": "simple/mine.glb",
+      "nom": "Landmine",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/PtqkseZo9O",
+      "longueurReelle": 0.3,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 12,
+      "bornes": {
+        "min": [
+          -0.5574,
+          -0.012,
+          -0.5574
+        ],
+        "max": [
+          0.5574,
+          0.2822,
+          0.5574
+        ]
+      },
+      "echelle": 0.269107,
+      "notes": "Mine (Quaternius, Landmine)."
+    },
+    "propulseur": {
+      "fichier": "simple/propulseur.glb",
+      "nom": "Gas Tank",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/RoCvKBGkoC",
+      "longueurReelle": 0.35,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 32,
+      "bornes": {
+        "min": [
+          -0.5031,
+          -0.0012,
+          -0.5031
+        ],
+        "max": [
+          0.5031,
+          1.386,
+          0.5031
+        ]
+      },
+      "echelle": 0.347843,
+      "notes": "Bouteille de gaz jaune (Quaternius, Gas Tank), debout ; réduite à 80 %."
+    },
+    "trou_noir": {
+      "fichier": "simple/trou_noir.glb",
+      "nom": "Scifi Grenade Launcher",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/r10Gkf9yDs",
+      "longueurReelle": 1,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 69,
+      "bornes": {
+        "min": [
+          -1.0567,
+          -0.1083,
+          -0.0729
+        ],
+        "max": [
+          0.7511,
+          0.4257,
+          0.0729
+        ]
+      },
+      "echelle": 0.553159,
+      "notes": "Lance-grenades de science-fiction (Quaternius) recoloré en noir et violet lumineux."
+    },
+    "tesla": {
+      "fichier": "simple/tesla.glb",
+      "nom": "Lightning Gun",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/Nl8qWErOw2",
+      "longueurReelle": 0.9,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 135,
+      "bornes": {
+        "min": [
+          -0.702,
+          -0.4327,
+          -3.1296
+        ],
+        "max": [
+          0.702,
+          1.7273,
+          1.6724
+        ]
+      },
+      "echelle": 0.187422,
+      "notes": "Lightning Gun (Quaternius) ; la bobine cyan brille ; réduit à 78 %."
+    },
+    "minigun": {
+      "fichier": "simple/minigun.glb",
+      "nom": "Fait pour Plycube",
+      "auteur": "Plycube",
+      "licence": "CC0",
+      "source": "fait pour Plycube (three.js)",
+      "longueurReelle": 1,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 54,
+      "bornes": {
+        "min": [
+          -0.183,
+          -0.164,
+          -0.812
+        ],
+        "max": [
+          0.06,
+          0.157,
+          0.1245
+        ]
+      },
+      "echelle": 1.067806,
+      "notes": "Fait pour Plycube : minigun à 6 canons (le rotor tourne, centré à 0,1 mm près), boîte de munitions animée."
+    },
+    "marteau_thor": {
+      "fichier": "simple/marteau_thor.glb",
+      "nom": "Doublesided Hammer",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/UIXvQ73DS1",
+      "longueurReelle": 0.6,
+      "axe": "y",
+      "bouche": "+",
+      "haut": "+x",
+      "tailleFichierKo": 103,
+      "bornes": {
+        "min": [
+          -0.5795,
+          -0.8262,
+          -0.2143
+        ],
+        "max": [
+          0.6013,
+          1.7009,
+          0.2148
+        ]
+      },
+      "echelle": 0.237426,
+      "notes": "Marteau à deux têtes (Quaternius, Doublesided Hammer)."
+    },
+    "feu_artifice": {
+      "fichier": "simple/feu_artifice.glb",
+      "nom": "Fait pour Plycube",
+      "auteur": "Plycube",
+      "licence": "CC0",
+      "source": "fait pour Plycube (three.js)",
+      "longueurReelle": 0.75,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 87,
+      "bornes": {
+        "min": [
+          -0.076,
+          -0.184,
+          -0.44
+        ],
+        "max": [
+          0.076,
+          0.144,
+          0.1136
+        ]
+      },
+      "echelle": 1.354769,
+      "notes": "Fait pour Plycube : lance-feux d'artifice à 4 tubes colorés, fusée prête animée."
+    },
+    "rayon_lev": {
+      "fichier": "simple/rayon_lev.glb",
+      "nom": "Ray Gun",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/DIcib0mihf",
+      "longueurReelle": 0.35,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 169,
+      "bornes": {
+        "min": [
+          -0.2941,
+          -0.5074,
+          -2.9597
+        ],
+        "max": [
+          0.2991,
+          1.4644,
+          0.4027
+        ]
+      },
+      "echelle": 0.104092,
+      "notes": "Ray Gun (Quaternius) ; émetteur violet lumineux."
+    },
+    "meteores": {
+      "fichier": "simple/meteores.glb",
+      "nom": "Fait pour Plycube",
+      "auteur": "Plycube",
+      "licence": "CC0",
+      "source": "fait pour Plycube (three.js)",
+      "longueurReelle": 0.18,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 26,
+      "bornes": {
+        "min": [
+          -0.026,
+          -0.066,
+          -0.026
+        ],
+        "max": [
+          0.026,
+          0.13,
+          0.026
+        ]
+      },
+      "echelle": 3.461538,
+      "notes": "Fait pour Plycube : balise (lumière rouge, cage, antenne), debout."
+    },
+    "sabre_laser": {
+      "fichier": "simple/sabre_laser.glb",
+      "nom": "Fait pour Plycube",
+      "auteur": "Plycube",
+      "licence": "CC0",
+      "source": "fait pour Plycube (three.js)",
+      "longueurReelle": 1.15,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 28,
+      "bornes": {
+        "min": [
+          -0.023,
+          -0.022,
+          -0.993
+        ],
+        "max": [
+          0.023,
+          0.029,
+          0.185
+        ]
+      },
+      "echelle": 0.976231,
+      "notes": "Fait pour Plycube : poignée chromée et lame verte lumineuse (design générique)."
     }
   },
   "texture": {
@@ -658,7 +1360,7 @@
       "auteur": "LonesomeDucky",
       "licence": "CC0",
       "source": "https://opengameart.org/content/lightning-pump-action-rifle",
-      "longueurReelle": 1.0,
+      "longueurReelle": 1,
       "axe": "z",
       "bouche": "+",
       "haut": "+y",
@@ -926,7 +1628,7 @@
       "bornes": {
         "min": [
           -0.0951,
-          0.0,
+          0,
           -0.3522
         ],
         "max": [
@@ -1004,7 +1706,7 @@
       "bornes": {
         "min": [
           -0.2627,
-          0.0,
+          0,
           -0.1723
         ],
         "max": [
@@ -1015,6 +1717,708 @@
       },
       "echelle": 0.951508,
       "notes": "Boite de premiers secours militaire verte, PBR (inscription FIRST AID sur le dessus +y)."
+    },
+    "pompe_auto": {
+      "fichier": "texture/pompe_auto.glb",
+      "nom": "Shotgun Auto West",
+      "auteur": "Pichuliru",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/f0USjc13vj",
+      "longueurReelle": 0.9,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 176,
+      "bornes": {
+        "min": [
+          -0.0943,
+          -0.205,
+          -0.371
+        ],
+        "max": [
+          0.093,
+          0.1148,
+          0.4098
+        ]
+      },
+      "echelle": 1.152664,
+      "notes": "Même modèle que le style simple, textures générées pour Plycube (métal brossé, polymère)."
+    },
+    "double_canon": {
+      "fichier": "texture/double_canon.glb",
+      "nom": "Shotgun Double Barrel",
+      "auteur": "CreativeTrio",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/k0fA37Awl8",
+      "longueurReelle": 1.1,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "-x",
+      "tailleFichierKo": 147,
+      "bornes": {
+        "min": [
+          -0.0329,
+          -0.0146,
+          -1.183
+        ],
+        "max": [
+          0.3907,
+          0.0767,
+          0.8901
+        ]
+      },
+      "echelle": 0.530606,
+      "notes": "Même modèle, couleurs de la palette séparées puis textures générées pour Plycube (bois, métal)."
+    },
+    "vector": {
+      "fichier": "texture/vector.glb",
+      "nom": "MPX",
+      "auteur": "austincford",
+      "licence": "CC BY 3.0",
+      "source": "https://poly.pizza/m/p7sAqeuUWR",
+      "longueurReelle": 0.62,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 584,
+      "bornes": {
+        "min": [
+          -0.0158,
+          -0.0611,
+          -0.1214
+        ],
+        "max": [
+          0.0158,
+          0.0637,
+          0.1559
+        ]
+      },
+      "echelle": 2.235846,
+      "notes": "MPX texturé (austincford) ; chargeur = maillage Magazine_Standard."
+    },
+    "bullpup": {
+      "fichier": "texture/bullpup.glb",
+      "nom": "SRSA1",
+      "auteur": "austincford",
+      "licence": "CC BY 3.0",
+      "source": "https://poly.pizza/m/4FyY7r5sjB",
+      "longueurReelle": 0.79,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 712,
+      "bornes": {
+        "min": [
+          -0.0093,
+          -0.0359,
+          -0.1587
+        ],
+        "max": [
+          0.0153,
+          0.0373,
+          0.1303
+        ]
+      },
+      "echelle": 2.733564,
+      "notes": "SRSA1 texturé (austincford), bullpup à lunette ; chargeur = maillage Magazine."
+    },
+    "lance_grenades": {
+      "fichier": "texture/lance_grenades.glb",
+      "nom": "Grenade Launcher",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/ZKvWhvu4tV",
+      "longueurReelle": 0.78,
+      "axe": "x",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 123,
+      "bornes": {
+        "min": [
+          -0.6902,
+          -0.2817,
+          -0.239
+        ],
+        "max": [
+          0.5146,
+          0.2733,
+          0.239
+        ]
+      },
+      "echelle": 0.64741,
+      "notes": "Même modèle, textures générées pour Plycube."
+    },
+    "plasma": {
+      "fichier": "texture/plasma.glb",
+      "nom": "Scifi Assault Rifle",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/RGtBoJNn3N",
+      "longueurReelle": 0.85,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 250,
+      "bornes": {
+        "min": [
+          -0.9926,
+          -0.0716,
+          -0.0678
+        ],
+        "max": [
+          0.4998,
+          0.4148,
+          0.0678
+        ]
+      },
+      "echelle": 0.569552,
+      "notes": "Même modèle, parties cyan lumineuses, textures générées pour Plycube."
+    },
+    "anti_materiel": {
+      "fichier": "texture/anti_materiel.glb",
+      "nom": "Precision Rifle Chassis",
+      "auteur": "austincford",
+      "licence": "CC BY 3.0",
+      "source": "https://poly.pizza/m/XAhFlZjqoy",
+      "longueurReelle": 1.45,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 768,
+      "bornes": {
+        "min": [
+          -0.0053,
+          -0.0047,
+          -0.0841
+        ],
+        "max": [
+          0.0056,
+          0.0381,
+          0.0892
+        ]
+      },
+      "echelle": 8.366994,
+      "notes": "Precision Rifle Chassis texturé (austincford) ; chargeur = Magazine_Standard."
+    },
+    "cloueuse": {
+      "fichier": "texture/cloueuse.glb",
+      "nom": "Fait pour Plycube",
+      "auteur": "Plycube",
+      "licence": "CC0",
+      "source": "fait pour Plycube (three.js)",
+      "longueurReelle": 0.45,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 178,
+      "bornes": {
+        "min": [
+          -0.036,
+          -0.194,
+          -0.245
+        ],
+        "max": [
+          0.0379,
+          0.093,
+          0.15
+        ]
+      },
+      "echelle": 1.139241,
+      "notes": "Fait pour Plycube, version plus détaillée avec textures générées."
+    },
+    "pistolet_lourd": {
+      "fichier": "texture/pistolet_lourd.glb",
+      "nom": "P226",
+      "auteur": "austincford",
+      "licence": "CC BY 3.0",
+      "source": "https://poly.pizza/m/tsBFT7K4Ud",
+      "longueurReelle": 0.27,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 169,
+      "bornes": {
+        "min": [
+          -0.0137,
+          -0.0735,
+          -0.0924
+        ],
+        "max": [
+          0.0133,
+          0.0558,
+          0.0928
+        ]
+      },
+      "echelle": 1.457883,
+      "notes": "P226 texturé (austincford) ; chargeur = Magazine, culasse = slide."
+    },
+    "pistolet_auto": {
+      "fichier": "texture/pistolet_auto.glb",
+      "nom": "FN - 5",
+      "auteur": "Muerte",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/gzHBO8eV5F",
+      "longueurReelle": 0.25,
+      "axe": "z",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 832,
+      "bornes": {
+        "min": [
+          -2.0795,
+          -6.637,
+          -5.2501
+        ],
+        "max": [
+          2.0795,
+          10.1518,
+          22.4911
+        ]
+      },
+      "echelle": 0.009012,
+      "notes": "FN-5 texturé (Muerte) ; un seul maillage, pas de pièce animée séparée ; textures réduites à 512 px."
+    },
+    "mini_arbalete": {
+      "fichier": "texture/mini_arbalete.glb",
+      "nom": "Fait pour Plycube",
+      "auteur": "Plycube",
+      "licence": "CC0",
+      "source": "fait pour Plycube (three.js)",
+      "longueurReelle": 0.5,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 196,
+      "bornes": {
+        "min": [
+          -0.1768,
+          -0.1127,
+          -0.261
+        ],
+        "max": [
+          0.1768,
+          0.056,
+          0.0783
+        ]
+      },
+      "echelle": 1.473622,
+      "notes": "Fait pour Plycube, version plus détaillée avec textures générées."
+    },
+    "pistolet_eau": {
+      "fichier": "texture/pistolet_eau.glb",
+      "nom": "Water gun",
+      "auteur": "福岡のDaichi",
+      "licence": "CC BY 3.0",
+      "source": "https://poly.pizza/m/1W8CTzsXXRJ",
+      "longueurReelle": 0.55,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 211,
+      "bornes": {
+        "min": [
+          -0.2891,
+          -0.1404,
+          -0.0647
+        ],
+        "max": [
+          0.2813,
+          0.1582,
+          0.0653
+        ]
+      },
+      "echelle": 0.964236,
+      "notes": "Même modèle, textures plastique générées pour Plycube."
+    },
+    "katana": {
+      "fichier": "texture/katana.glb",
+      "nom": "Antique Katana 01",
+      "auteur": "Tal Swicegood",
+      "licence": "CC0",
+      "source": "https://polyhaven.com/a/antique_katana_01",
+      "longueurReelle": 1,
+      "axe": "y",
+      "bouche": "+",
+      "haut": "+x",
+      "tailleFichierKo": 295,
+      "bornes": {
+        "min": [
+          -0.0467,
+          -0.3066,
+          -0.0467
+        ],
+        "max": [
+          0.0467,
+          0.6963,
+          0.0467
+        ]
+      },
+      "echelle": 0.997108,
+      "notes": "Antique Katana 01 (Poly Haven, PBR), textures réduites à 512 px ; plat de la lame vers +x."
+    },
+    "hache": {
+      "fichier": "texture/hache.glb",
+      "nom": "Wooden Axe",
+      "auteur": "Ulan Cabanilla",
+      "licence": "CC0",
+      "source": "https://polyhaven.com/a/wooden_axe",
+      "longueurReelle": 0.75,
+      "axe": "y",
+      "bouche": "+",
+      "haut": "-z",
+      "tailleFichierKo": 172,
+      "bornes": {
+        "min": [
+          -0.0238,
+          -0.2186,
+          -0.0359
+        ],
+        "max": [
+          0.0233,
+          0.4117,
+          0.1784
+        ]
+      },
+      "echelle": 1.18991,
+      "notes": "Wooden Axe (Poly Haven, PBR), textures réduites à 512 px ; tranchant tourné vers -z."
+    },
+    "masse": {
+      "fichier": "texture/masse.glb",
+      "nom": "Sledgehammer 01",
+      "auteur": "Dylan Guzman",
+      "licence": "CC0",
+      "source": "https://polyhaven.com/a/sledgehammer_01",
+      "longueurReelle": 0.85,
+      "axe": "y",
+      "bouche": "+",
+      "haut": "+z",
+      "tailleFichierKo": 136,
+      "bornes": {
+        "min": [
+          -0.1043,
+          -0.7466,
+          -0.0452
+        ],
+        "max": [
+          0.1042,
+          0.2591,
+          0.0452
+        ]
+      },
+      "echelle": 0.845182,
+      "notes": "Sledgehammer 01 (Poly Haven, PBR), textures réduites à 512 px."
+    },
+    "pelle": {
+      "fichier": "texture/pelle.glb",
+      "nom": "Rusted Spade 01",
+      "auteur": "Blemonade",
+      "licence": "CC0",
+      "source": "https://polyhaven.com/a/rusted_spade_01",
+      "longueurReelle": 0.95,
+      "axe": "y",
+      "bouche": "-",
+      "haut": "+z",
+      "tailleFichierKo": 345,
+      "bornes": {
+        "min": [
+          -0.0841,
+          -0.5032,
+          -0.023
+        ],
+        "max": [
+          0.0841,
+          0.5977,
+          0.0226
+        ]
+      },
+      "echelle": 0.86293,
+      "notes": "Rusted Spade 01 (Poly Haven, PBR), textures réduites à 512 px ; lame vers -y."
+    },
+    "grenade_flash": {
+      "fichier": "texture/grenade_flash.glb",
+      "nom": "Flashbang Grenade West",
+      "auteur": "Pichuliru",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/fiJvXydZUg",
+      "longueurReelle": 0.13,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 70,
+      "bornes": {
+        "min": [
+          -0.025,
+          -0.0636,
+          -0.0399
+        ],
+        "max": [
+          0.0262,
+          0.0851,
+          0.025
+        ]
+      },
+      "echelle": 2.003082,
+      "notes": "Même modèle, textures générées pour Plycube."
+    },
+    "mine": {
+      "fichier": "texture/mine.glb",
+      "nom": "Landmine",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/PtqkseZo9O",
+      "longueurReelle": 0.3,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 64,
+      "bornes": {
+        "min": [
+          -0.5574,
+          -0.012,
+          -0.5574
+        ],
+        "max": [
+          0.5574,
+          0.2822,
+          0.5574
+        ]
+      },
+      "echelle": 0.269107,
+      "notes": "Même modèle, textures générées pour Plycube."
+    },
+    "propulseur": {
+      "fichier": "texture/propulseur.glb",
+      "nom": "Small Lpg Tank",
+      "auteur": "Ulan Cabanilla",
+      "licence": "CC0",
+      "source": "https://polyhaven.com/a/small_lpg_tank",
+      "longueurReelle": 0.35,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 454,
+      "bornes": {
+        "min": [
+          -0.2047,
+          0,
+          -0.2049
+        ],
+        "max": [
+          0.2053,
+          0.642,
+          0.2043
+        ]
+      },
+      "echelle": 0.855327,
+      "notes": "Small LPG Tank (Poly Haven, PBR), textures réduites à 512 px ; réduite à 80 %."
+    },
+    "trou_noir": {
+      "fichier": "texture/trou_noir.glb",
+      "nom": "Scifi Grenade Launcher",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/r10Gkf9yDs",
+      "longueurReelle": 1,
+      "axe": "x",
+      "bouche": "+",
+      "haut": "+y",
+      "tailleFichierKo": 156,
+      "bornes": {
+        "min": [
+          -1.0567,
+          -0.1083,
+          -0.0729
+        ],
+        "max": [
+          0.7511,
+          0.4257,
+          0.0729
+        ]
+      },
+      "echelle": 0.553159,
+      "notes": "Même modèle recoloré, textures générées pour Plycube."
+    },
+    "tesla": {
+      "fichier": "texture/tesla.glb",
+      "nom": "Lightning Gun",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/Nl8qWErOw2",
+      "longueurReelle": 0.9,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 179,
+      "bornes": {
+        "min": [
+          -0.702,
+          -0.4327,
+          -3.1296
+        ],
+        "max": [
+          0.702,
+          1.7273,
+          1.6724
+        ]
+      },
+      "echelle": 0.187422,
+      "notes": "Même modèle, textures générées pour Plycube."
+    },
+    "minigun": {
+      "fichier": "texture/minigun.glb",
+      "nom": "Fait pour Plycube",
+      "auteur": "Plycube",
+      "licence": "CC0",
+      "source": "fait pour Plycube (three.js)",
+      "longueurReelle": 1,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 236,
+      "bornes": {
+        "min": [
+          -0.183,
+          -0.164,
+          -0.812
+        ],
+        "max": [
+          0.06,
+          0.157,
+          0.1245
+        ]
+      },
+      "echelle": 1.067806,
+      "notes": "Fait pour Plycube, version plus détaillée avec textures générées."
+    },
+    "marteau_thor": {
+      "fichier": "texture/marteau_thor.glb",
+      "nom": "Doublesided Hammer",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/UIXvQ73DS1",
+      "longueurReelle": 0.6,
+      "axe": "y",
+      "bouche": "+",
+      "haut": "+x",
+      "tailleFichierKo": 221,
+      "bornes": {
+        "min": [
+          -0.5795,
+          -0.8262,
+          -0.2143
+        ],
+        "max": [
+          0.6013,
+          1.7009,
+          0.2148
+        ]
+      },
+      "echelle": 0.237426,
+      "notes": "Même modèle (Quaternius), textures générées pour Plycube (le marteau de Poly Haven avait une tête trop petite)."
+    },
+    "feu_artifice": {
+      "fichier": "texture/feu_artifice.glb",
+      "nom": "Fait pour Plycube",
+      "auteur": "Plycube",
+      "licence": "CC0",
+      "source": "fait pour Plycube (three.js)",
+      "longueurReelle": 0.75,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 379,
+      "bornes": {
+        "min": [
+          -0.076,
+          -0.184,
+          -0.44
+        ],
+        "max": [
+          0.076,
+          0.144,
+          0.1136
+        ]
+      },
+      "echelle": 1.354769,
+      "notes": "Fait pour Plycube, version plus détaillée avec textures générées."
+    },
+    "rayon_lev": {
+      "fichier": "texture/rayon_lev.glb",
+      "nom": "Ray Gun",
+      "auteur": "Quaternius",
+      "licence": "CC0",
+      "source": "https://poly.pizza/m/DIcib0mihf",
+      "longueurReelle": 0.35,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 292,
+      "bornes": {
+        "min": [
+          -0.2941,
+          -0.5074,
+          -2.9597
+        ],
+        "max": [
+          0.2991,
+          1.4644,
+          0.4027
+        ]
+      },
+      "echelle": 0.104092,
+      "notes": "Même modèle, émetteur violet lumineux, textures générées pour Plycube."
+    },
+    "meteores": {
+      "fichier": "texture/meteores.glb",
+      "nom": "Fait pour Plycube",
+      "auteur": "Plycube",
+      "licence": "CC0",
+      "source": "fait pour Plycube (three.js)",
+      "longueurReelle": 0.18,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 154,
+      "bornes": {
+        "min": [
+          -0.026,
+          -0.066,
+          -0.026
+        ],
+        "max": [
+          0.026,
+          0.13,
+          0.026
+        ]
+      },
+      "echelle": 3.461538,
+      "notes": "Fait pour Plycube, version plus détaillée avec textures générées."
+    },
+    "sabre_laser": {
+      "fichier": "texture/sabre_laser.glb",
+      "nom": "Fait pour Plycube",
+      "auteur": "Plycube",
+      "licence": "CC0",
+      "source": "fait pour Plycube (three.js)",
+      "longueurReelle": 1.15,
+      "axe": "z",
+      "bouche": "-",
+      "haut": "+y",
+      "tailleFichierKo": 172,
+      "bornes": {
+        "min": [
+          -0.023,
+          -0.022,
+          -0.993
+        ],
+        "max": [
+          0.023,
+          0.029,
+          0.185
+        ]
+      },
+      "echelle": 0.976231,
+      "notes": "Fait pour Plycube, version plus détaillée avec textures générées."
     }
   }
 }

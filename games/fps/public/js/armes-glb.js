@@ -13,10 +13,12 @@ export const STYLES_ARMES = ['simple', 'texture', 'classique'];
 const CALQUE_INVISIBLE = 31; // calque qu'aucune caméra n'affiche : les boîtes d'origine y vont
 
 // Petits réglages à la main, arme par arme : { echelle, decalage: [x, y, z], rotation: [x, y, z] }
-const AJUSTEMENTS = { simple: {}, texture: {} };
+// (les modèles très épais sont un peu réduits, sinon ils cachent la moitié de l'écran en première personne)
+const PLUS_FINS = { lance_grenades: { echelle: 0.75, decalage: [0, -0.0152, 0] }, plasma: { echelle: 0.88 }, tesla: { echelle: 0.78 }, pistolet_eau: { echelle: 0.82 }, propulseur: { echelle: 0.8 }, minigun: { decalage: [-0.0021, -0.0077, 0] } };
+const AJUSTEMENTS = { simple: { ...PLUS_FINS }, texture: { ...PLUS_FINS } };
 // Modèles qui ont une vraie lunette : en visant, l'œil se place dans l'axe de la lunette
 // (le MK14 du style « texture » n'en a pas : on vise au-dessus, comme avec un viseur simple).
-const A_LUNETTE = { simple: new Set(['sniper', 'precision', 'arbalete']), texture: new Set(['sniper', 'arbalete']) };
+const A_LUNETTE = { simple: new Set(['sniper', 'precision', 'arbalete', 'anti_materiel']), texture: new Set(['sniper', 'arbalete', 'anti_materiel', 'bullpup']) };
 
 // Trouve l'axe de la lunette d'un modèle déjà placé : le tube tout en haut de l'arme.
 // Renvoie { y, x, zArriere } (centre du tube et bout côté œil), ou null.
@@ -125,6 +127,13 @@ function orienter(scene, info) {
         specular: (m.metalness ?? 0) > 0.5 ? 0x5a5a5a : 0x1e1e1e,
       });
       if (phong.map) phong.map.colorSpace = THREE.SRGBColorSpace;
+      // pièces lumineuses (lame du sabre, bobines du Tesla...) : elles brillent même dans l'ombre
+      if (m.isMeshBasicMaterial) phong.emissive.copy(m.color);
+      else if (m.emissive && m.emissive.r + m.emissive.g + m.emissive.b > 0.01) {
+        phong.emissive.copy(m.emissive);
+        phong.emissiveIntensity = m.emissiveIntensity ?? 1;
+        if (m.emissiveMap) { phong.emissiveMap = m.emissiveMap; phong.emissiveMap.colorSpace = THREE.SRGBColorSpace; }
+      }
       return phong;
     });
     o.material = Array.isArray(o.material) ? nouveaux : nouveaux[0];
@@ -144,7 +153,7 @@ const _centre = new THREE.Vector3();
 // animée : ils bougent, tombent ou disparaissent avec elle (rechargement, tir, lancer...).
 // Un îlot s'écrit "maillage:îlot" (numéros dans l'ordre du fichier), ou "maillage:*" pour tout un maillage.
 // Les gadgets (grenade, fumigène, kit de soin) sont pris en entier. Calculé une seule fois par arme et par style.
-export const PIECES_ANIMEES = ['chargeur', 'culasse', 'pompe', 'barillet', 'canons', 'munition', 'munitionCanon', 'crochet', 'objet'];
+export const PIECES_ANIMEES = ['chargeur', 'culasse', 'pompe', 'barillet', 'canons', 'munition', 'munitionCanon', 'crochet', 'objet', 'rotor'];
 const decoupes = new Map(); // `${style}:${id}` -> plan de découpe (un par maillage du .glb)
 const _v = new THREE.Vector3();
 

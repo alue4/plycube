@@ -133,3 +133,21 @@ body:not(.tactile) #btn-disposition { display: none; }
 .outils-edition .consigne { margin: 0 0 8px; font-size: .9rem; }
 .outils-edition .rangee { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .btn-petit.danger { border-color: rgba(255, 107, 107, .7); color: #ffc2c2; }
+
+/* « Ma pose et ma taille » (js/pose-perso.js) */
+.mapose { position: fixed; right: 12px; top: 12px; bottom: 12px; z-index: 15; width: min(340px, calc(100vw - 24px)); overflow: auto; padding: 12px 14px;
+  border-radius: 18px; background: rgba(8, 24, 20, .92); border: 1px solid var(--bord); box-shadow: 0 10px 40px rgba(0, 0, 0, .5); }
+.mapose[hidden] { display: none; }
+.mp-entete { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 1.05rem; }
+.mp-fermer { background: none; border: 0; color: var(--texte); font-size: 1.2rem; cursor: pointer; padding: 4px 8px; }
+.mp-titre { margin: 10px 0 4px; font-size: .78rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--gris); }
+.mp-ligne { display: grid; grid-template-columns: 9.5em 1fr; align-items: center; gap: 8px; font-size: .88rem; margin: 3px 0; }
+.mp-ligne input[type="range"] { width: 100%; }
+.mp-taille { font-size: .95rem; }
+.mp-bases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.mp-bases button, .mp-actions button { padding: 8px 6px; border-radius: 10px; border: 1px solid var(--bord); background: rgba(255, 255, 255, .08); color: var(--texte); font-weight: 700; cursor: pointer; }
+.mp-bases button.choisi { background: rgba(95, 212, 168, .3); border-color: rgba(95, 212, 168, .9); }
+.mp-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 12px; }
+.mp-actions .mp-ok { background: rgba(95, 212, 168, .3); }
+.mp-astuce { margin: 10px 0 0; font-size: .8rem; color: var(--gris); }
+body.tactile .mp-ligne input[type="range"] { height: 28px; }

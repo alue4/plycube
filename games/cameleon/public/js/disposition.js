@@ -13,10 +13,11 @@ export const DISPOSITION_DEFAUT = {
   radar: { x: 95, y: 58, taille: 1 },
   pose: { x: 95, y: 58, taille: 1 },
   leurre: { x: 81, y: 58, taille: 1 },
+  mapose: { x: 81, y: 72, taille: 1 },
   sauter: { x: 95, y: 86, taille: 1 },
   menu: { x: 81, y: 86, taille: 1 },
 };
-const NOMS = { joystick: 'Déplacement', tirer: 'Tirer', peindre: 'Peindre', radar: 'Radar', pose: 'Pose', leurre: 'Leurre', sauter: 'Sauter', menu: 'Menu' };
+const NOMS = { joystick: 'Déplacement', tirer: 'Tirer', peindre: 'Peindre', radar: 'Radar', pose: 'Pose', leurre: 'Leurre', mapose: 'Ma pose', sauter: 'Sauter', menu: 'Menu' };
 const borne = (v, a, b) => Math.max(a, Math.min(b, v));
 
 export class DispositionTactile {

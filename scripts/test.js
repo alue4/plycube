@@ -598,6 +598,62 @@ function testerClasse() {
 
 // Caméléon (cache-cache) : rôles, chercheurs figés pendant la cachette, tir qui touche / rate / leurre,
 // peinture, radar, fin de manche, bots quand on est seul.
+// Caméléon : taille et « ma pose » d'un cacheur (validées par le serveur, zone de touche à la bonne taille, leurre)
+function testerCameleonTaille() {
+  const { Salon } = require(path.join(ROOT, 'games/cameleon/serveur/salon.js'));
+  const G = require(path.join(ROOT, 'games/cameleon/serveur/geometrie.js'));
+  const reglages = JSON.parse(fs.readFileSync(path.join(ROOT, 'games/cameleon/public/reglages.json'), 'utf8'));
+  const carte = { id: 'test-taille', nom: 'Test', taille: 30, boites: [[-30, -1, -30, 30, 0, 30, 'herbe']],
+    apparitions: [{ x: 0, y: 0, z: 20, angle: 0, role: 'chercheur' }, ...[[-5, 5], [5, 5], [0, 8]].map(([x, z]) => ({ x, y: 0, z, angle: 0, role: 'cacheur' }))], cachettes: [] };
+  const fauxWs = () => ({ readyState: 1, recus: [], send(x) { this.recus.push(JSON.parse(x)); } });
+  const s = new Salon({ code: 'TAIL', carte, reglages, surVide: () => {} });
+  clearInterval(s.timer);
+  const ws = [fauxWs(), fauxWs(), fauxWs()];
+  const js = ws.map((w, i) => s.ajouter(w, { id: i + 1, username: `Joueur${i + 1}` }));
+  s.bots.preparerManche = () => {};
+  s.nouvelleManche();
+  const ch = js.find((j) => j.role === 'chercheur'); const [c1, c2] = js.filter((j) => j.role === 'cacheur');
+  const envoi = (j, d) => { j.derniereApparence = 0; s.message(j, { t: 'apparence', ...d }); };
+  envoi(c1, { taille: 0.1 });
+  check('caméléon taille : trop petite → ramenée au minimum (60 %)', c1.taille === (reglages.tailleMin || 0.6), c1.taille);
+  envoi(c1, { taille: 9 });
+  check('caméléon taille : trop grande → ramenée au maximum (140 %)', c1.taille === (reglages.tailleMax || 1.4), c1.taille);
+  const autre = ws[js.indexOf(ch)];
+  check('caméléon taille : les autres joueurs reçoivent la nouvelle taille', autre.recus.some((m) => m.t === 'apparence' && m.id === c1.id && m.taille === c1.taille));
+  envoi(c1, { pose: [3, 5, -5, 0, 0, -9, 9, 0, 0, 9, -9] });
+  check('caméléon ma pose : angles ramenés dans leurs bornes', JSON.stringify(c1.posePerso) === JSON.stringify([3, 0.8, -1.2, 0, 0, -3.1, 2.8, 0, 0, 1.6, -1.6]), c1.posePerso);
+  envoi(c1, { pose: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] });
+  envoi(c1, { pose: [0, 0, 0] });
+  envoi(c1, { pose: [0, 'x', 0, 0, 0, 0, 0, 0, 0, 0, 0] });
+  check('caméléon ma pose : pose mal formée refusée (on garde l\'ancienne)', c1.posePerso && c1.posePerso[0] === 3, c1.posePerso);
+  s.message(c1, { t: 'pose', p: 4 });
+  check('caméléon ma pose : la pose 4 prend la base choisie (allongé) pour la zone de touche', c1.pose === 4 && s.poseDe(c1) === 3);
+  envoi(ch, { taille: 0.6 });
+  check('caméléon taille : ne compte pas pour un chercheur', s.tailleDe(ch) === 1);
+  const b = G.boiteJoueur(0, 0, 0, 0, 0, 0.05, 0.6);
+  check('caméléon taille : la zone de touche rétrécit depuis les pieds', Math.abs(b[4] - (1.9 * 0.6 + 0.05)) < 1e-9 && b[1] === 0 && Math.abs(b[3] - (0.36 * 0.6 + 0.05)) < 1e-9, b);
+  // un tir à hauteur de tête d'un joueur normal passe au-dessus d'un cacheur réduit à 60 %
+  s.message(c1, { t: 'pose', p: 0 });
+  s.debutRecherche();
+  ch.x = 0; ch.y = 0; ch.z = 20; c1.x = 0; c1.y = 0; c1.z = 5; c2.x = 15; c2.z = -15;
+  const oeil = [0, G.HAUTEUR_YEUX, 20];
+  const vers = (h) => { const v = [0 - oeil[0], h - oeil[1], 5 - oeil[2]]; const n = Math.hypot(...v); return v.map((x) => x / n); };
+  envoi(c1, { taille: 0.6 });
+  ch.bloqueJusqua = 0; ch.dernierTir = 0;
+  s.message(ch, { t: 'tir', d: vers(1.55) });
+  check('caméléon taille : tir à hauteur de tête normale → raté sur un cacheur à 60 %', c1.role === 'cacheur');
+  envoi(c1, { taille: 1 });
+  ch.bloqueJusqua = 0; ch.dernierTir = 0;
+  s.message(ch, { t: 'tir', d: vers(1.55) });
+  check('caméléon taille : le même tir touche un cacheur de taille normale', c1.role === 'chercheur');
+  // le leurre copie la taille et « ma pose »
+  envoi(c2, { taille: 0.8, pose: [2, 0.2, 0, 0, 0, -1, 0.5, 0, 0, 0, 0] });
+  s.message(c2, { t: 'pose', p: 4 });
+  s.message(c2, { t: 'leurre' });
+  const l = [...s.leurres.values()].find((x) => x.owner === c2.id);
+  check('caméléon ma pose : le leurre copie la taille et la pose', l && l.taille === 0.8 && l.pose === 4 && l.posePerso && l.posePerso[0] === 2, l);
+}
+
 function testerCameleon() {
   const { Salon } = require(path.join(ROOT, 'games/cameleon/serveur/salon.js'));
   const reglages = JSON.parse(fs.readFileSync(path.join(ROOT, 'games/cameleon/public/reglages.json'), 'utf8'));
@@ -1429,6 +1485,7 @@ async function main() {
     console.log('\n— Jeu FPS : nouvelles armes —');
     testerNouvellesArmes();
     testerCameleon();
+    testerCameleonTaille();
 
     console.log('\n— Journal —');
     check('aucun pseudo ni mot de passe dans le journal', !/Alice|Bob|Carol|Patron|motdepasse/i.test(log), log);

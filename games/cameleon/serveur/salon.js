@@ -10,6 +10,8 @@
 // Le serveur est l'arbitre : il décide si un tir touche. Les navigateurs disent seulement « je suis ici »,
 // « je tire dans cette direction », « voici ma peinture ».
 const G = require('./geometrie');
+// Bornes des angles de « ma pose » (radians), dans l'ordre du tableau envoyé par le navigateur (voir public/js/pose-perso.js)
+const BORNES_POSE = [null, [-0.8, 0.8], [-1.2, 1.2], [-0.9, 0.9], [-0.6, 0.6], [-3.1, 1.2], [-0.3, 2.8], [-3.1, 1.2], [-0.3, 2.8], [-1.6, 1.6], [-1.6, 1.6]];
 const { Bots } = require('./bots');
 
 const TICK_MS = 50;
@@ -58,6 +60,25 @@ class Salon {
     this.timer = setInterval(() => this.tick(), TICK_MS);
   }
 
+  // « Ma pose » d'un cacheur : base (0 debout, 2 accroupi, 3 allongé) + angles (radians) de la tête, du corps, des bras et des jambes
+  static validerPose(p) {
+    if (!Array.isArray(p) || p.length !== BORNES_POSE.length) return null;
+    const res = [];
+    for (let i = 0; i < BORNES_POSE.length; i++) {
+      const v = Number(p[i]);
+      if (!Number.isFinite(v)) return null;
+      if (i === 0) { if (![0, 2, 3].includes(v)) return null; res.push(v); continue; }
+      const [a, b] = BORNES_POSE[i];
+      res.push(Math.round(Math.max(a, Math.min(b, v)) * 100) / 100);
+    }
+    return res;
+  }
+
+  // La taille qui compte (zone de touche, affichage) : seulement pour un cacheur
+  tailleDe(j) { return j.role === 'cacheur' ? (j.taille || 1) : 1; }
+  // La pose de base (pour la zone de touche) : « ma pose » (4) prend la base choisie
+  poseDe(j) { return j.pose === 4 ? (j.posePerso ? j.posePerso[0] : 0) : j.pose; }
+
   humains() { let n = 0; for (const j of this.joueurs.values()) if (!j.bot) n++; return n; }
   liste(role) { return [...this.joueurs.values()].filter((j) => j.role === role); }
 
@@ -76,6 +97,7 @@ class Salon {
       id: j.id, nom: j.nom, style: j.style, role: j.role, points: j.points, pose: j.pose,
       p: arrondir([j.x, j.y, j.z]), yaw: arrondi(j.yaw), ...(j.bot ? { bot: 1 } : {}),
       ...(j.peau ? { peau: j.peau } : {}), ...(j.couleurs && j.bot ? { couleurs: j.couleurs } : {}),
+      ...(j.taille !== 1 ? { taille: j.taille } : {}), ...(j.posePerso ? { posePerso: j.posePerso } : {}),
     };
   }
 
@@ -103,7 +125,7 @@ class Salon {
   creerJoueur({ id, nom, ws, style = null, bot = false }) {
     return {
       id, nom, ws, bot, style,
-      role: null, x: 0, y: 0, z: 0, yaw: 0, pitch: 0, pose: 0,
+      role: null, x: 0, y: 0, z: 0, yaw: 0, pitch: 0, pose: 0, taille: 1, posePerso: null, derniereApparence: 0,
       peau: null, couleurs: null, points: 0, foisChercheur: 0,
       bloqueJusqua: 0, dernierTir: 0, leurreUtilise: false, radarUtilise: false,
       derniereMaj: Date.now(), dernierCorr: 0, derniereePeau: 0, rtt: 80, gele: false,
@@ -142,6 +164,7 @@ class Salon {
       case 'tir': return this.tir(j, data);
       case 'peau': return this.peindre(j, data);
       case 'pose': return this.changerPose(j, data);
+      case 'apparence': return this.changerApparence(j, data);
       case 'leurre': return this.poserLeurre(j);
       case 'radar': return this.radar(j);
       case 'commencer': if (this.etat === 'attente') this.nouvelleManche(); return undefined;
@@ -199,8 +222,19 @@ class Salon {
     this.diffuser({ t: 'peau', id: j.id, png: j.peau }, j);
   }
 
+  // Taille et « ma pose » d'un joueur (gardées d'une manche à l'autre ; elles ne comptent que quand il est cacheur)
+  changerApparence(j, data) {
+    const now = Date.now();
+    if (now - j.derniereApparence < 90) return; // le navigateur en envoie au plus 5 par seconde
+    j.derniereApparence = now;
+    const taille = Number(data.taille);
+    if (Number.isFinite(taille)) j.taille = Math.round(Math.max(this.r.tailleMin || 0.6, Math.min(this.r.tailleMax || 1.4, taille)) * 100) / 100;
+    if (data.pose !== undefined) { const p = Salon.validerPose(data.pose); if (p) j.posePerso = p; }
+    this.diffuser({ t: 'apparence', id: j.id, taille: j.taille, posePerso: j.posePerso }, j);
+  }
+
   changerPose(j, data) {
-    const p = [0, 1, 2, 3].includes(data.p) ? data.p : 0;
+    const p = [0, 1, 2, 3, 4].includes(data.p) ? data.p : 0;
     if (j.role !== 'cacheur' && p !== 0) return;
     if (p === j.pose) return;
     j.pose = p;
@@ -211,7 +245,8 @@ class Salon {
   poserLeurre(j) {
     if (j.role !== 'cacheur' || j.leurreUtilise || (this.etat !== 'cachette' && this.etat !== 'recherche')) return;
     j.leurreUtilise = true;
-    const l = { id: this.prochainLeurre++, owner: j.id, p: arrondir([j.x, j.y, j.z]), yaw: arrondi(j.yaw), pose: j.pose };
+    const l = { id: this.prochainLeurre++, owner: j.id, p: arrondir([j.x, j.y, j.z]), yaw: arrondi(j.yaw), pose: j.pose, taille: this.tailleDe(j),
+      ...(j.pose === 4 && j.posePerso ? { posePerso: j.posePerso } : {}) };
     this.leurres.set(l.id, l);
     this.diffuser({ t: 'leurre', ...l });
   }
@@ -243,11 +278,11 @@ class Salon {
     let leurre = null;
     for (const c of this.joueurs.values()) {
       if (c.role !== 'cacheur') continue;
-      const tc = G.rayonBoite(oeil, d, G.boiteJoueur(c.x, c.y, c.z, c.pose, c.yaw));
+      const tc = G.rayonBoite(oeil, d, G.boiteJoueur(c.x, c.y, c.z, this.poseDe(c), c.yaw, 0.05, this.tailleDe(c)));
       if (tc < t) { t = tc; cible = c; leurre = null; }
     }
     for (const l of this.leurres.values()) {
-      const tl = G.rayonBoite(oeil, d, G.boiteJoueur(l.p[0], l.p[1], l.p[2], l.pose, l.yaw));
+      const tl = G.rayonBoite(oeil, d, G.boiteJoueur(l.p[0], l.p[1], l.p[2], l.pose === 4 ? (l.posePerso ? l.posePerso[0] : 0) : l.pose, l.yaw, 0.05, l.taille || 1));
       if (tl < t) { t = tl; leurre = l; cible = null; }
     }
     const impact = [oeil[0] + d[0] * t, oeil[1] + d[1] * t, oeil[2] + d[2] * t];

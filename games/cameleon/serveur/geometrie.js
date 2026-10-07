@@ -50,14 +50,17 @@ function rayonCarteDetail(o, d, boites, portee) {
 function rayonCarte(o, d, boites, portee) { return rayonCarteDetail(o, d, boites, portee).t; }
 
 // Boîte d'un joueur selon sa pose : 0 normal / 1 statue (debout), 2 accroupi, 3 allongé (le long de son regard).
-function boiteJoueur(x, y, z, pose = 0, yaw = 0, marge = 0.05) {
-  if (pose === 2) return [x - 0.36 - marge, y, z - 0.36 - marge, x + 0.36 + marge, y + 1.25 + marge, z + 0.36 + marge];
+// taille : la taille choisie par un cacheur (1 = normale) ; la boîte grandit ou rétrécit depuis les pieds.
+function boiteJoueur(x, y, z, pose = 0, yaw = 0, marge = 0.05, taille = 1) {
+  const k = taille;
+  if (pose === 2) { const w = 0.36 * k + marge; return [x - w, y, z - w, x + w, y + 1.25 * k + marge, z + w]; }
   if (pose === 3) {
     const lelongX = Math.abs(Math.sin(yaw)) > Math.abs(Math.cos(yaw));
-    const L = 0.95 + marge; const W = 0.38 + marge;
-    return lelongX ? [x - L, y, z - W, x + L, y + 0.5 + marge, z + W] : [x - W, y, z - L, x + W, y + 0.5 + marge, z + L];
+    const L = 0.95 * k + marge; const W = 0.38 * k + marge; const h = 0.5 * k + marge;
+    return lelongX ? [x - L, y, z - W, x + L, y + h, z + W] : [x - W, y, z - L, x + W, y + h, z + L];
   }
-  return [x - 0.36 - marge, y, z - 0.36 - marge, x + 0.36 + marge, y + 1.9 + marge, z + 0.36 + marge];
+  const w = 0.36 * k + marge;
+  return [x - w, y, z - w, x + w, y + 1.9 * k + marge, z + w];
 }
 
 function distancePointBoite(p, b) {

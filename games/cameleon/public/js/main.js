@@ -13,6 +13,7 @@ import { Effets } from '/games/fps/js/effets.js';
 import { el } from '/games/fps/js/hud.js';
 import { icone, svgIcone } from '/games/fps/js/icones.js';
 import { DispositionTactile } from './disposition.js';
+import { MaPose, poseDepuis, POSE_NEUTRE } from './pose-perso.js';
 import { Peinture, sansAccessoires, remplirParties, couleursMoyennes } from './peinture.js';
 import * as S from './sons.js';
 
@@ -20,7 +21,7 @@ const $ = (id) => document.getElementById(id);
 const COULEURS_PEINTURE = ['#ff5ea8', '#ffd23f', '#3bb3ff', '#ff7a2f', '#b06cff', '#3bd36b'];
 const TRAVERSABLES = new Set(['vitre', 'invisible']);
 const DELAI = 100; // on affiche les autres joueurs avec 0,1 s de retard (plus fluide)
-const NOMS_POSES = ['debout', 'statue', 'accroupi', 'allongé'];
+const NOMS_POSES = ['debout', 'statue', 'accroupi', 'allongé', 'ma pose'];
 const couleurDe = (id) => COULEURS_PEINTURE[Math.abs(Number(id) || 0) % COULEURS_PEINTURE.length];
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
 
@@ -179,6 +180,7 @@ async function demarrer() {
     const j = {
       id: info.id, nom: info.nom, style: info.style, role: info.role, bot: !!info.bot, points: info.points || 0,
       pose: info.pose || 0, peauPng: info.peau || null, couleurs: info.couleurs || null, tampon: [], vitesse: new THREE.Vector3(),
+      taille: info.taille || 1, posePerso: info.posePerso || null,
       x: info.p ? info.p[0] : 0, y: info.p ? info.p[1] : 0, z: info.p ? info.p[2] : 0, yaw: info.yaw || 0,
     };
     E.joueurs.set(j.id, j);
@@ -204,12 +206,15 @@ async function demarrer() {
 
   // Poses et animation d'un personnage (cacheur sans arme : les bras se balancent)
   function animerPerso(j, perso, dt, vitesse, enLAir, pitch) {
+    const taille = j.role === 'cacheur' ? (j.taille || 1) : 1; // taille choisie par un cacheur (« ma pose »)
+    if (perso.groupe.scale.x !== taille) perso.groupe.scale.setScalar(taille);
     const pose = j.role === 'cacheur' ? j.pose : 0;
     if (pose) {
-      if (j.poseAffichee !== pose) { perso.poserDanse(POSES[pose] || {}, false); j.poseAffichee = pose; }
+      const cle = pose === 4 ? `4:${(j.posePerso || POSE_NEUTRE).join(',')}` : pose;
+      if (j.poseAffichee !== cle) { perso.poserDanse(pose === 4 ? poseDepuis(j.posePerso, POSES) : (POSES[pose] || {}), false); j.poseAffichee = cle; }
       return;
     }
-    if (j.poseAffichee > 0) { perso.finDanse(); }
+    if (j.poseAffichee) { perso.finDanse(); }
     j.poseAffichee = 0;
     perso.animer(dt, { vitesse, enLAir, pitch: j.role === 'cacheur' ? 0 : pitch });
     if (j.role === 'cacheur') {
@@ -232,7 +237,8 @@ async function demarrer() {
     if (proprio && proprio.perso && proprio.role === 'cacheur') { perso.canvas.getContext('2d').drawImage(proprio.perso.canvas, 0, 0); perso.texture.needsUpdate = true; }
     perso.groupe.position.set(l.p[0], l.p[1], l.p[2]);
     perso.groupe.rotation.y = l.yaw;
-    if (l.pose) perso.poserDanse(POSES[l.pose] || {}, false);
+    if (l.pose) perso.poserDanse(l.pose === 4 ? poseDepuis(l.posePerso, POSES) : (POSES[l.pose] || {}), false);
+    if (l.taille && l.taille !== 1) perso.groupe.scale.setScalar(l.taille);
     scene.add(perso.groupe);
     E.leurres.set(l.id, { ...l, perso });
   }
@@ -267,6 +273,34 @@ async function demarrer() {
     scene.add(m);
     E.taches.push(m);
     if (E.taches.length > 160) { const v = E.taches.shift(); v.material.dispose(); v.removeFromParent(); }
+  }
+
+  // ---------- Ma pose et ma taille (cacheurs) ----------
+  let prochainEnvoiApparence = 0; let envoiApparencePrevu = null;
+  function envoyerApparence() {
+    clearTimeout(envoiApparencePrevu);
+    const attente = prochainEnvoiApparence - performance.now();
+    if (attente > 0) { envoiApparencePrevu = setTimeout(envoyerApparence, attente); return; } // au plus 5 par seconde
+    prochainEnvoiApparence = performance.now() + 200;
+    envoyer({ t: 'apparence', taille: maPose.taille, pose: maPose.pose });
+  }
+  function appliquerMaPose(changePose) {
+    const m = moi();
+    if (m) { m.taille = maPose.taille; m.posePerso = [...maPose.pose]; }
+    if (changePose && E.role === 'cacheur' && E.pose !== 4) changerPose(4); // on voit tout de suite sa pose
+    envoyerApparence();
+  }
+  const maPose = new MaPose({
+    min: R.tailleMin || 0.6, max: R.tailleMax || 1.4,
+    surChange: (changePose) => appliquerMaPose(changePose),
+    surFermer: () => { envoyerApparence(); if (!tactile && E.ecran === 'jeu') $('jeu').requestPointerLock?.(); },
+  });
+  function ouvrirMaPose() {
+    if (E.ecran !== 'jeu') return;
+    if (peinture.ouvert) peinture.fermer();
+    if (document.pointerLockElement) document.exitPointerLock();
+    maPose.ouvrir();
+    if (E.role === 'cacheur' && E.pose !== 4) changerPose(4);
   }
 
   // ---------- Peinture (cacheurs) ----------
@@ -339,11 +373,14 @@ async function demarrer() {
     if (e.code === 'Tab') { e.preventDefault(); montrerTableau(true); return; }
     if (e.code === 'KeyP') { if (peinture.ouvert) peinture.fermer(); else ouvrirPeinture(); return; }
     if (peinture.ouvert) { if (e.code === 'Escape') peinture.fermer(); return; }
+    if (e.code === 'KeyM') { if (maPose.ouvert) maPose.fermer(); else ouvrirMaPose(); return; }
+    if (maPose.ouvert) { if (e.code === 'Escape') maPose.fermer(); return; }
     touches.add(e.code);
     if (e.repeat) return;
     if (e.code === 'Digit1' || e.code === 'Numpad1') changerPose(1);
     else if (e.code === 'Digit2' || e.code === 'Numpad2') changerPose(2);
     else if (e.code === 'Digit3' || e.code === 'Numpad3') changerPose(3);
+    else if (e.code === 'Digit4' || e.code === 'Numpad4') changerPose(4);
     else if (e.code === 'Digit0' || e.code === 'Numpad0') changerPose(0);
     else if (e.code === 'KeyL') poserLeurre();
     else if (e.code === 'KeyR') demanderRadar();
@@ -356,7 +393,7 @@ async function demarrer() {
   });
   addEventListener('blur', () => touches.clear());
   $('jeu').addEventListener('click', () => {
-    if (tactile || E.ecran !== 'jeu' || peinture.ouvert || !$('pause').hidden) return;
+    if (tactile || E.ecran !== 'jeu' || peinture.ouvert || maPose.ouvert || !$('pause').hidden) return;
     if (!document.pointerLockElement) $('jeu').requestPointerLock?.();
   });
   addEventListener('mousedown', (e) => { if (e.button === 0 && document.pointerLockElement) tirer(); });
@@ -369,7 +406,7 @@ async function demarrer() {
   });
   addEventListener('wheel', (e) => { if (E.ecran === 'jeu') E.distCam = Math.max(1.8, Math.min(7, E.distCam + Math.sign(e.deltaY) * 0.4)); }, { passive: true });
   document.addEventListener('pointerlockchange', () => {
-    if (!document.pointerLockElement && E.ecran === 'jeu' && !peinture.ouvert && !tactile && E.etat !== 'fin') $('pause').hidden = false;
+    if (!document.pointerLockElement && E.ecran === 'jeu' && !peinture.ouvert && !maPose.ouvert && !tactile && E.etat !== 'fin') $('pause').hidden = false;
     if (document.pointerLockElement) $('pause').hidden = true;
   });
 
@@ -432,7 +469,7 @@ async function demarrer() {
     const menu = b('menu', 'menu', 'Menu', () => { $('pause').hidden = false; });
     const liste = role === 'chercheur'
       ? [b('tirer', 'arme', 'Tirer', () => tirer()), b('radar', 'radar', 'Radar', () => demanderRadar()), saut, menu]
-      : [b('peindre', 'palette', 'Peindre', () => (peinture.ouvert ? peinture.fermer() : ouvrirPeinture())), b('pose', 'pose', 'Pose', () => changerPose((E.pose + 1) % 4)),
+      : [b('peindre', 'palette', 'Peindre', () => (peinture.ouvert ? peinture.fermer() : ouvrirPeinture())), b('pose', 'pose', 'Pose', () => changerPose((E.pose + 1) % 5)), b('mapose', 'perso', 'Ma pose', () => (maPose.ouvert ? maPose.fermer() : ouvrirMaPose())),
         b('leurre', 'cameleon', 'Leurre', () => poserLeurre()), saut, menu];
     $('boutons-tactiles').replaceChildren(...liste);
   }
@@ -498,6 +535,7 @@ async function demarrer() {
     for (const l of m.leurres || []) creerLeurre(l);
     const j = moi();
     E.role = j ? j.role : null;
+    appliquerMaPose(false); // le serveur garde ma taille et ma pose (elles comptent quand je suis cacheur)
     E.points = j ? j.points : 0;
     $('att-code').textContent = m.code;
     const c = E.cartes.find((x) => x.id === m.carte);
@@ -541,7 +579,7 @@ async function demarrer() {
     $('role').replaceChildren(icone(cacheur ? 'cameleon' : 'arme'), document.createTextNode(cacheur ? ' CACHEUR' : ' CHERCHEUR'));
     $('viseur').hidden = cacheur;
     $('aide-touches').replaceChildren(...(cacheur
-      ? [`<kbd>P</kbd> se peindre (pipette ${svgIcone('pipette')} dans le décor)`, '<kbd>1</kbd> statue · <kbd>2</kbd> accroupi · <kbd>3</kbd> allongé', '<kbd>L</kbd> leurre (1 par manche) · molette : caméra']
+      ? [`<kbd>P</kbd> se peindre (pipette ${svgIcone('pipette')} dans le décor)`, '<kbd>1</kbd> statue · <kbd>2</kbd> accroupi · <kbd>3</kbd> allongé · <kbd>4</kbd> ma pose', '<kbd>M</kbd> régler ma pose et ma taille', '<kbd>L</kbd> leurre (1 par manche) · molette : caméra']
       : ['<kbd>Clic</kbd> tirer de la peinture (raté = bloqué 2,5 s)', '<kbd>R</kbd> radar (1 par manche)', '<kbd>Tab</kbd> scores']).map((h) => { const d = document.createElement('div'); d.innerHTML = h; return d; }));
     if (!cacheur && !armeVue) armeVue = new ArmeVue(normaliserStyle(E.monStyle || styleParDefaut(E.moiId)), [armePeinture]);
     if (!cacheur) peinture.fermer();
@@ -611,6 +649,7 @@ async function demarrer() {
     appliquerPeau(j);
   });
   on('pose', (m) => { const j = E.joueurs.get(m.id); if (j && m.id !== E.moiId) j.pose = m.p; });
+  on('apparence', (m) => { const j = E.joueurs.get(m.id); if (j && m.id !== E.moiId) { j.taille = m.taille || 1; j.posePerso = m.posePerso || null; } });
   on('tir', (m) => {
     const couleur = couleurDe(m.id);
     const o = new THREE.Vector3(...m.o); const f = new THREE.Vector3(...m.f);
@@ -699,7 +738,7 @@ async function demarrer() {
     if (yeuxBandes) $('bandeau-chrono').textContent = mmss(E.finA - now);
 
     // --- moi ---
-    joueur.actif = (tactile || !!document.pointerLockElement) && !peinture.ouvert && $('pause').hidden && E.etat !== 'fin';
+    joueur.actif = (tactile || !!document.pointerLockElement) && !peinture.ouvert && !maPose.ouvert && $('pause').hidden && E.etat !== 'fin';
     if (cacheur && E.pose && veutBouger() && joueur.actif) changerPose(0); // bouger fait quitter la pose
     if (!yeuxBandes && !(cacheur && E.pose)) joueur.maj(dt);
     const vh = joueur.vitesseHorizontale();
@@ -714,7 +753,8 @@ async function demarrer() {
         m.perso.groupe.visible = true;
       }
       // caméra à la 3e personne, derrière moi (sans traverser les murs)
-      const hauteur = E.pose === 3 ? 0.6 : E.pose === 2 ? 1.0 : 1.5;
+      const base = E.pose === 4 ? maPose.pose[0] : E.pose;
+      const hauteur = (base === 3 ? 0.6 : base === 2 ? 1.0 : 1.5) * (E.role === 'cacheur' ? maPose.taille : 1);
       const cible = [joueur.pos.x, joueur.pos.y + hauteur, joueur.pos.z];
       const pitch = Math.max(-1.2, Math.min(0.9, joueur.pitch));
       const dir = [Math.sin(joueur.yaw) * Math.cos(pitch), -Math.sin(pitch), Math.cos(joueur.yaw) * Math.cos(pitch)];
@@ -800,7 +840,7 @@ async function demarrer() {
   try { await chargerCarte('maison'); } catch { /* pas grave */ }
   requestAnimationFrame(boucle);
   connecter();
-  if (location.search.includes('debug')) window.__cam = { E, joueur, camera, peinture, envoyer, get armeVue() { return armeVue; } };
+  if (location.search.includes('debug')) window.__cam = { E, joueur, camera, peinture, maPose, envoyer, moi, get armeVue() { return armeVue; } };
 }
 
 demarrer();

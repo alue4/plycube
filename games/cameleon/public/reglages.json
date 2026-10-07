@@ -13,6 +13,8 @@
   "penaliteLeurreMs": 3500,
   "siffletSecondes": 30,
   "radarMs": 2000,
+  "tailleMin": 0.6,
+  "tailleMax": 1.4,
   "joueur": { "vitesse": 6.2, "vitesseAccroupi": 2.4, "vitesseAllonge": 1.1, "forceSaut": 8.2, "gravite": 24, "forceTrampoline": 16 },
   "points": { "trouve": 100, "survie10s": 10, "survieFin": 50, "leurre": 25 }
 }

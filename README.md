@@ -360,6 +360,8 @@ Cache-cache en blocs, façon « Meccha Chameleon » : les **cacheurs se peignent
 
 ---
 
+**Ma pose et ma taille** (cacheurs, touche **M** ou bouton « Ma pose ») : on choisit sa taille (de 60 % à 140 %, réglage `tailleMin` / `tailleMax` dans `games/cameleon/public/reglages.json`) et sa propre pose : position de départ (debout, accroupi, allongé) puis tête, corps, chaque bras (lever, écarter) et chaque jambe. Touche **4** pour reprendre sa pose. Le serveur vérifie les valeurs, la zone de touche suit la taille (plus petit = plus dur à toucher), les autres joueurs voient la même pose et le leurre la copie. C'est gardé dans le navigateur (code : `games/cameleon/public/js/pose-perso.js`).
+
 **Sur tablette, les boutons se personnalisent** : *Réglages* → **Personnaliser les boutons (tablette)**. On glisse chaque bouton (et le joystick) où on veut, on le touche puis « Plus grand » / « Plus petit », et « Voir les boutons du chercheur » montre l'autre jeu de boutons. C'est gardé dans le navigateur (code : `games/cameleon/public/js/disposition.js`).
 
 ## Sécurité (ce qui est déjà en place)

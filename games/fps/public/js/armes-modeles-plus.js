@@ -209,12 +209,15 @@ export function fabriquesNouvelles({ THREE, M, phong, boite, cylindre, lunette, 
     g.add(barillet);
     boite(g, 0.04, 0.03, 0.36, 0, 0.076, -0.14, M.noir);                 // cadre du dessus
     boite(g, 0.03, 0.025, 0.08, 0, -0.08, -0.12, M.noir);                // axe sous le tambour
+    boite(g, 0.05, 0.11, 0.16, 0, 0.007, 0.01, M.noir);                  // corps (relie le tambour, la poignée et la crosse)
+    boite(g, 0.052, 0.012, 0.12, 0, -0.03, 0.0, M.olive);                // bande sur le corps
     holo(g, 0.115, -0.12);
     boite(g, 0.034, 0.1, 0.046, 0, -0.07, 0.05, M.polymere, -0.25);      // poignée
-    boite(g, 0.006, 0.018, 0.05, 0, -0.04, -0.0, M.noir);                // pontet
+    boite(g, 0.006, 0.018, 0.05, 0, -0.06, -0.01, M.noir);               // pontet
+    boite(g, 0.028, 0.034, 0.07, 0, -0.012, -0.33, M.noir);              // attache de la poignée avant (sous le canon)
     boite(g, 0.03, 0.08, 0.035, 0, -0.06, -0.33, M.polymere, 0.1);       // poignée avant
-    boite(g, 0.03, 0.03, 0.18, 0, 0.0, 0.17, M.noir);                    // crosse
-    boite(g, 0.04, 0.1, 0.02, 0, -0.02, 0.26, M.caoutchouc);
+    boite(g, 0.034, 0.05, 0.18, 0, 0.005, 0.17, M.noir);                 // crosse
+    boite(g, 0.04, 0.1, 0.02, 0, -0.012, 0.26, M.caoutchouc);
     Object.assign(g.userData, {
       bout: V(0, 0.03, -0.43), visee: V(0, 0.115, -0.08), oeil: 0.2,
       ejection: null, mainD: V(0, -0.07, 0.05), mainG: V(0, -0.05, -0.33),

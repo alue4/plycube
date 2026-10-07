@@ -487,6 +487,32 @@ Pour que Google la trouve vite (une seule fois, avec ton compte Google) :
 
 ---
 
+## Commande de mise à jour verrouillée (pour Claude)
+
+Pour que Claude puisse reconstruire et relancer le site tout seul **sans avoir accès à Docker** (Docker donnerait tout le NAS), une seule commande lui est autorisée : `/usr/local/sbin/plycube-maj` (source : `scripts/plycube-maj.sh`). Elle appartient à root, Claude ne peut pas la modifier, et elle utilise une **copie verrouillée** du réglage Docker (`/etc/plycube/docker-compose.yml`).
+
+| Commande | Effet |
+|---|---|
+| `sudo plycube-maj` | reconstruit et relance le site (comme `sudo docker compose up -d --build`) |
+| `sudo plycube-maj redemarrer` | relance seulement le site |
+| `sudo plycube-maj etat` | état des conteneurs |
+| `sudo plycube-maj journal` | les 150 dernières lignes du journal du site |
+
+Installation (une seule fois, dans le dossier du projet) :
+
+```bash
+sudo mkdir -p /etc/plycube
+sudo install -o root -g root -m 0644 docker-compose.yml /etc/plycube/docker-compose.yml
+sudo install -o root -g root -m 0644 /dev/null /etc/plycube/vide.env
+sudo install -o root -g root -m 0755 scripts/plycube-maj.sh /usr/local/sbin/plycube-maj
+sudo install -o root -g root -m 0440 scripts/plycube.sudoers /etc/plycube/plycube.sudoers
+sudo visudo -cf /etc/plycube/plycube.sudoers && sudo cp -p /etc/plycube/plycube.sudoers /etc/sudoers.d/plycube
+```
+
+- **Après une modification de `docker-compose.yml`** : recopie-le dans la version verrouillée (2e ligne ci-dessus), sinon l'ancien réglage reste utilisé.
+- **Retirer l'autorisation** : `sudo rm /etc/sudoers.d/plycube`.
+- Une mise à jour du système du NAS peut effacer ces fichiers : il suffit de refaire l'installation.
+
 ## Sans Docker (pour développer)
 
 Avec Node.js 18 ou plus :

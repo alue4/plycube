@@ -1,0 +1,4 @@
+# Plycube : Marcel peut lancer la commande verrouillée de mise à jour du site (et seulement elle), sans mot de passe.
+# Installé dans /etc/sudoers.d/plycube (vérifié avec visudo avant). Pour retirer l'autorisation :
+#   sudo rm /etc/sudoers.d/plycube
+Marcel ALL=(root) NOPASSWD: /usr/local/sbin/plycube-maj
